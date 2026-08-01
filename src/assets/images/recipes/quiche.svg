@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fdf8f4"/>
+      <stop offset="100%" stop-color="#e8eff5"/>
+    </linearGradient>
+    <linearGradient id="board" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7e3c8"/>
+      <stop offset="100%" stop-color="#f2d5b7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg2)" />
+  <rect x="140" y="140" width="920" height="520" rx="44" fill="#ffffff" stroke="#e7edf8" stroke-width="14" />
+  <rect x="240" y="210" width="720" height="260" rx="30" fill="url(#board)" />
+  <circle cx="600" cy="430" r="180" fill="#ffdca8" stroke="#f0c26b" stroke-width="18" />
+  <circle cx="600" cy="410" r="120" fill="#fef0d5" />
+  <path d="M520 380 C540 360 580 360 620 380 C660 400 680 430 650 460 C620 490 560 490 520 460 C480 430 500 400 520 380 Z" fill="#d3a45f" />
+  <ellipse cx="580" cy="360" rx="90" ry="36" fill="#fff2d9" />
+  <path d="M450 330 Q470 300 510 320 Q550 340 560 300 Q580 280 610 305" fill="#a1cf5e" opacity="0.9" />
+  <path d="M640 340 Q680 310 720 330 Q700 360 660 350" fill="#96be56" opacity="0.85" />
+  <path d="M550 460 C530 470 520 510 540 520 C560 530 590 520 610 510 C630 500 650 460 620 450 C600 440 570 440 550 460 Z" fill="#f2b45d" />
+  <rect x="260" y="520" width="160" height="90" rx="22" fill="#f8fafc" stroke="#e4e9f5" stroke-width="10" />
+  <rect x="380" y="520" width="160" height="90" rx="22" fill="#f8fafc" stroke="#e4e9f5" stroke-width="10" />
+  <rect x="680" y="520" width="160" height="90" rx="22" fill="#f8fafc" stroke="#e4e9f5" stroke-width="10" />
+  <text x="600" y="620" font-family="Inter, sans-serif" font-size="36" fill="#3b4254" text-anchor="middle">TRES QUESOS</text>
+</svg>

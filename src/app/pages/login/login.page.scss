@@ -1,0 +1,428 @@
+/* ===========================
+   FONDO
+=========================== */
+
+.login-content {
+  --background: #f6f8fc;
+}
+
+.login-wrapper {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 35px 24px;
+  max-width: 430px;
+  margin: auto;
+}
+
+/* ===========================
+   LOGO
+=========================== */
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo-box {
+  width: 82px;
+  height: 82px;
+  margin: auto;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #eef5ff, #dbeafe);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 12px 25px rgba(37, 99, 235, .15);
+  margin-bottom: 18px;
+}
+
+.logo-image {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+}
+
+h1 {
+  margin: 0;
+  color: #2563EB;
+  font-size: 31px;
+  font-weight: 700;
+}
+
+h2 {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #6B7280;
+  font-size: 15px;
+  line-height: 24px;
+  margin: 0;
+}
+
+/* ===========================
+   FORM
+=========================== */
+
+.login-form {
+  margin-top: 10px;
+}
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ===========================
+   INPUT
+=========================== */
+
+.custom-input {
+
+  display: flex;
+  align-items: center;
+
+  background: white;
+
+  border: 1px solid #E5E7EB;
+
+  border-radius: 16px;
+
+  height: 58px;
+
+  padding: 0 18px;
+
+  transition: .25s;
+
+}
+
+.custom-input:hover {
+
+  border-color: #c5d3ef;
+
+}
+
+.custom-input:focus-within {
+
+  border-color: #2563EB;
+
+  box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+
+}
+
+.custom-input ion-icon {
+
+  font-size: 20px;
+
+  color: #94A3B8;
+
+}
+
+.custom-input input {
+
+  flex: 1;
+
+  border: none;
+
+  outline: none;
+
+  padding: 0 14px;
+
+  font-size: 15px;
+
+  background: transparent;
+
+  color: #111827;
+
+}
+
+.custom-input input::placeholder {
+
+  color: #9CA3AF;
+
+}
+
+.eye-button {
+
+  border: none;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+}
+
+.eye-button ion-icon {
+
+  font-size: 22px;
+
+  color: #94A3B8;
+
+}
+
+/* ===========================
+   FORGOT
+=========================== */
+
+.forgot-password {
+
+  text-align: right;
+
+  margin-top: -8px;
+
+  margin-bottom: 25px;
+
+}
+
+.forgot-password a {
+
+  color: #2563EB;
+
+  font-size: 14px;
+
+  text-decoration: none;
+
+  font-weight: 600;
+
+}
+
+/* ===========================
+   BOTÓN LOGIN
+=========================== */
+
+.login-btn {
+
+  width: 100%;
+
+  height: 58px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background: linear-gradient(180deg,#2563EB,#1D4ED8);
+
+  color: white;
+
+  font-size: 17px;
+
+  font-weight: 600;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+
+  transition: .25s;
+
+  box-shadow: 0 12px 28px rgba(37,99,235,.30);
+
+}
+
+.login-btn:hover {
+
+  transform: translateY(-2px);
+
+}
+
+.login-btn ion-icon {
+
+  font-size: 19px;
+
+}
+
+/* ===========================
+   DIVIDER
+=========================== */
+
+.divider {
+
+  display: flex;
+
+  align-items: center;
+
+  margin: 34px 0 24px;
+
+}
+
+.line {
+
+  flex: 1;
+
+  height: 1px;
+
+  background: #E5E7EB;
+
+}
+
+.divider span {
+
+  margin: 0 14px;
+
+  color: #94A3B8;
+
+  font-size: 14px;
+
+}
+
+/* ===========================
+   SOCIAL
+=========================== */
+
+.social-container {
+
+  display: flex;
+
+  gap: 14px;
+
+}
+
+.social-btn {
+
+  flex: 1;
+
+  height: 52px;
+
+  border-radius: 16px;
+
+  border: 1px solid #E5E7EB;
+
+  background: white;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+  transition: .25s;
+
+}
+
+.social-btn:hover {
+
+  background: #F8FAFC;
+
+}
+
+.social-btn ion-icon {
+
+  font-size: 20px;
+
+}
+
+/* ===========================
+   REGISTER
+=========================== */
+
+.register {
+
+  text-align: center;
+
+  margin-top: 28px;
+
+}
+
+.register span {
+
+  color: #6B7280;
+
+}
+
+.register a {
+
+  color: #2563EB;
+
+  text-decoration: none;
+
+  margin-left: 5px;
+
+  font-weight: 700;
+
+}
+
+/* ===========================
+   FOOTER
+=========================== */
+
+.footer {
+
+  text-align: center;
+
+  margin-top: 28px;
+
+  color: #9CA3AF;
+
+  font-size: 13px;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:420px){
+
+.login-wrapper{
+
+padding:30px 18px;
+
+}
+
+.logo-box{
+
+width:74px;
+
+height:74px;
+
+}
+
+.logo-image{
+
+width:52px;
+
+height:52px;
+
+}
+
+h1{
+
+font-size:28px;
+
+}
+
+h2{
+
+font-size:23px;
+
+}
+
+}

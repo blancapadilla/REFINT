@@ -1,0 +1,63 @@
+/*=========================================
+=            REFINT THEME                 =
+=========================================*/
+
+:root {
+  /* Design tokens from Luminous Fridge (DESIGN.md) */
+
+  /* Primary */
+  --ion-color-primary: #004ac6;
+  --ion-color-primary-rgb: 0,74,198;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade: #003ea8;
+  --ion-color-primary-tint: #2563eb;
+
+  /* Success (tertiary green) */
+  --ion-color-success: #006229;
+  --ion-color-success-rgb: 0,98,41;
+  --ion-color-success-contrast: #ffffff;
+
+  /* Warning (use warm yellow) */
+  --ion-color-warning: #f59e0b;
+  --ion-color-warning-rgb: 245,158,11;
+  --ion-color-warning-contrast: #ffffff;
+
+  /* Error / Alert */
+  --ion-color-danger: #ba1a1a;
+  --ion-color-danger-rgb: 186,26,26;
+  --ion-color-danger-contrast: #ffffff;
+
+  /* Surface & background */
+  --ion-color-light: #f7f9fb;
+  --ion-color-dark: #191c1e;
+  --app-background: #f7f9fb;
+  --card-background: #ffffff;
+
+  /* Text */
+  --text-primary: #191c1e;
+  --text-secondary: #434655;
+
+  /* Border */
+  --border-color: #c3c6d7;
+
+  /* Shadow */
+  --card-shadow: 0 16px 36px rgba(15,23,42,0.06);
+
+  /* Border radius */
+  --radius: 16px;
+
+  /* Convenience aliases used by dashboard styles */
+  --bg: #f7f9fb;
+  --surface: #ffffff;
+  --text: #191c1e;
+  --muted: #434655;
+  --primary: #004ac6;
+  --primary-strong: #003ea8;
+  --primary-soft: #2563eb;
+  --success: #006229;
+  --warning: #f59e0b;
+  --danger: #ba1a1a;
+  --shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+
+} 

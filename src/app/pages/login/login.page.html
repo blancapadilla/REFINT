@@ -1,0 +1,167 @@
+<ion-content [fullscreen]="true" class="login-content">
+
+  <div class="login-wrapper">
+
+    <!-- LOGO -->
+    <div class="logo-container">
+
+      <div class="logo-box">
+        <img
+          src="assets/logo/logo.png"
+          alt="Logo"
+          class="logo-image">
+      </div>
+
+      <h1>Refrigerador Inteligente</h1>
+
+      <h2>Bienvenido de nuevo</h2>
+
+      <p class="subtitle">
+        Gestiona tu refrigerador de forma inteligente
+      </p>
+
+    </div>
+
+    <!-- FORMULARIO -->
+
+    <form class="login-form">
+
+      <!-- EMAIL -->
+
+      <div class="form-group">
+
+        <label>Email</label>
+
+        <div class="custom-input">
+
+          <ion-icon
+            name="mail-outline">
+          </ion-icon>
+
+          <input
+            type="email"
+            placeholder="nombre@ejemplo.com">
+
+        </div>
+
+      </div>
+
+      <!-- PASSWORD -->
+
+      <div class="form-group">
+
+        <label>Contraseña</label>
+
+        <div class="custom-input">
+
+          <ion-icon
+            name="lock-closed-outline">
+          </ion-icon>
+
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="••••••••">
+
+          <button
+            type="button"
+            class="eye-button"
+            (click)="togglePassword()">
+
+            <ion-icon
+              [name]="showPassword ? 'eye-off-outline' : 'eye-outline'">
+            </ion-icon>
+
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+
+      <div class="forgot-password">
+
+        <a href="#">
+          ¿Olvidaste tu contraseña?
+        </a>
+
+      </div>
+
+      <!-- BOTÓN LOGIN -->
+
+      <button
+        class="login-btn"
+        type="button"
+        (click)="login()">
+
+        <span>Iniciar Sesión</span>
+
+        <ion-icon
+          name="arrow-forward-outline">
+        </ion-icon>
+
+      </button>
+
+    </form>
+
+    <!-- DIVIDER -->
+
+    <div class="divider">
+
+      <div class="line"></div>
+
+      <span>O continúa con</span>
+
+      <div class="line"></div>
+
+    </div>
+
+    <!-- SOCIAL -->
+
+    <div class="social-container">
+
+      <button class="social-btn">
+
+        <ion-icon
+          name="logo-google">
+        </ion-icon>
+
+        Google
+
+      </button>
+
+      <button class="social-btn">
+
+        <ion-icon
+          name="logo-apple">
+        </ion-icon>
+
+        Apple
+
+      </button>
+
+    </div>
+
+    <!-- REGISTER -->
+
+    <div class="register">
+
+      <span>
+        ¿No tienes una cuenta?
+      </span>
+
+      <a href="#">
+        Registrarse
+      </a>
+
+    </div>
+
+    <!-- FOOTER -->
+
+    <p class="footer">
+      FreshFocus AI Smart Kitchen Ecosystem © 2024
+    </p>
+
+  </div>
+
+</ion-content>
