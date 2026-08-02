@@ -22,9 +22,15 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () =>
       import('./home/home.page').then((m) => m.HomePage),
-  },  {
+  },
+  {
     path: 'inventario',
     loadComponent: () => import('./pages/inventario/inventario.page').then( m => m.InventarioPage)
+
+  },
+  {
+    path: 'configuracion',
+    loadComponent: () => import('./pages/configuracion/configuracion.page').then( m => m.ConfiguracionPage)
   },
 
 ];
