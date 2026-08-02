@@ -1,240 +1,113 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
-// Ionicons imports to ensure icons are registered and available
-import {
-  snowOutline,
-  searchOutline,
-  notificationsOutline,
-  personCircleOutline,
-  settingsOutline,
-  syncOutline,
-  alertCircleOutline,
-  thermometerOutline,
-  waterOutline,
-  flashOutline,
-  wifiOutline,
+import { Router } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { 
+  snowOutline, 
+  settingsOutline, 
+  syncOutline, 
+  notificationsOutline, 
+  thermometerOutline, 
+  waterOutline, 
   cubeOutline,
+  alertCircleOutline,
+  cartOutline,
   timeOutline,
-  nutritionOutline,
-  pizzaOutline,
-  leafOutline,
-  restaurantOutline,
-  scanOutline,
-  personOutline,
-  homeOutline,
+  gridOutline
 } from 'ionicons/icons';
-
-interface ActionButton {
-  label: string;
-  icon: string;
-  type: 'primary' | 'secondary';
-}
-
-interface StatusCard {
-  title: string;
-  value: string | number;
-  subtitle: string;
-  icon: string;
-  color: 'primary' | 'success' | 'warning' | 'danger';
-}
-
-interface SummaryCard {
-  title: string;
-  value: number;
-  subtitle: string;
-  icon: string;
-  type: 'warning' | 'danger';
-}
-
-interface ProductItem {
-  nombre: string;
-  vence: string;
-  cantidad: string;
-  clase: string;
-  progreso: number;
-  image?: string;
-}
-
-interface LegendItem {
-  label: string;
-  color: 'primary' | 'success' | 'warning';
-}
-
-interface RecipeSuggestion {
-  title: string;
-  description: string;
-  icon: string;
-  variant: 'default' | 'orange';
-}
-
-interface NavigationItem {
-  label: string;
-  icon: string;
-  active?: boolean;
-  special?: boolean;
-}
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, IonicModule],
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule]
 })
-export class DashboardPage {
+export class DashboardPage implements OnInit {
   usuario = 'Vanessa';
-  temperatura = 3;
-  humedad = 45;
   totalProductos = 42;
-  porVencer = 3;
-  escaseando = 5;
-  ultimaSync = 'Hace 2 min';
+  chartGradient = 'conic-gradient(#004ac6 0% 65%, #64a8fe 65% 85%, #006229 85% 100%)';
 
-  // Expose imported icons for template binding
   snowOutline = snowOutline;
-  searchOutline = searchOutline;
-  notificationsOutline = notificationsOutline;
-  personCircleOutline = personCircleOutline;
-  syncOutline = syncOutline;
-  alertCircleOutline = alertCircleOutline;
-  thermometerOutline = thermometerOutline;
-  waterOutline = waterOutline;
-  flashOutline = flashOutline;
-  wifiOutline = wifiOutline;
-  cubeOutline = cubeOutline;
-  timeOutline = timeOutline;
-  nutritionOutline = nutritionOutline;
-  pizzaOutline = pizzaOutline;
-  leafOutline = leafOutline;
-  restaurantOutline = restaurantOutline;
-  scanOutline = scanOutline;
-  personOutline = personOutline;
-  homeOutline = homeOutline;
   settingsOutline = settingsOutline;
+  alertCircleOutline = alertCircleOutline;
+  notificationsOutline = notificationsOutline;
+  cubeOutline = cubeOutline;
 
-  quickActions: ActionButton[] = [
-    { label: 'Sincronizar', icon: syncOutline, type: 'primary' },
-    { label: 'Alertas', icon: alertCircleOutline, type: 'secondary' },
+  quickActions = [
+    { type: 'sync', label: 'Sincronizar', icon: syncOutline },
+    { type: 'alerts', label: 'Ver Alertas', icon: notificationsOutline }
   ];
 
-  statusCards: StatusCard[] = [
-    {
-      title: 'Temperatura',
-      value: `${this.temperatura}°C`,
-      subtitle: 'Óptima',
-      icon: thermometerOutline,
-      color: 'danger',
-    },
-    {
-      title: 'Humedad',
-      value: `${this.humedad}%`,
-      subtitle: 'Nivel estable',
-      icon: waterOutline,
-      color: 'primary',
-    },
-    {
-      title: 'ESP32 STATUS',
-      value: 'Online',
-      subtitle: 'Potencia de señal: Excelente',
-      icon: wifiOutline,
-      color: 'success',
-    },
-    {
-      title: 'ÚLTIMA SINC.',
-      value: 'Hace 2 min',
-      subtitle: 'Auto-update habilitado',
-      icon: timeOutline,
-      color: 'warning',
-    },
+  statusCards = [
+    { color: 'primary', icon: thermometerOutline, title: 'Temperatura', value: '3 °C', subtitle: 'Óptima' },
+    { color: 'secondary', icon: waterOutline, title: 'Humedad', value: '45 %', subtitle: 'Nivel Estable' }
   ];
 
-  summaryCards: SummaryCard[] = [
-    {
-      title: 'Por vencer',
-      value: this.porVencer,
-      subtitle: 'Próximos 7 días',
-      icon: timeOutline,
-      type: 'warning',
-    },
-    {
-      title: 'Escaseando',
-      value: this.escaseando,
-      subtitle: 'Necesitan reposición',
-      icon: alertCircleOutline,
-      type: 'danger',
-    },
+  summaryCards = [
+    { type: 'warning', title: 'Por vencer', value: '3', subtitle: 'Alimentos próximos a caducar' },
+    { type: 'danger', title: 'Escaseando', value: '5', subtitle: 'Productos por reabastecer' }
   ];
 
-  productos: ProductItem[] = [
-    {
-      nombre: 'Leche Entera',
-      vence: '1 día restante',
-      cantidad: '2L',
-      clase: 'milk',
-      progreso: 85,
-      image: 'assets/images/products/lecheentera.webp',
-    },
-    {
-      nombre: 'Espinacas',
-      vence: '3 días restantes',
-      cantidad: '300 g',
-      clase: 'cheese',
-      progreso: 55,
-      image: 'assets/images/products/Espinacasss.jpeg',
-    },
-    {
-      nombre: 'Queso Brie',
-      vence: 'Vence mañana',
-      cantidad: '500 g',
-      clase: 'yogurt',
-      progreso: 74,
-      image: 'assets/images/products/quesoo.jpg',
-    },
+  productos = [
+    { nombre: 'Leche Entera', image: 'assets/images/products/lecheentera.webp', vence: '1 día restante', progreso: 10, clase: 'danger' },
+    { nombre: 'Espinacas', image: 'assets/images/products/espinacas.png', vence: '3 días restantes', progreso: 30, clase: 'warning' }
   ];
 
-  // Distribution values (percent) used to build the donut
-  distributionLegend: (LegendItem & { percent: number })[] = [
-    { label: 'Lácteos & Huevos', color: 'primary', percent: 65 },
-    { label: 'Vegetales', color: 'success', percent: 20 },
-    { label: 'Proteínas', color: 'warning', percent: 15 },
+  distributionLegend = [
+    { color: 'primary', label: 'Lácteos & Huevos', percent: 65 },
+    { color: 'secondary', label: 'Vegetales', percent: 20 },
+    { color: 'tertiary', label: 'Proteínas', percent: 15 }
   ];
 
-  // Compute a CSS conic-gradient string for the donut chart
-  get chartGradient(): string {
-    let start = 0;
-    const parts = this.distributionLegend.map((d) => {
-      const end = start + d.percent;
-      const color = d.color === 'primary' ? 'var(--primary)' : d.color === 'success' ? 'var(--success)' : 'var(--warning)';
-      const seg = `${color} ${start}% ${end}%`;
-      start = end;
-      return seg;
+  recipeSuggestions = [
+    { title: 'Omelette Cremoso de Espinacas', description: 'Receta recomendada', variant: 'green', image: 'assets/images/recipes/omeleet.png' },
+    { title: 'Quiche de Tres Quesos', description: 'Lácteos por vencer', variant: 'orange', image: 'assets/images/recipes/quiche.jpg' }
+  ];
+
+  bottomNavItems = [
+    { id: 'inventory', label: 'Inventory', icon: cubeOutline, path: '/inventario', active: false },
+    { id: 'shopping', label: 'Shopping', icon: cartOutline, path: '/lista-compras', active: false },
+    { id: 'sync', label: 'Sync', icon: syncOutline, path: '/comparacion', active: false },
+    { id: 'history', label: 'History', icon: timeOutline, path: '/historial', active: false },
+    { id: 'alerts', label: 'Alerts', icon: notificationsOutline, path: '/alertas', active: false }
+  ];
+
+  constructor(private router: Router) {
+    addIcons({
+      snowOutline,
+      settingsOutline,
+      syncOutline,
+      notificationsOutline,
+      thermometerOutline,
+      waterOutline,
+      cubeOutline,
+      alertCircleOutline,
+      cartOutline,
+      timeOutline,
+      gridOutline
     });
-    return `conic-gradient(${parts.join(',')})`;
   }
 
-  recipeSuggestions: (RecipeSuggestion & { image?: string })[] = [
-    {
-      title: 'Omelette cremoso de Espinacas',
-      description: 'Usa tus espinacas antes de que se vuelvan a perder.',
-      icon: restaurantOutline,
-      variant: 'default',
-      image: 'assets/images/recipes/omeleet.png',
-    },
-    {
-      title: 'Quiche de Tres Quesos',
-      description: 'Perfecto para aprovechar lácteos cercanos a vencer.',
-      icon: pizzaOutline,
-      variant: 'orange',
-      image: 'assets/images/recipes/quiche.jpg',
-    },
-  ];
+  ngOnInit() {}
 
-  bottomNavItems: NavigationItem[] = [
-    { label: 'Inicio', icon: homeOutline, active: true },
-    { label: 'Inventario', icon: cubeOutline },
-    { label: 'Scan', icon: scanOutline, special: true },
-    { label: 'Alertas', icon: notificationsOutline },
-    { label: 'Perfil', icon: personOutline },
-  ];
+  irADashboard() {
+    this.router.navigate(['/dashboard']);
+  }
+
+  irAConfiguracion() {
+    this.router.navigate(['/configuracion']);
+  }
+
+  irA(ruta: string) {
+    this.router.navigate([ruta]);
+  }
+
+  navegar(item: any) {
+    if (item.path) {
+      this.router.navigate([item.path]);
+    }
+  }
 }

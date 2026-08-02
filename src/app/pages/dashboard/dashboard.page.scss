@@ -1,1 +1,72 @@
-/* dashboard styles are moved to global.scss */
+.dashboard-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 16px 20px !important;
+  background-color: #f7f9fb !important;
+  border-bottom: 1px solid #e0e3e5 !important;
+  box-sizing: border-box !important;
+
+  /* Logo + Texto */
+  .brand-group {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+    cursor: pointer;
+
+    .refint-logo-svg {
+      width: 24px !important;
+      height: 28px !important;
+      flex-shrink: 0 !important;
+    }
+
+    .brand-title {
+      font-size: 26px !important;
+      font-weight: 700 !important;
+      color: #0053db !important; /* Azul Refint */
+      line-height: 1 !important;
+      letter-spacing: -0.5px !important;
+    }
+  }
+
+  /* Engranaje a la extrema derecha */
+  .gear-button {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px !important;
+    margin: 0 !important;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    ion-icon {
+      font-size: 26px !important;
+      color: #2d3133 !important; /* Gris oscuro */
+    }
+
+    &:active {
+      opacity: 0.6;
+    }
+  }
+}
+
+.bottom-nav {
+  .nav-item {
+    .custom-nav-svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      margin-bottom: 2px;
+    }
+
+    &.active {
+      .custom-nav-svg {
+        stroke: #0053db; /* Color activo */
+      }
+    }
+  }
+}
