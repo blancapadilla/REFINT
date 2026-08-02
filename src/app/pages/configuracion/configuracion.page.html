@@ -1,0 +1,163 @@
+<ion-content class="settings-content">
+  <div class="settings-container">
+
+    <!-- CABECERA -->
+    <header class="dashboard-header">
+      <div class="brand-group" (click)="irADashboard()">
+        <svg class="refint-logo-svg" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="20" height="24" rx="4" stroke="#0053db" stroke-width="2.5"/>
+          <line x1="2" y1="12" x2="22" y2="12" stroke="#0053db" stroke-width="2.5"/>
+          <line x1="6" y1="5.5" x2="6" y2="9.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="6" y1="15.5" x2="6" y2="20.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="brand-title">Refint</span>
+      </div>
+
+      <button class="gear-button" type="button" aria-label="Ajustes" (click)="irAConfiguracion()">
+        <ion-icon [icon]="settingsOutline"></ion-icon>
+      </button>
+    </header>
+
+    <main class="main-settings-body">
+      
+      <!-- PERFIL DE USUARIO -->
+      <section class="profile-card">
+        <div class="avatar-container">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxzXUPhyslY1FIWRBqUKCLvT75cd8meIx3Zmcs_93qGv-I_SQ6VSIV8Z6Odv236FzGybm2WRBqwzeF3bBe-SC9I43Ubhl9O0WcUFT-ImeFyoRthDFQ3ESLqlgXymdnDbWEUupKMS4jrOraC1aFR4LnAjSXVC6GhQf-pX1mjbLg_ElZekgsfoJVfHAm0ue3ZZELRzSnyjw3XtZRAhbLubtVQFojvttJ2glduSmfVecP7ayaLgPUkiHHcTZ4N_A8l3ISxFpysB85KtQ" alt="Profile" />
+          <div class="edit-badge">
+            <ion-icon [icon]="createOutline"></ion-icon>
+          </div>
+        </div>
+
+        <div class="profile-info">
+          <h2>{{ nombreUsuario }}</h2>
+          <p>{{ emailUsuario }}</p>
+          <span class="plan-badge">{{ planUsuario }}</span>
+        </div>
+
+        <ion-icon [icon]="chevronForwardOutline" class="chevron-icon"></ion-icon>
+      </section>
+
+      <!-- CUENTA & DISPOSITIVOS -->
+      <section class="settings-group">
+        <h3 class="group-title">CUENTA & DISPOSITIVOS</h3>
+        
+        <div class="group-box">
+          <div class="settings-item">
+            <div class="item-left">
+              <div class="icon-bubble primary">
+                <ion-icon [icon]="personOutline"></ion-icon>
+              </div>
+              <span>Perfil de Usuario</span>
+            </div>
+            <ion-icon [icon]="chevronForwardOutline" class="chevron"></ion-icon>
+          </div>
+
+          <div class="settings-item">
+            <div class="item-left">
+              <div class="icon-bubble primary">
+                <ion-icon [icon]="lockClosedOutline"></ion-icon>
+              </div>
+              <span>Seguridad (Cambiar Contraseña)</span>
+            </div>
+            <ion-icon [icon]="chevronForwardOutline" class="chevron"></ion-icon>
+          </div>
+
+          <div class="settings-item">
+            <div class="item-left">
+              <div class="icon-bubble tertiary">
+                <ion-icon [icon]="cameraOutline"></ion-icon>
+              </div>
+              <div class="item-text-group">
+                <span>Configuración Wi-Fi ESP32-CAM</span>
+                <span class="status-badge" [class.connected]="camaraConectada">
+                  <span class="dot"></span> {{ camaraConectada ? 'CONECTADO' : 'DESCONECTADO' }}
+                </span>
+              </div>
+            </div>
+            <ion-icon [icon]="chevronForwardOutline" class="chevron"></ion-icon>
+          </div>
+        </div>
+      </section>
+
+      <!-- PREFERENCIAS DE APP -->
+      <section class="settings-group">
+        <h3 class="group-title">PREFERENCIAS DE APP</h3>
+
+        <div class="group-box">
+          <div class="settings-item">
+            <div class="item-left">
+              <div class="icon-bubble secondary">
+                <ion-icon [icon]="notificationsOutline"></ion-icon>
+              </div>
+              <span>Notificaciones</span>
+            </div>
+            <div class="item-right">
+              <span class="value-label">Activadas</span>
+              <ion-icon [icon]="chevronForwardOutline" class="chevron"></ion-icon>
+            </div>
+          </div>
+
+          <div class="settings-item">
+            <div class="item-left">
+              <div class="icon-bubble secondary">
+                <ion-icon [icon]="globeOutline"></ion-icon>
+              </div>
+              <span>Idioma</span>
+            </div>
+            <div class="item-right">
+              <span class="value-label">{{ idiomaSeleccionado }}</span>
+              <ion-icon [icon]="chevronForwardOutline" class="chevron"></ion-icon>
+            </div>
+          </div>
+
+          <div class="settings-item no-border">
+            <div class="item-left">
+              <div class="icon-bubble secondary">
+                <ion-icon [icon]="esModoOscuro ? moonOutline : sunnyOutline"></ion-icon>
+              </div>
+              <span>Tema (Claro/Oscuro)</span>
+            </div>
+            <ion-toggle [checked]="esModoOscuro" (ionChange)="cambiarTema($event)"></ion-toggle>
+          </div>
+        </div>
+      </section>
+
+      <!-- CERRAR SESIÓN -->
+      <section class="logout-section">
+        <button class="logout-button" (click)="cerrarSesion()">
+          <ion-icon [icon]="logOutOutline"></ion-icon>
+          <span>Cerrar sesión</span>
+        </button>
+        <p class="app-version">FreshIQ v2.4.1 - "Keep it Fresh"</p>
+      </section>
+
+    </main>
+
+    <!-- BARRA NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+      <button
+        *ngFor="let nav of bottomNavItems"
+        type="button"
+        class="nav-item"
+        [class.active]="nav.active"
+        (click)="navegar(nav)"
+      >
+        <ng-container *ngIf="nav.id === 'inventory'; else standardIcon">
+          <svg class="custom-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="4" rx="1.5" />
+            <path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
+            <line x1="10" y1="13" x2="14" y2="13" />
+          </svg>
+        </ng-container>
+
+        <ng-template #standardIcon>
+          <ion-icon [icon]="nav.icon"></ion-icon>
+        </ng-template>
+
+        <span>{{ nav.label }}</span>
+      </button>
+    </nav>
+
+  </div>
+</ion-content>
