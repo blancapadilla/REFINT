@@ -1,61 +1,71 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
-
 import { addIcons } from 'ionicons';
-
-import {
-  mailOutline,
-  lockClosedOutline,
-  eyeOutline,
-  eyeOffOutline,
-  arrowForwardOutline,
-  logoGoogle,
-  logoApple
+import { 
+  mailOutline, 
+  lockClosedOutline, 
+  eyeOutline, 
+  eyeOffOutline, 
+  arrowForwardOutline 
 } from 'ionicons/icons';
-
-import {
-  IonContent,
-  IonIcon
-} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonContent,
-    IonIcon
-  ]
+  standalone: true,
+  imports: [CommonModule, FormsModule, IonicModule]
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
+  email = '';
+  password = '';
+  mostrarPassword = false;
 
-  showPassword = false;
+  mailOutline = mailOutline;
+  lockClosedOutline = lockClosedOutline;
+  eyeOutline = eyeOutline;
+  eyeOffOutline = eyeOffOutline;
+  arrowForwardOutline = arrowForwardOutline;
 
   constructor(private router: Router) {
-
     addIcons({
       mailOutline,
       lockClosedOutline,
       eyeOutline,
       eyeOffOutline,
-      arrowForwardOutline,
-      logoGoogle,
-      logoApple
+      arrowForwardOutline
     });
-
   }
 
-  togglePassword() {
-    this.showPassword = !this.showPassword;
+  ngOnInit() {}
+
+  toggleMostrarPassword() {
+    this.mostrarPassword = !this.mostrarPassword;
   }
 
-  login() {
+  iniciarSesion() {
+    // Lógica de autenticación e ingreso al dashboard
     this.router.navigate(['/dashboard']);
   }
 
+  loginGoogle() {
+    console.log('Iniciar sesión con Google');
+    this.router.navigate(['/dashboard']);
+  }
+
+  loginApple() {
+    console.log('Iniciar sesión con Apple');
+    this.router.navigate(['/dashboard']);
+  }
+
+  recuperarPassword() {
+    console.log('Recuperar contraseña');
+  }
+
+  irARegistro() {
+    console.log('Navegar a pantalla de registro');
+  }
 }
