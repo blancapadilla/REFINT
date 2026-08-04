@@ -1,0 +1,396 @@
+:host {
+  display: block;
+}
+
+.shopping-content {
+  --background: #f7f9fb;
+}
+
+.shopping-container {
+  padding-bottom: 90px;
+}
+
+/* Cabecera idéntica (60px de alto rígido) */
+.dashboard-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 60px;
+  padding: 0 20px;
+  background-color: #f7f9fb;
+  border-bottom: 1px solid #e0e3e5;
+  box-sizing: border-box;
+
+  .brand-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+
+    .refint-logo-svg {
+      width: 24px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0053db;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+  }
+
+  .gear-button {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    ion-icon {
+      font-size: 24px;
+      color: #2d3133;
+    }
+
+    &:active {
+      opacity: 0.6;
+    }
+  }
+}
+
+.main-shopping-body {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Título de página */
+.page-title-block {
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0 0 4px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #191c1e;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #c66a00;
+  }
+}
+
+/* Botón Generar Automáticamente */
+.generate-button {
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0060f0 0%, #0041ab 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 74, 198, 0.3);
+
+  ion-icon {
+    font-size: 20px;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.generate-hint {
+  margin: 8px 0 24px 0;
+  font-size: 12px;
+  color: #737686;
+  text-align: center;
+}
+
+/* Bloques de categoría */
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
+  .category-block {
+
+    .category-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+
+      .category-title-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .category-icon-circle {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          ion-icon {
+            font-size: 15px;
+          }
+
+          &.icon-blue {
+            background: rgba(0, 96, 240, 0.12);
+            color: #0053db;
+          }
+
+          &.icon-green {
+            background: rgba(41, 173, 96, 0.14);
+            color: #1f8a4c;
+          }
+
+          &.icon-teal {
+            background: rgba(0, 172, 172, 0.14);
+            color: #007a7a;
+          }
+        }
+
+        h2 {
+          margin: 0;
+          font-size: 17px;
+          font-weight: 700;
+          color: #191c1e;
+        }
+      }
+
+      .items-count-badge {
+        font-size: 12px;
+        font-weight: 600;
+        color: #004883;
+        background: #d4e3ff;
+        padding: 3px 10px;
+        border-radius: 10px;
+      }
+    }
+
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .shopping-item-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+
+        .checkbox-box {
+          width: 20px;
+          height: 20px;
+          border-radius: 6px;
+          border: 2px solid #c7cad1;
+          flex-shrink: 0;
+          box-sizing: border-box;
+
+          &.checked {
+            background: #0053db;
+            border-color: #0053db;
+          }
+        }
+
+        .item-name {
+          flex: 1;
+          font-size: 15px;
+          font-weight: 500;
+          color: #191c1e;
+
+          &.strike {
+            text-decoration: line-through;
+            color: #a4a7b0;
+          }
+        }
+
+        .item-badge {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 3px 9px;
+          border-radius: 8px;
+          text-transform: uppercase;
+          flex-shrink: 0;
+
+          &.badge-critico {
+            background: #ffdad6;
+            color: #93000a;
+          }
+
+          &.badge-agotado {
+            background: transparent;
+            color: #007a7a;
+            font-style: italic;
+            text-transform: none;
+            font-weight: 600;
+            padding: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Tarjetas de estadísticas */
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 26px;
+
+  .stat-card {
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    ion-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    &.stat-purple {
+      background: #e3e0ff;
+
+      ion-icon, .stat-value {
+        color: #4a3ec9;
+      }
+
+      .stat-label {
+        color: #5b52a8;
+      }
+    }
+
+    &.stat-green {
+      background: #baf5c4;
+
+      ion-icon, .stat-value {
+        color: #0a7a2f;
+      }
+
+      .stat-label {
+        color: #1f7a41;
+      }
+    }
+  }
+}
+
+/* Botón Flotante (FAB) */
+.fab-add-button {
+  position: fixed;
+  right: 20px;
+  bottom: 80px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #004ac6;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 74, 198, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99;
+
+  ion-icon {
+    font-size: 28px;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Menú inferior local (Shopping Resaltado en Azul) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background-color: #ffffff;
+  border-top: 1px solid #e0e3e5;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    flex: 1;
+    padding: 6px 0;
+    color: #737686;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 22px;
+      margin-bottom: 2px;
+      color: currentColor;
+    }
+
+    .custom-nav-svg {
+      width: 22px;
+      height: 22px;
+      margin-bottom: 2px;
+      stroke: currentColor;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    &.active {
+      color: #0053db;
+      font-weight: 700;
+
+      .custom-nav-svg {
+        stroke: #0053db;
+      }
+    }
+  }
+}
