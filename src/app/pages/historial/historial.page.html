@@ -1,0 +1,100 @@
+<ion-header>
+  <ion-toolbar class="main-toolbar">
+    <div slot="start" class="brand">
+      <div class="brand-icon">
+        <span></span>
+      </div>
+
+      <span class="brand-name">Refint</span>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button aria-label="Configuración">
+        <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="activity-header">
+    <h1>Historial de Actividad</h1>
+    <p>Seguimiento en tiempo real de tu inventario inteligente.</p>
+  </section>
+
+  <ion-list class="timeline-list">
+    <div class="date-label">Hoy</div>
+
+    <ion-item
+      *ngFor="let item of todayActivities"
+      class="timeline-item"
+      lines="none"
+    >
+      <div slot="start" class="timeline-icon" [ngClass]="item.color">
+        <ion-icon [name]="item.icon"></ion-icon>
+      </div>
+
+      <ion-label>
+        <h2 [ngClass]="item.color + '-text'">{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </ion-label>
+
+      <ion-note slot="end">{{ item.time }}</ion-note>
+    </ion-item>
+
+    <div class="date-label">Ayer</div>
+
+    <ion-item
+      *ngFor="let item of yesterdayActivities"
+      class="timeline-item"
+      lines="none"
+    >
+      <div slot="start" class="timeline-icon" [ngClass]="item.color">
+        <ion-icon [name]="item.icon"></ion-icon>
+      </div>
+
+      <ion-label>
+        <h2 [ngClass]="item.color + '-text'">{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </ion-label>
+
+      <ion-note slot="end">{{ item.time }}</ion-note>
+    </ion-item>
+  </ion-list>
+
+  <ion-button class="load-more" expand="block" fill="outline">
+    Cargar más actividad
+    <ion-icon slot="end" name="chevron-down-outline"></ion-icon>
+  </ion-button>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar class="bottom-toolbar">
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <a class="nav-option" routerLink="/inventario" routerLinkActive="active">
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Inventory</span>
+      </a>
+
+      <a class="nav-option" routerLink="/shopping" routerLinkActive="active">
+        <ion-icon name="cart-outline"></ion-icon>
+        <span>Shopping</span>
+      </a>
+
+      <a class="nav-option" routerLink="/sync" routerLinkActive="active">
+        <ion-icon name="sync-outline"></ion-icon>
+        <span>Sync</span>
+      </a>
+
+      <a class="nav-option" routerLink="/historial" routerLinkActive="active">
+        <ion-icon name="list-outline"></ion-icon>
+        <span>History</span>
+      </a>
+
+      <a class="nav-option" routerLink="/alertas" routerLinkActive="active">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Alerts</span>
+      </a>
+    </nav>
+  </ion-toolbar>
+</ion-footer>
