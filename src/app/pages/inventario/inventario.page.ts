@@ -109,11 +109,11 @@ export class InventarioPage implements OnInit {
 
   // Menú inferior: "Inventory" está ACTIVO (active: true)
   bottomNavItems = [
-    { id: 'inventory', label: 'Inventory', icon: cubeOutline, path: '/inventario', active: true },
-    { id: 'shopping', label: 'Shopping', icon: cartOutline, path: '/lista-compras', active: false },
-    { id: 'sync', label: 'Sync', icon: syncOutline, path: '/comparacion', active: false },
-    { id: 'history', label: 'History', icon: timeOutline, path: '/historial', active: false },
-    { id: 'alerts', label: 'Alerts', icon: notificationsOutline, path: '/alertas', active: false }
+    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: true },
+    { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
+    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
+    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
+    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
   ];
 
   constructor(private router: Router) {
