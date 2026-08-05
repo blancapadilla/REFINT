@@ -1,0 +1,129 @@
+<ion-header>
+  <ion-toolbar class="alerts-toolbar">
+    <div slot="start" class="alerts-brand">
+      <div class="brand-icon">
+        <span></span>
+      </div>
+
+      <span>Centro de Alertas</span>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button aria-label="Configuración">
+        <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="summary-cards">
+    <article class="summary-card critical-summary">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <strong>2 Críticas</strong>
+      <span>AGOTADOS</span>
+    </article>
+
+    <article class="summary-card upcoming-summary">
+      <ion-icon name="time-outline"></ion-icon>
+      <strong>4 Próximos</strong>
+      <span>POR VENCER</span>
+    </article>
+  </section>
+
+  <section class="recent-header">
+    <h1>Notificaciones<br>Recientes</h1>
+
+    <button type="button" class="mark-all">
+      Marcar todo como<br>leído
+    </button>
+  </section>
+
+  <section class="alerts-list">
+    <article
+      *ngFor="let alert of alerts"
+      class="alert-card"
+      [ngClass]="alert.type"
+    >
+      <div class="alert-top">
+        <div class="alert-icon">
+          <ion-icon [name]="alert.icon"></ion-icon>
+        </div>
+
+        <div class="alert-info">
+          <h2>{{ alert.title }}</h2>
+          <p>{{ alert.description }}</p>
+        </div>
+
+        <span class="alert-time">{{ alert.time }}</span>
+      </div>
+
+      <div *ngIf="alert.status" class="expiration-status">
+        <div class="expiration-bar">
+          <span></span>
+        </div>
+        <small>{{ alert.status }}</small>
+      </div>
+
+      <div *ngIf="alert.action" class="alert-actions">
+        <button type="button" class="primary-action">
+          {{ alert.action }}
+        </button>
+
+        <button
+          *ngIf="alert.secondaryAction"
+          type="button"
+          class="secondary-action"
+        >
+          {{ alert.secondaryAction }}
+        </button>
+      </div>
+    </article>
+  </section>
+
+  <a class="saving-tip" routerLink="/shopping">
+    <img
+      src="assets/images/tip-inventario.jpg"
+      alt="Consejo de ahorro para el inventario"
+    >
+
+    <div class="saving-tip-overlay">
+      <span>TIP DE AHORRO</span>
+      <h2>
+        Optimiza tu lista de compras según las alertas de caducidad
+        para reducir el desperdicio en un 20%.
+      </h2>
+    </div>
+  </a>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar class="bottom-toolbar">
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <a class="nav-option" routerLink="/inventario" routerLinkActive="active">
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Inventory</span>
+      </a>
+
+      <a class="nav-option" routerLink="/shopping" routerLinkActive="active">
+        <ion-icon name="cart-outline"></ion-icon>
+        <span>Shopping</span>
+      </a>
+
+      <a class="nav-option" routerLink="/sync" routerLinkActive="active">
+        <ion-icon name="sync-outline"></ion-icon>
+        <span>Sync</span>
+      </a>
+
+      <a class="nav-option" routerLink="/historial" routerLinkActive="active">
+        <ion-icon name="list-outline"></ion-icon>
+        <span>History</span>
+      </a>
+
+      <a class="nav-option" routerLink="/alertas" routerLinkActive="active">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Alerts</span>
+      </a>
+    </nav>
+  </ion-toolbar>
+</ion-footer>
