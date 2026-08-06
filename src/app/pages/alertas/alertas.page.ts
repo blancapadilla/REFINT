@@ -1,16 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import {
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonButton,
-  IonIcon,
-  IonContent,
-  IonFooter
-} from '@ionic/angular/standalone';
-
+import { IonicModule } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   settingsOutline,
@@ -20,13 +11,13 @@ import {
   calendarOutline,
   basketOutline,
   cloudOutline,
-  homeOutline,
+  cubeOutline,
   cartOutline,
   syncOutline,
-  listOutline
+  notificationsOutline
 } from 'ionicons/icons';
 
-interface AlertItem {
+interface AlertaItem {
   type: 'critical' | 'warning' | 'yellow' | 'success';
   icon: string;
   title: string;
@@ -35,6 +26,7 @@ interface AlertItem {
   action?: string;
   secondaryAction?: string;
   status?: string;
+  progreso?: number;
 }
 
 @Component({
@@ -42,74 +34,100 @@ interface AlertItem {
   templateUrl: './alertas.page.html',
   styleUrls: ['./alertas.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    RouterLinkActive,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonButton,
-    IonIcon,
-    IonContent,
-    IonFooter
-  ]
+  imports: [CommonModule, IonicModule]
 })
-export class AlertasPage {
-  alerts: AlertItem[] = [
+export class AlertasPage implements OnInit {
+
+  // Iconos
+  settingsOutline = settingsOutline;
+  alertCircleOutline = alertCircleOutline;
+  timeOutline = timeOutline;
+
+  // Alertas de ejemplo
+  alerts: AlertaItem[] = [
     {
       type: 'critical',
-      icon: 'close-circle-outline',
+      icon: closeCircleOutline,
       title: 'Leche Entera (2L)',
       time: 'Hace 5 min',
-      description:
-        'El producto está completamente agotado. No quedan existencias en el compartimiento principal.',
+      description: 'El producto está completamente agotado. No quedan existencias en el compartimiento principal.',
       action: 'Añadir al Carrito',
       secondaryAction: 'Omitir'
     },
     {
       type: 'warning',
-      icon: 'calendar-outline',
+      icon: calendarOutline,
       title: 'Yogur Griego Natural',
       time: 'Hace 1 hora',
-      description:
-        'Vence mañana. Se recomienda consumir pronto o usar en recetas de repostería.',
+      description: 'Vence mañana. Se recomienda consumir pronto o usar en recetas de repostería.',
       action: 'Ver Recetas',
-      status: '85% expirado'
+      status: '85% del tiempo transcurrido',
+      progreso: 85
     },
     {
       type: 'yellow',
-      icon: 'basket-outline',
+      icon: basketOutline,
       title: 'Huevos (Docena)',
       time: 'Hace 3 horas',
-      description:
-        'Quedan solo 2 unidades. Tu consumo promedio indica que necesitarás más en 2 días.',
+      description: 'Quedan solo 2 unidades. Tu consumo promedio indica que necesitarás más en 2 días.',
       action: 'Comprar'
     },
     {
       type: 'success',
-      icon: 'cloud-outline',
+      icon: cloudOutline,
       title: 'Inventario Sincronizado',
       time: 'Hoy, 08:45 AM',
-      description:
-        'Se han actualizado 12 artículos correctamente después de tu visita al supermercado.',
+      description: 'Se han actualizado 12 artículos correctamente después de tu visita al supermercado.',
       action: 'Ver detalles'
     }
   ];
 
-  constructor() {
+  // Menú inferior: "Alerts" está ACTIVO (active: true)
+  bottomNavItems = [
+    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
+    { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
+    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
+    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
+    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: true }
+  ];
+
+  constructor(private router: Router) {
     addIcons({
-      'settings-outline': settingsOutline,
-      'alert-circle-outline': alertCircleOutline,
-      'time-outline': timeOutline,
-      'close-circle-outline': closeCircleOutline,
-      'calendar-outline': calendarOutline,
-      'basket-outline': basketOutline,
-      'cloud-outline': cloudOutline,
-      'home-outline': homeOutline,
-      'cart-outline': cartOutline,
-      'sync-outline': syncOutline,
-      'list-outline': listOutline
+      settingsOutline,
+      alertCircleOutline,
+      timeOutline,
+      closeCircleOutline,
+      calendarOutline,
+      basketOutline,
+      cloudOutline,
+      cubeOutline,
+      cartOutline,
+      syncOutline,
+      notificationsOutline
     });
+  }
+
+  ngOnInit() {}
+
+  irADashboard() {
+    this.router.navigate(['/dashboard']);
+  }
+
+  irAConfiguracion() {
+    this.router.navigate(['/configuracion']);
+  }
+
+  marcarTodoLeido() {
+    console.log('Marcar todas las alertas como leídas');
+  }
+
+  irAListaCompras() {
+    this.router.navigate(['/lista-compras']);
+  }
+
+  navegar(item: any) {
+    if (item.path) {
+      this.router.navigate([item.path]);
+    }
   }
 }

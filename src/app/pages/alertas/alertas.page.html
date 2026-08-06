@@ -1,129 +1,122 @@
-<ion-header>
-  <ion-toolbar class="alerts-toolbar">
-    <div slot="start" class="alerts-brand">
-      <div class="brand-icon">
-        <span></span>
+<ion-content class="alerts-content">
+  <div class="alerts-container">
+
+    <!-- CABECERA DE LA APP (idéntica a las demás pantallas) -->
+    <header class="dashboard-header">
+      <div class="brand-group" (click)="irADashboard()">
+        <svg class="refint-logo-svg" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="20" height="24" rx="4" stroke="#0053db" stroke-width="2.5"/>
+          <line x1="2" y1="12" x2="22" y2="12" stroke="#0053db" stroke-width="2.5"/>
+          <line x1="6" y1="5.5" x2="6" y2="9.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="6" y1="15.5" x2="6" y2="20.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="brand-title">Refint</span>
       </div>
 
-      <span>Centro de Alertas</span>
-    </div>
+      <button class="gear-button" type="button" aria-label="Ajustes" (click)="irAConfiguracion()">
+        <ion-icon [icon]="settingsOutline"></ion-icon>
+      </button>
+    </header>
 
-    <ion-buttons slot="end">
-      <ion-button aria-label="Configuración">
-        <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+    <main class="main-alerts-body">
 
-<ion-content class="ion-padding">
-  <section class="summary-cards">
-    <article class="summary-card critical-summary">
-      <ion-icon name="alert-circle-outline"></ion-icon>
-      <strong>2 Críticas</strong>
-      <span>AGOTADOS</span>
-    </article>
-
-    <article class="summary-card upcoming-summary">
-      <ion-icon name="time-outline"></ion-icon>
-      <strong>4 Próximos</strong>
-      <span>POR VENCER</span>
-    </article>
-  </section>
-
-  <section class="recent-header">
-    <h1>Notificaciones<br>Recientes</h1>
-
-    <button type="button" class="mark-all">
-      Marcar todo como<br>leído
-    </button>
-  </section>
-
-  <section class="alerts-list">
-    <article
-      *ngFor="let alert of alerts"
-      class="alert-card"
-      [ngClass]="alert.type"
-    >
-      <div class="alert-top">
-        <div class="alert-icon">
-          <ion-icon [name]="alert.icon"></ion-icon>
-        </div>
-
-        <div class="alert-info">
-          <h2>{{ alert.title }}</h2>
-          <p>{{ alert.description }}</p>
-        </div>
-
-        <span class="alert-time">{{ alert.time }}</span>
+      <!-- TÍTULO -->
+      <div class="page-title-block">
+        <h1>Centro de Alertas</h1>
+        <p>Notificaciones de tu inventario en tiempo real.</p>
       </div>
 
-      <div *ngIf="alert.status" class="expiration-status">
-        <div class="expiration-bar">
-          <span></span>
+      <!-- TARJETAS RESUMEN -->
+      <div class="summary-cards">
+        <div class="summary-card summary-red">
+          <ion-icon [icon]="alertCircleOutline"></ion-icon>
+          <span class="summary-value">2 Críticas</span>
+          <span class="summary-label">Agotados</span>
         </div>
-        <small>{{ alert.status }}</small>
+        <div class="summary-card summary-blue">
+          <ion-icon [icon]="timeOutline"></ion-icon>
+          <span class="summary-value">4 Próximos</span>
+          <span class="summary-label">Por Vencer</span>
+        </div>
       </div>
 
-      <div *ngIf="alert.action" class="alert-actions">
-        <button type="button" class="primary-action">
-          {{ alert.action }}
-        </button>
-
-        <button
-          *ngIf="alert.secondaryAction"
-          type="button"
-          class="secondary-action"
-        >
-          {{ alert.secondaryAction }}
+      <!-- ENCABEZADO DE LA LISTA -->
+      <div class="section-header-row">
+        <h2>Notificaciones Recientes</h2>
+        <button type="button" class="mark-all-btn" (click)="marcarTodoLeido()">
+          Marcar todo como leído
         </button>
       </div>
-    </article>
-  </section>
 
-  <a class="saving-tip" routerLink="/shopping">
-    <img
-      src="assets/images/tip-inventario.jpg"
-      alt="Consejo de ahorro para el inventario"
-    >
+      <!-- LISTA DE ALERTAS -->
+      <div class="alerts-list">
+        <div *ngFor="let alert of alerts" class="alert-card" [ngClass]="'alert-' + alert.type">
 
-    <div class="saving-tip-overlay">
-      <span>TIP DE AHORRO</span>
-      <h2>
-        Optimiza tu lista de compras según las alertas de caducidad
-        para reducir el desperdicio en un 20%.
-      </h2>
-    </div>
-  </a>
-</ion-content>
+          <div class="alert-top">
+            <span class="alert-icon">
+              <ion-icon [icon]="alert.icon"></ion-icon>
+            </span>
 
-<ion-footer>
-  <ion-toolbar class="bottom-toolbar">
-    <nav class="bottom-nav" aria-label="Navegación principal">
-      <a class="nav-option" routerLink="/inventario" routerLinkActive="active">
-        <ion-icon name="home-outline"></ion-icon>
-        <span>Inventory</span>
+            <div class="alert-info">
+              <h3>{{ alert.title }}</h3>
+              <p>{{ alert.description }}</p>
+            </div>
+
+            <span class="alert-time">{{ alert.time }}</span>
+          </div>
+
+          <div *ngIf="alert.status" class="expiration-status">
+            <div class="expiration-bar">
+              <span [style.width]="alert.progreso + '%'"></span>
+            </div>
+            <small>{{ alert.status }}</small>
+          </div>
+
+          <div *ngIf="alert.action" class="alert-actions">
+            <button type="button" class="primary-action-btn">{{ alert.action }}</button>
+            <button *ngIf="alert.secondaryAction" type="button" class="secondary-action-btn">
+              {{ alert.secondaryAction }}
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TIP DE AHORRO -->
+      <a class="saving-tip-card" (click)="irAListaCompras()">
+        <div class="saving-tip-overlay">
+          <span>Tip de Ahorro</span>
+          <h3>Optimiza tu lista de compras según las alertas de caducidad para reducir el desperdicio en un 20%.</h3>
+        </div>
       </a>
 
-      <a class="nav-option" routerLink="/shopping" routerLinkActive="active">
-        <ion-icon name="cart-outline"></ion-icon>
-        <span>Shopping</span>
-      </a>
+    </main>
 
-      <a class="nav-option" routerLink="/sync" routerLinkActive="active">
-        <ion-icon name="sync-outline"></ion-icon>
-        <span>Sync</span>
-      </a>
+    <!-- MENÚ INFERIOR (ALERTS RESALTADO CON FONDO AZUL) -->
+    <nav class="bottom-nav">
+      <button
+        *ngFor="let nav of bottomNavItems"
+        type="button"
+        class="nav-item"
+        [class.active]="nav.active"
+        (click)="navegar(nav)"
+      >
+        <span class="nav-icon-wrap" [class.pill-active]="nav.active">
+          <ng-container *ngIf="nav.id === 'inventory'; else standardIcon">
+            <svg class="custom-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="4" rx="1.5" />
+              <path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
+              <line x1="10" y1="13" x2="14" y2="13" />
+            </svg>
+          </ng-container>
 
-      <a class="nav-option" routerLink="/historial" routerLinkActive="active">
-        <ion-icon name="list-outline"></ion-icon>
-        <span>History</span>
-      </a>
-
-      <a class="nav-option" routerLink="/alertas" routerLinkActive="active">
-        <ion-icon name="alert-circle-outline"></ion-icon>
-        <span>Alerts</span>
-      </a>
+          <ng-template #standardIcon>
+            <ion-icon [icon]="nav.icon"></ion-icon>
+          </ng-template>
+        </span>
+        <span>{{ nav.label }}</span>
+      </button>
     </nav>
-  </ion-toolbar>
-</ion-footer>
+
+  </div>
+</ion-content>

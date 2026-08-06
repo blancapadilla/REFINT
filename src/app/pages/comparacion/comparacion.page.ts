@@ -81,9 +81,9 @@ export class ComparacionPage implements OnInit {
   bottomNavItems = [
     { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false, badge: false },
     { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false, badge: false },
-    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: true, badge: false },
+    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: true, badge: true },
     { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false, badge: false },
-    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false, badge: true }
+    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false, badge: false }
   ];
 
   constructor(private router: Router) {

@@ -340,7 +340,7 @@
   }
 }
 
-/* Menú inferior local (Shopping Resaltado en Azul) */
+/* Menú inferior local (fondo azul en el ícono activo) */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -369,28 +369,42 @@
     font-weight: 500;
     cursor: pointer;
 
-    ion-icon {
-      font-size: 22px;
+    .nav-icon-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 2px;
-      color: currentColor;
-    }
 
-    .custom-nav-svg {
-      width: 22px;
-      height: 22px;
-      margin-bottom: 2px;
-      stroke: currentColor;
-      flex-shrink: 0;
-      display: block;
+      ion-icon {
+        font-size: 22px;
+        color: currentColor;
+      }
+
+      .custom-nav-svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+        flex-shrink: 0;
+        display: block;
+      }
+
+      &.pill-active {
+        background: #0053db;
+        border-radius: 10px;
+        width: 34px;
+        height: 30px;
+
+        ion-icon, .custom-nav-svg {
+          color: #ffffff;
+          stroke: #ffffff;
+        }
+      }
     }
 
     &.active {
       color: #0053db;
       font-weight: 700;
-
-      .custom-nav-svg {
-        stroke: #0053db;
-      }
     }
   }
 }
