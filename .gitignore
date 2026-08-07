@@ -1,70 +1,43 @@
-# Specifies intentionally untracked files to ignore when using Git
-# http://git-scm.com/docs/gitignore
+# ==========================================
+# 1. FRONTEND (Angular / Ionic)
+# ==========================================
+frontend/node_modules/
+frontend/.angular/
+frontend/www/
+frontend/dist/
+frontend/coverage/
 
-*~
-*.sw[mnpcod]
-.tmp
-*.tmp
-*.tmp.*
-UserInterfaceState.xcuserstate
-$RECYCLE.BIN/
+# ==========================================
+# 2. BACKEND (Python / FastAPI)
+# ==========================================
+backend/.venv/
+**/venv/
+**/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-*.log
-log.txt
+# ==========================================
+# 3. VISIÓN ARTIFICIAL & IA (OpenCV / YOLO)
+# ==========================================
+# Oculta los pesos de modelos de IA y resultados de entrenamiento pesados
+ai/*.pt
+ai/runs/
+ai/.onnx
 
+# ==========================================
+# 4. CONFIGURACIÓN Y SEGURIDAD (¡SÚPER IMPORTANTE!)
+# ==========================================
+# Oculta claves privadas de Supabase o credenciales de la API
+*.env
+.env
+.env.*
 
-/.sourcemaps
-/.versions
-/coverage
-
-# Ionic
-/.ionic
-/www
-/platforms
-/plugins
-
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
-
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
-
-# IDEs and editors
-.idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-project
-*.sublime-workspace
-
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
-
-
-# Miscellaneous
-/.angular
-/.angular/cache
-.sass-cache/
-/.nx
-/.nx/cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-
-# System files
+# ==========================================
+# 5. ARCHIVOS DEL SISTEMA OPERATIVO E IDE
+# ==========================================
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
