@@ -17,6 +17,7 @@ import {
   timeOutline,
   gridOutline
 } from 'ionicons/icons';
+import { DashboardService } from 'src/app/services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -75,7 +76,7 @@ export class DashboardPage implements OnInit {
     { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
   ];
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private dashboardService: DashboardService) {
     addIcons({
       snowOutline,
       settingsOutline,
@@ -91,7 +92,7 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() { this.cargarDashboard(); }
 
   irADashboard() {
     this.router.navigate(['/dashboard']);
@@ -110,4 +111,33 @@ export class DashboardPage implements OnInit {
       this.router.navigate([item.path]);
     }
   }
+
+  cargarDashboard() {
+  this.dashboardService.getDashboardData().subscribe({
+    next: (data) => {
+      this.usuario = data.usuario;
+      this.totalProductos = data.resumen.total_productos;
+      
+      // Mapear tarjetas de sensores
+      this.statusCards = [
+        { color: data.sensores.temperatura.color, icon: thermometerOutline, title: 'Temperatura', value: data.sensores.temperatura.valor, subtitle: data.sensores.temperatura.estado },
+        { color: data.sensores.humedad.color, icon: waterOutline, title: 'Humedad', value: data.sensores.humedad.valor, subtitle: data.sensores.humedad.estado }
+      ];
+
+      // Mapear tarjetas de resumen
+      this.summaryCards = [
+        { type: 'warning', title: 'Por vencer', value: data.resumen.por_vencer.toString(), subtitle: 'Alimentos próximos a caducar' },
+        { type: 'danger', title: 'Escaseando', value: data.resumen.escaseando.toString(), subtitle: 'Productos por reabastecer' }
+      ];
+
+      this.productos = data.productos_por_vencer;
+      this.distributionLegend = data.distribucion;
+      this.recipeSuggestions = data.recetas_recomendadas;
+    },
+    error: (err) => {
+      console.error('Error al cargar datos del dashboard:', err);
+    }
+  });
+  }
 }
+
