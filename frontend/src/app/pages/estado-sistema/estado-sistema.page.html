@@ -7,55 +7,27 @@
         <h1>Estado del Sistema</h1>
         <p>Real-time hardware and network diagnostics.</p>
       </div>
-      <div class="status-pill">
+      <div class="status-pill" [class.warning]="systemStatus !== 'System Operational'">
         <span class="status-dot"></span>
-        System Operational
+        {{ systemStatus }}
       </div>
     </section>
 
     <div class="system-grid">
-      <div class="glass-card">
+      <div class="glass-card" *ngFor="let device of deviceStatuses">
         <div class="card-row">
-          <div class="icon-box"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+          <div class="icon-box">
+            <ion-icon [name]="getDeviceIcon(device.type)"></ion-icon>
+          </div>
           <div>
-            <p class="card-title">ESP32 Core</p>
-            <p class="card-subtitle">Main Controller</p>
+            <p class="card-title">{{ device.name }}</p>
+            <p class="card-subtitle">{{ device.type }}</p>
           </div>
         </div>
-        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
-      </div>
-
-      <div class="glass-card">
-        <div class="card-row">
-          <div class="icon-box"><ion-icon name="camera-outline"></ion-icon></div>
-          <div>
-            <p class="card-title">Vision Module</p>
-            <p class="card-subtitle">Interior Camera</p>
-          </div>
-        </div>
-        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
-      </div>
-
-      <div class="glass-card">
-        <div class="card-row">
-          <div class="icon-box"><ion-icon name="thermometer-outline"></ion-icon></div>
-          <div>
-            <p class="card-title">Thermistor</p>
-            <p class="card-subtitle">Zone 1 & 2</p>
-          </div>
-        </div>
-        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
-      </div>
-
-      <div class="glass-card">
-        <div class="card-row">
-          <div class="icon-box"><ion-icon name="business-outline"></ion-icon></div>
-          <div>
-            <p class="card-title">Magnetic Contact</p>
-            <p class="card-subtitle">Main Door</p>
-          </div>
-        </div>
-        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
+        <span class="card-badge" [class.success]="device.status === 'online'" [class.warning]="device.status !== 'online'">
+          <ion-icon [name]="device.status === 'online' ? 'checkmark-circle-outline' : 'warning-outline'"></ion-icon>
+          {{ device.status.toUpperCase() }}
+        </span>
       </div>
     </div>
 
@@ -63,15 +35,15 @@
       <h2>Cloud Infrastructure</h2>
       <div class="cloud-row">
         <span>Backend API</span>
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <ion-icon [name]="backendHealthy ? 'checkmark-circle-outline' : 'close-circle-outline'"></ion-icon>
       </div>
       <div class="cloud-row divider">
         <span>Supabase DB</span>
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <ion-icon [name]="supabaseHealthy ? 'checkmark-circle-outline' : 'close-circle-outline'"></ion-icon>
       </div>
-      <div class="cloud-row warning">
-        <span>WiFi Link <small>(Low Signal)</small></span>
-        <ion-icon name="warning-outline"></ion-icon>
+      <div class="cloud-row" [class.warning]="networkStatus !== 'Healthy'">
+        <span>WiFi Link <small>({{ networkStatus }})</small></span>
+        <ion-icon [name]="networkStatus === 'Healthy' ? 'checkmark-circle-outline' : 'warning-outline'"></ion-icon>
       </div>
     </section>
 
@@ -79,16 +51,20 @@
       <h2>Device Info</h2>
       <div class="info-grid">
         <div class="info-card">
+          <span class="label">REFRIGERATOR</span>
+          <span class="value">{{ refrigerador?.name ?? 'Sin datos' }}</span>
+        </div>
+        <div class="info-card">
           <span class="label">IP ADDRESS</span>
-          <span class="value">192.168.1.104</span>
+          <span class="value">{{ ipAddress }}</span>
         </div>
         <div class="info-card">
           <span class="label">FIRMWARE</span>
-          <span class="value">v2.4.1</span>
+          <span class="value">{{ firmwareVersion }}</span>
         </div>
         <div class="info-card span-full">
           <span class="label">UPTIME</span>
-          <span class="value">14d 08h 22m 15s</span>
+          <span class="value">{{ uptime }}</span>
         </div>
       </div>
     </section>
