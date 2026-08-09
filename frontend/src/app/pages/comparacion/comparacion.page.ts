@@ -165,8 +165,4 @@ export class ComparacionPage implements OnInit {
     }
   }
 
-  irADashboard() { this.router.navigate(['/dashboard']); }
-  irAConfiguracion() { this.router.navigate(['/configuracion']); }
-  buscar() { console.log('Abrir búsqueda de comparación'); }
-  navegar(item: any) { if (item.path) this.router.navigate([item.path]); }
 }

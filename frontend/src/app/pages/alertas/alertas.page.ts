@@ -1,11 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
+
+import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { addIcons } from 'ionicons';
 import {
   settingsOutline,
+  searchOutline,
   alertCircleOutline,
+  notificationsOutline,
   timeOutline,
   closeCircleOutline,
   calendarOutline,
@@ -14,107 +18,120 @@ import {
   cubeOutline,
   cartOutline,
   syncOutline,
-  notificationsOutline
+  listOutline,
+  homeOutline
 } from 'ionicons/icons';
 
-// Importamos el servicio
-import { AlertasService } from 'src/app/services/alertas.service';
+interface AlertItem {
+  type: 'critical' | 'warning' | 'yellow' | 'success';
+  icon: string;
+  title: string;
+  time: string;
+  description: string;
+  action?: string;
+  secondaryAction?: string;
+  status?: string;
+}
 
 @Component({
   selector: 'app-alertas',
   templateUrl: './alertas.page.html',
   styleUrls: ['./alertas.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule]
+  imports: [
+    CommonModule,
+    IonicModule,
+    AppHeaderComponent
+  ]
 })
-export class AlertasPage implements OnInit {
-
-  // Iconos principales
-  settingsOutline = settingsOutline;
-  alertCircleOutline = alertCircleOutline;
-  timeOutline = timeOutline;
-
-  // Resumen y alertas cargadas dinámicamente
-  resumen = { criticas: 0, proximos: 0 };
-  alerts: any[] = [];
-
-  // Mapeo de nombres de texto a íconos reales de IonIcons
-  private iconMap: { [key: string]: any } = {
-    closeCircleOutline: closeCircleOutline,
-    calendarOutline: calendarOutline,
-    basketOutline: basketOutline,
-    cloudOutline: cloudOutline,
-    alertCircleOutline: alertCircleOutline
-  };
-
-  // Menú inferior
-  bottomNavItems = [
-    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
-    { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
-    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
-    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
-    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: true }
+export class AlertasPage {
+  alerts: AlertItem[] = [
+    {
+      type: 'critical',
+      icon: 'close-circle-outline',
+      title: 'Leche Entera (2L)',
+      time: 'Hace 5 min',
+      description:
+        'El producto está completamente agotado. No quedan existencias en el compartimiento principal.',
+      action: 'Añadir al Carrito',
+      secondaryAction: 'Omitir'
+    },
+    {
+      type: 'warning',
+      icon: 'calendar-outline',
+      title: 'Yogur Griego Natural',
+      time: 'Hace 1 hora',
+      description:
+        'Vence mañana. Se recomienda consumir pronto o usar en recetas de repostería.',
+      action: 'Ver Recetas',
+      status: '85% expirado'
+    },
+    {
+      type: 'yellow',
+      icon: 'basket-outline',
+      title: 'Huevos (Docena)',
+      time: 'Hace 3 horas',
+      description:
+        'Quedan solo 2 unidades. Tu consumo promedio indica que necesitarás más en 2 días.',
+      action: 'Comprar'
+    },
+    {
+      type: 'success',
+      icon: 'cloud-outline',
+      title: 'Inventario Sincronizado',
+      time: 'Hoy, 08:45 AM',
+      description:
+        'Se han actualizado 12 artículos correctamente después de tu visita al supermercado.',
+      action: 'Ver detalles'
+    }
   ];
 
-  constructor(
-    private router: Router,
-    private alertasService: AlertasService // Inyección de servicio
-  ) {
+  bottomNavItems = [
+    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false, badge: false },
+    { id: 'shopping', label: 'Lista', icon: cartOutline, path: '/lista-compras', active: false, badge: false },
+    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false, badge: false },
+    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false, badge: false },
+    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: true, badge: false }
+  ];
+
+  searchOutline = searchOutline;
+  settingsOutline = settingsOutline;
+
+  constructor(private router: Router) {
     addIcons({
-      settingsOutline,
-      alertCircleOutline,
-      timeOutline,
-      closeCircleOutline,
-      calendarOutline,
-      basketOutline,
-      cloudOutline,
-      cubeOutline,
-      cartOutline,
-      syncOutline,
-      notificationsOutline
-    });
-  }
-
-  ngOnInit() {
-    this.cargarAlertas();
-  }
-
-  cargarAlertas() {
-    this.alertasService.getAlertas().subscribe({
-      next: (res) => {
-        this.resumen = res.resumen;
-        this.alerts = res.alerts.map(alert => ({
-          ...alert,
-          icon: this.iconMap[alert.icon] || alertCircleOutline
-        }));
-      },
-      error: (err) => console.error('Error al cargar alertas:', err)
-    });
-  }
-
-  marcarTodoLeido() {
-    this.alertasService.marcarTodoLeido().subscribe({
-      next: () => {
-        this.alerts = [];
-        this.resumen = { criticas: 0, proximos: 0 };
-      },
-      error: (err) => console.error('Error al marcar todo como leído:', err)
+      'settings-outline': settingsOutline,
+      'search-outline': searchOutline,
+      'alert-circle-outline': alertCircleOutline,
+      'time-outline': timeOutline,
+      'close-circle-outline': closeCircleOutline,
+      'calendar-outline': calendarOutline,
+      'basket-outline': basketOutline,
+      'cloud-outline': cloudOutline,
+      'home-outline': homeOutline,
+      'cart-outline': cartOutline,
+      'sync-outline': syncOutline,
+      'list-outline': listOutline
     });
   }
 
   irADashboard() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/inventario']);
   }
 
   irAConfiguracion() {
     this.router.navigate(['/configuracion']);
   }
 
-  irAListaCompras() {
-    this.router.navigate(['/lista-compras']);
+  buscar() {
+    console.log('Buscar en alertas');
   }
 
   navegar(item: any) {
+    this.bottomNavItems = this.bottomNavItems.map(nav => ({
+      ...nav,
+      active: nav.id === item.id
+    }));
+
     if (item.path) {
       this.router.navigate([item.path]);
     }

@@ -1,99 +1,77 @@
-<ion-content class="history-content">
-  <div class="history-container">
+<app-header title="Historial" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
 
-    <!-- CABECERA DE LA APP (idéntica a las demás pantallas) -->
-    <header class="dashboard-header">
-      <div class="brand-group" (click)="irADashboard()">
-        <svg class="refint-logo-svg" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="20" height="24" rx="4" stroke="#0053db" stroke-width="2.5"/>
-          <line x1="2" y1="12" x2="22" y2="12" stroke="#0053db" stroke-width="2.5"/>
-          <line x1="6" y1="5.5" x2="6" y2="9.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="6" y1="15.5" x2="6" y2="20.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
+<ion-content class="ion-padding">
+  <section class="activity-header">
+    <h1>Historial de Actividad</h1>
+    <p>Seguimiento en tiempo real de tu inventario inteligente.</p>
+  </section>
+
+  <ion-list class="timeline-list">
+    <div class="date-label">Hoy</div>
+
+    <ion-item
+      *ngFor="let item of todayActivities"
+      class="timeline-item"
+      lines="none"
+    >
+      <div slot="start" class="timeline-icon" [ngClass]="item.color">
+        <ion-icon [name]="item.icon"></ion-icon>
+      </div>
+
+      <ion-label>
+        <h2 [ngClass]="item.color + '-text'">{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </ion-label>
+
+      <ion-note slot="end">{{ item.time }}</ion-note>
+    </ion-item>
+
+    <div class="date-label">Ayer</div>
+
+    <ion-item
+      *ngFor="let item of yesterdayActivities"
+      class="timeline-item"
+      lines="none"
+    >
+      <div slot="start" class="timeline-icon" [ngClass]="item.color">
+        <ion-icon [name]="item.icon"></ion-icon>
+      </div>
+
+      <ion-label>
+        <h2 [ngClass]="item.color + '-text'">{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </ion-label>
+
+      <ion-note slot="end">{{ item.time }}</ion-note>
+    </ion-item>
+  </ion-list>
+
+  <ion-button class="load-more" expand="block" fill="outline">
+    Cargar más actividad
+    <ion-icon slot="end" name="chevron-down-outline"></ion-icon>
+  </ion-button>
+
+  <nav class="bottom-nav">
+    <button
+      *ngFor="let nav of bottomNavItems"
+      type="button"
+      class="nav-item"
+      [class.active]="nav.active"
+      (click)="navegar(nav)"
+    >
+      <ng-container *ngIf="nav.id === 'inventory'; else standardIcon">
+        <svg class="custom-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="4" rx="1.5" />
+          <path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
+          <line x1="10" y1="13" x2="14" y2="13" />
         </svg>
-        <span class="brand-title">Refint</span>
-      </div>
+      </ng-container>
 
-      <button class="gear-button" type="button" aria-label="Ajustes" (click)="irAConfiguracion()">
-        <ion-icon [icon]="settingsOutline"></ion-icon>
-      </button>
-    </header>
+      <ng-template #standardIcon>
+        <ion-icon [icon]="nav.icon"></ion-icon>
+      </ng-template>
 
-    <main class="main-history-body">
-
-      <!-- TÍTULO -->
-      <div class="page-title-block">
-        <h1>Historial de Actividad</h1>
-        <p>Seguimiento en tiempo real de tu inventario inteligente.</p>
-      </div>
-
-      <!-- LÍNEA DE TIEMPO -->
-      <div class="timeline-list">
-
-        <div class="date-label">Hoy</div>
-
-        <div *ngFor="let item of todayActivities" class="timeline-item">
-          <span class="timeline-icon" [ngClass]="'icon-' + item.color">
-            <ion-icon [icon]="item.icon"></ion-icon>
-          </span>
-
-          <div class="timeline-info">
-            <span class="timeline-title" [ngClass]="'title-' + item.color">{{ item.title }}</span>
-            <span class="timeline-desc">{{ item.description }}</span>
-          </div>
-
-          <span class="timeline-time">{{ item.time }}</span>
-        </div>
-
-        <div class="date-label">Ayer</div>
-
-        <div *ngFor="let item of yesterdayActivities" class="timeline-item">
-          <span class="timeline-icon" [ngClass]="'icon-' + item.color">
-            <ion-icon [icon]="item.icon"></ion-icon>
-          </span>
-
-          <div class="timeline-info">
-            <span class="timeline-title" [ngClass]="'title-' + item.color">{{ item.title }}</span>
-            <span class="timeline-desc">{{ item.description }}</span>
-          </div>
-
-          <span class="timeline-time">{{ item.time }}</span>
-        </div>
-
-      </div>
-
-      <!-- BOTÓN CARGAR MÁS -->
-      <button class="load-more-btn" type="button" (click)="cargarMasActividad()">
-        <span>Cargar más actividad</span>
-        <ion-icon [icon]="chevronDownOutline"></ion-icon>
-      </button>
-
-    </main>
-
-    <!-- MENÚ INFERIOR (HISTORY RESALTADO CON FONDO AZUL) -->
-    <nav class="bottom-nav">
-      <button
-        *ngFor="let nav of bottomNavItems"
-        type="button"
-        class="nav-item"
-        [class.active]="nav.active"
-        (click)="navegar(nav)"
-      >
-        <span class="nav-icon-wrap" [class.pill-active]="nav.active">
-          <ng-container *ngIf="nav.id === 'inventory'; else standardIcon">
-            <svg class="custom-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="4" rx="1.5" />
-              <path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
-              <line x1="10" y1="13" x2="14" y2="13" />
-            </svg>
-          </ng-container>
-
-          <ng-template #standardIcon>
-            <ion-icon [icon]="nav.icon"></ion-icon>
-          </ng-template>
-        </span>
-        <span>{{ nav.label }}</span>
-      </button>
-    </nav>
-
-  </div>
+      <span>{{ nav.label }}</span>
+    </button>
+  </nav>
 </ion-content>
