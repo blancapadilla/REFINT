@@ -13,7 +13,7 @@ import { cubeOutline, qrCodeOutline, checkmarkOutline } from 'ionicons/icons';
   templateUrl: './registro-refri.page.html',
   styleUrls: ['./registro-refri.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, IonicModule, AppHeaderComponent]
 })
 export class RegistroRefriPage {
   nombre = '';
@@ -34,6 +34,10 @@ export class RegistroRefriPage {
 
   valido(): boolean {
     return this.nombre.trim().length > 0 && this.codigo.trim().length > 0;
+  }
+
+  regresarConfiguracion(): void {
+    void this.router.navigate(['/configuracion']);
   }
 
   async registrar() {
