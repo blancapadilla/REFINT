@@ -3,25 +3,10 @@
 
   <main class="stats-main">
     <section class="stats-grid">
-      <article class="metric-card">
-        <span class="metric-label">Escaneos</span>
-        <strong>1,248</strong>
-        <span class="metric-note">+12% vs mes anterior</span>
-      </article>
-      <article class="metric-card">
-        <span class="metric-label">Temp. Promedio</span>
-        <strong>3.8°C</strong>
-        <span class="metric-note">Óptimo</span>
-      </article>
-      <article class="metric-card">
-        <span class="metric-label">Ahorro Est.</span>
-        <strong>$45.20</strong>
-        <span class="metric-note">vs mes anterior</span>
-      </article>
-      <article class="metric-card danger-card">
-        <span class="metric-label">Desperdicio</span>
-        <strong>2%</strong>
-        <span class="metric-note">Revisar</span>
+      <article class="metric-card" *ngFor="let metric of metrics" [class.danger-card]="metric.label === 'Desperdicio'">
+        <span class="metric-label">{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <span class="metric-note">{{ metric.note }}</span>
       </article>
     </section>
 
@@ -31,18 +16,34 @@
       </div>
       <div class="line-chart">
         <div class="line-grid"></div>
-        <div class="line-path"></div>
+        <div class="line-path">
+          <div *ngFor="let point of trendData" class="line-point" [attr.data-count]="point.count">
+            <span class="line-label">{{ point.day }}</span>
+            <strong>{{ point.count }}</strong>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="chart-card small-card">
       <h2>Productos Más Consumidos</h2>
       <div class="bar-chart">
-        <div class="bar-row"><span>Leche</span><div class="bar bar-1"></div></div>
-        <div class="bar-row"><span>Huevos</span><div class="bar bar-2"></div></div>
-        <div class="bar-row"><span>Manzanas</span><div class="bar bar-3"></div></div>
-        <div class="bar-row"><span>Pollo</span><div class="bar bar-4"></div></div>
-        <div class="bar-row"><span>Yogurt</span><div class="bar bar-5"></div></div>
+        <div *ngFor="let product of topProducts" class="bar-row">
+          <span>{{ product.name }}</span>
+          <div class="bar" [style.width.%]="product.quantity / maxProductQuantity * 100"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chart-card small-card">
+      <h2>Estado de Caducidad</h2>
+      <div class="donut-legend">
+        <div class="donut-chart"></div>
+        <div class="legend-list">
+          <div><span class="legend-swatch green"></span> Seguro (>7 días) {{ expiryCounts.fresh }}</div>
+          <div><span class="legend-swatch blue"></span> Atención (3-7 días) {{ expiryCounts.soon }}</div>
+          <div><span class="legend-swatch red"></span> Crítico (&lt;3 días) {{ expiryCounts.critical }}</div>
+        </div>
       </div>
     </section>
 

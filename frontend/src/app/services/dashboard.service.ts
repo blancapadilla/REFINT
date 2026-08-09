@@ -1,16 +1,118 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { SupabaseService } from './supabase';
+
+export interface WeeklyTrendItem {
+  day: string;
+  count: number;
+}
+
+export interface DeviceStatus {
+  id: string;
+  type: string;
+  name: string;
+  status: string;
+  ip_address?: string;
+  firmware?: string;
+  uptime_seconds?: number;
+  wifi_rssi?: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = 'http://localhost:8000/api/v1/dashboard';
+  constructor(private supabase: SupabaseService) {}
 
-  constructor(private http: HttpClient) {}
+  async getCompletedScanCount(): Promise<number> {
+    const { count, error } = await this.supabase.client
+      .from('scans')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'completed');
 
-  getDashboardData(): Observable<any> {
-    return this.http.get<any>(this.apiUrl);
+    if (error) throw error;
+    return count ?? 0;
+  }
+
+  async getAverageFridgeTemperature(): Promise<number> {
+    const { data, error } = await this.supabase.client
+      .from('refrigerators')
+      .select('temperature_min_c, temperature_max_c')
+      .limit(1)
+      .single();
+
+    if (error) throw error;
+    const fridge = data as any;
+    if (!fridge) return 0;
+
+    const minTemp = Number(fridge.temperature_min_c ?? 0);
+    const maxTemp = Number(fridge.temperature_max_c ?? 0);
+    return Number.isFinite(minTemp) && Number.isFinite(maxTemp)
+      ? (minTemp + maxTemp) / 2
+      : 0;
+  }
+
+  async getSavingsEstimate(): Promise<number> {
+    const { data, error } = await this.supabase.client
+      .from('inventory_items')
+      .select('quantity');
+
+    if (error) throw error;
+    const items = (data ?? []) as Array<{ quantity?: string | number }>;
+    return items.reduce((sum, item) => {
+      const quantity = Number(item.quantity ?? 0);
+      return sum + (Number.isFinite(quantity) ? quantity * 3.5 : 0);
+    }, 0);
+  }
+
+  async getWeeklyScanTrend(days = 7): Promise<WeeklyTrendItem[]> {
+    const start = new Date();
+    start.setDate(start.getDate() - (days - 1));
+    start.setHours(0, 0, 0, 0);
+
+    const { data, error } = await this.supabase.client
+      .from('scans')
+      .select('started_at')
+      .gte('started_at', start.toISOString())
+      .eq('status', 'completed');
+
+    if (error) throw error;
+
+    const counts: Record<string, number> = {};
+    const labels: string[] = [];
+    for (let i = 0; i < days; i++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + i);
+      const label = date.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+      labels.push(label);
+      counts[label] = 0;
+    }
+
+    (data ?? []).forEach((row: any) => {
+      const date = new Date(row.started_at);
+      const label = date.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+      if (counts[label] !== undefined) {
+        counts[label] += 1;
+      }
+    });
+
+    return labels.map(day => ({ day, count: counts[day] }));
+  }
+
+  async getDeviceStatuses(): Promise<DeviceStatus[]> {
+    const { data, error } = await this.supabase.client
+      .from('devices')
+      .select('id, type, name, status, ip_address, firmware, uptime_seconds, wifi_rssi');
+
+    if (error) throw error;
+    return (data ?? []) as DeviceStatus[];
+  }
+
+  async checkSupabaseHealth(): Promise<boolean> {
+    const { error } = await this.supabase.client
+      .from('refrigerators')
+      .select('id')
+      .limit(1);
+
+    return !error;
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { InventarioService } from '../../services/inventario.service';
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { addIcons } from 'ionicons';
 import {
@@ -65,7 +66,7 @@ export class AgregarProductoPage {
   checkmarkOutline = checkmarkOutline;
   closeOutline    = closeOutline;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private inventario: InventarioService) {
     addIcons({ cubeOutline, calendarOutline, layersOutline, pricetagOutline, imageOutline, checkmarkOutline, closeOutline });
   }
 
@@ -77,8 +78,23 @@ export class AgregarProductoPage {
     if (!this.formularioValido()) return;
 
     this.guardando = true;
-    // TODO: conectar con Supabase inventory_items insert
-    await new Promise(r => setTimeout(r, 800));
+    try {
+      const res = await this.inventario.addProducto({
+        nombre: this.producto.nombre,
+        marca: this.producto.marca,
+        categoria: this.producto.categoria,
+        cantidad: this.producto.cantidad,
+        unidad: this.producto.unidad,
+        fechaVencimiento: this.producto.fechaVencimiento,
+        notas: this.producto.notas
+      });
+      console.log('Producto insertado:', res);
+    } catch (err: any) {
+      console.error('Error guardando producto:', err);
+      alert('Error guardando producto: ' + (err?.message || err));
+      this.guardando = false;
+      return;
+    }
     this.guardando = false;
     this.mensajeExito = true;
 

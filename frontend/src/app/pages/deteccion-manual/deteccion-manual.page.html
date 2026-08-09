@@ -12,15 +12,14 @@
 
     <section class="manual-photo-card">
       <div class="manual-photo-frame">
-        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3TXj0zkLLog0jzO0W69RSt8gUYhFP65ks2rowRErKthCyXpCHw2DTqXvBtYOty6D-sJD2LcKhApQwPkeH36sxa9n7bogO3zjKekCDyr3qPz3iFT41Y86jG2pi-PNrrBWAR_lD5jv439SWd3wWBDXbO1cLIsPtWtaHkSwJUBkddd2rWYq62EmGh1chm98JKf-S7la0YGw-xB7AXDPPTcWzZFM5PMebJ7mnv6wCwu6OosaiY5jovh2e"
-          alt="Captured product photo" />
+        <img [src]="imageUrl" alt="Captured product photo" />
         <span class="manual-photo-tag">Fotografía capturada</span>
         <span class="manual-photo-time">10:42 AM</span>
       </div>
     </section>
 
     <section class="manual-actions">
-      <button class="primary-action" type="button" (click)="irAAgregar()">
+      <button class="primary-action" type="button" (click)="registrarManual()">
         <ion-icon name="create-outline"></ion-icon>
         Agregar manualmente
       </button>
