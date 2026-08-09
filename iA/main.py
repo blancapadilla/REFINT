@@ -1,5 +1,9 @@
 from time import perf_counter
 
+from ai.detector import detect_products
+from camera.capture import capture_image
+
+from services.supabase_service import supabase
 from services.scan_service import create_scan, complete_scan
 from services.detection_service import create_detection
 from services.comparison_service import compare_scan_with_inventory
@@ -7,62 +11,173 @@ from services.comparison_service import compare_scan_with_inventory
 
 REFRIGERATOR_ID = "595494f8-76ea-418f-af92-d16ca17d2613"
 
-PRODUCTS = [
-    {
-        "id": "e2af1899-9eca-45d2-aab5-7a7b5edaa726",
-        "label": "milk_carton",
-        "confidence": 0.96,
-        "quantity": 1
-    },
-    {
-        "id": "ea78dd5a-6c77-4b8d-88b1-7470a32c5188",
-        "label": "egg_carton",
-        "confidence": 0.91,
-        "quantity": 1
-    },
-    {
-        "id": "1d5e4b06-5db3-457f-ac5f-be6d1e93a111",
-        "label": "greek_yogurt",
-        "confidence": 0.88,
-        "quantity": 2
-    }
-]
+
+def get_product_by_ai_label(label):
+    response = (
+        supabase
+        .table("products")
+        .select("id, name, brand, ai_label")
+        .eq("ai_label", label)
+        .eq("is_active", True)
+        .limit(1)
+        .execute()
+    )
+
+    if not response.data:
+        return None
+
+    return response.data[0]
 
 
 def main():
     started = perf_counter()
 
     try:
+        # ==========================================
+        # 1. CREAR SCAN
+        # ==========================================
+
         print("Creando scan...")
 
-        scan = create_scan(REFRIGERATOR_ID)
+        scan = create_scan(
+            REFRIGERATOR_ID
+        )
 
-        print(f'Scan creado: {scan["id"]}')
+        scan_id = scan["id"]
 
-        print("\nGuardando detecciones...")
+        print(
+            f"Scan creado: {scan_id}"
+        )
 
-        for product in PRODUCTS:
-            create_detection(
-                scan_id=scan["id"],
-                product_id=product["id"],
-                predicted_label=product["label"],
-                confidence=product["confidence"],
-                quantity=product["quantity"]
+        # ==========================================
+        # 2. TOMAR FOTO CON LA CAMARA
+        # ==========================================
+
+        print("\nTomando fotografía...")
+
+        image_path = capture_image(
+            camera_index=0
+        )
+
+        print(
+            f"Imagen capturada: {image_path}"
+        )
+
+        # ==========================================
+        # 3. ANALIZAR CON ROBOFLOW
+        # ==========================================
+
+        print("\nAnalizando imagen con Roboflow...")
+
+        detections = detect_products(
+            image_path,
+            min_confidence=0.70
+        )
+
+        # ==========================================
+        # PROTECCIÓN: 0 DETECCIONES
+        # ==========================================
+
+        if not detections:
+            print(
+                "\nADVERTENCIA: La IA no detectó ningún producto."
             )
 
             print(
-                f'{product["label"]}: '
-                f'{product["quantity"]}'
+                "Se cancela la comparación para evitar "
+                "marcar todo el inventario como retirado."
             )
+
+            processing_ms = int(
+                (perf_counter() - started) * 1000
+            )
+
+            completed_scan = complete_scan(
+                scan_id=scan_id,
+                detected_product_count=0,
+                processing_ms=processing_ms
+            )
+
+            print(
+                "\nScan terminado sin modificar el inventario."
+            )
+
+            print(
+                f'Estado: {completed_scan["status"]}'
+            )
+
+            return
+
+        # ==========================================
+        # MOSTRAR DETECCIONES
+        # ==========================================
+
+        print("\nDetecciones realizadas por IA:")
+
+        for detection in detections:
+            print(
+                f'{detection["label"]}: '
+                f'{detection["quantity"]} | '
+                f'Confianza: '
+                f'{detection["confidence"]:.2%}'
+            )
+
+        # ==========================================
+        # 4. GUARDAR DETECCIONES EN SUPABASE
+        # ==========================================
+
+        print("\nGuardando detecciones en Supabase...")
+
+        total_detected = 0
+
+        for detection in detections:
+
+            product = get_product_by_ai_label(
+                detection["label"]
+            )
+
+            if not product:
+                print(
+                    f'Producto no encontrado para '
+                    f'ai_label="{detection["label"]}"'
+                )
+
+                continue
+
+            create_detection(
+                scan_id=scan_id,
+                product_id=product["id"],
+                predicted_label=detection["label"],
+                confidence=detection["confidence"],
+                quantity=detection["quantity"]
+            )
+
+            total_detected += detection["quantity"]
+
+            print(
+                f'Guardado: {product["name"]} | '
+                f'Cantidad: {detection["quantity"]} | '
+                f'Confianza: '
+                f'{detection["confidence"]:.2%}'
+            )
+
+        # ==========================================
+        # 5. COMPARAR CON INVENTARIO
+        # ==========================================
 
         print("\nComparando con inventario...")
 
         changes = compare_scan_with_inventory(
-            scan_id=scan["id"],
+            scan_id=scan_id,
             refrigerator_id=REFRIGERATOR_ID
         )
 
         print("\nCambios detectados:")
+
+        if not changes:
+            print(
+                "No se encontraron cambios."
+            )
 
         for change in changes:
             print(
@@ -72,29 +187,44 @@ def main():
                 f'Tipo: {change["change_type"]}'
             )
 
+        # ==========================================
+        # 6. CALCULAR TIEMPO
+        # ==========================================
+
         processing_ms = int(
             (perf_counter() - started) * 1000
         )
 
+        # ==========================================
+        # 7. COMPLETAR SCAN
+        # ==========================================
+
         completed_scan = complete_scan(
-            scan_id=scan["id"],
-            detected_product_count=len(PRODUCTS),
+            scan_id=scan_id,
+            detected_product_count=total_detected,
             processing_ms=processing_ms
         )
 
         print("\nScan completado.")
-        print(f'Estado: {completed_scan["status"]}')
+
+        print(
+            f'Estado: '
+            f'{completed_scan["status"]}'
+        )
+
         print(
             f'Productos detectados: '
             f'{completed_scan["detected_product_count"]}'
         )
+
         print(
             f'Tiempo: '
             f'{completed_scan["processing_ms"]} ms'
         )
 
     except Exception as error:
-        print("\nError:")
+
+        print("\nError durante el scan:")
         print(error)
 
 
