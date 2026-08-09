@@ -23,6 +23,9 @@ import {
   timeOutline
 } from 'ionicons/icons';
 
+// Importamos el servicio
+import { ConfiguracionService } from 'src/app/services/configuracion.service';
+
 @Component({
   selector: 'app-configuracion',
   templateUrl: './configuracion.page.html',
@@ -31,16 +34,17 @@ import {
   imports: [CommonModule, FormsModule, IonicModule]
 })
 export class ConfiguracionPage implements OnInit {
+
   // Datos de usuario
-  nombreUsuario = 'Alex Rivera';
-  emailUsuario = 'alex.rivera@freshiq.com';
-  planUsuario = 'Premium Plan';
+  nombreUsuario = '';
+  emailUsuario = '';
+  planUsuario = '';
   
   // Preferencias
   esModoOscuro = false;
   notificacionesActivadas = true;
   idiomaSeleccionado = 'Español';
-  camaraConectada = true;
+  camaraConectada = false;
 
   // Iconos importados para la plantilla
   snowOutline = snowOutline;
@@ -65,7 +69,10 @@ export class ConfiguracionPage implements OnInit {
     { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
   ];
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private configuracionService: ConfiguracionService // Inyección de servicio
+  ) {
     addIcons({
       snowOutline,
       settingsOutline,
@@ -86,7 +93,29 @@ export class ConfiguracionPage implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.cargarConfiguracion();
+  }
+
+  cargarConfiguracion() {
+    this.configuracionService.getConfiguracion().subscribe({
+      next: (res) => {
+        this.nombreUsuario = res.perfil.nombre;
+        this.emailUsuario = res.perfil.email;
+        this.planUsuario = res.perfil.plan;
+        
+        this.camaraConectada = res.dispositivos.camaraConectada;
+
+        this.notificacionesActivadas = res.preferencias.notificacionesActivadas;
+        this.idiomaSeleccionado = res.preferencias.idioma;
+        this.esModoOscuro = res.preferencias.esModoOscuro;
+
+        // Aplicar modo oscuro si viene activado
+        document.body.classList.toggle('dark', this.esModoOscuro);
+      },
+      error: (err) => console.error('Error al obtener la configuración:', err)
+    });
+  }
 
   irADashboard() {
     this.router.navigate(['/dashboard']);
@@ -99,10 +128,24 @@ export class ConfiguracionPage implements OnInit {
   cambiarTema(event: any) {
     this.esModoOscuro = event.detail.checked;
     document.body.classList.toggle('dark', this.esModoOscuro);
+
+    this.configuracionService.actualizarPreferencias({ esModoOscuro: this.esModoOscuro }).subscribe({
+      error: (err) => console.error('Error al guardar el tema:', err)
+    });
   }
 
   cerrarSesion() {
-    this.router.navigate(['/login']);
+    this.configuracionService.logout().subscribe({
+      next: () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('Error al cerrar sesión:', err);
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   navegar(item: any) {

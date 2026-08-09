@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, dashboard, inventario, compras, sync, historial
+from app.routers import auth, dashboard, inventario, compras, sync, historial, alertas, configuracion # <-- Importar configuracion
 
 app = FastAPI(
     title="FreshFocus AI - Backend API",
@@ -8,7 +8,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Permitir solicitudes desde Angular/Ionic
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,14 +16,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Unir los routers modulares
+# Unir routers
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(inventario.router)
 app.include_router(compras.router)
 app.include_router(sync.router)
 app.include_router(historial.router)
-
+app.include_router(alertas.router)
+app.include_router(configuracion.router)  # <-- Registrar router de configuración
 
 @app.get("/")
 def root():

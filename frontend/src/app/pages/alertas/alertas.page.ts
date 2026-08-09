@@ -17,17 +17,8 @@ import {
   notificationsOutline
 } from 'ionicons/icons';
 
-interface AlertaItem {
-  type: 'critical' | 'warning' | 'yellow' | 'success';
-  icon: string;
-  title: string;
-  time: string;
-  description: string;
-  action?: string;
-  secondaryAction?: string;
-  status?: string;
-  progreso?: number;
-}
+// Importamos el servicio
+import { AlertasService } from 'src/app/services/alertas.service';
 
 @Component({
   selector: 'app-alertas',
@@ -38,51 +29,25 @@ interface AlertaItem {
 })
 export class AlertasPage implements OnInit {
 
-  // Iconos
+  // Iconos principales
   settingsOutline = settingsOutline;
   alertCircleOutline = alertCircleOutline;
   timeOutline = timeOutline;
 
-  // Alertas de ejemplo
-  alerts: AlertaItem[] = [
-    {
-      type: 'critical',
-      icon: closeCircleOutline,
-      title: 'Leche Entera (2L)',
-      time: 'Hace 5 min',
-      description: 'El producto está completamente agotado. No quedan existencias en el compartimiento principal.',
-      action: 'Añadir al Carrito',
-      secondaryAction: 'Omitir'
-    },
-    {
-      type: 'warning',
-      icon: calendarOutline,
-      title: 'Yogur Griego Natural',
-      time: 'Hace 1 hora',
-      description: 'Vence mañana. Se recomienda consumir pronto o usar en recetas de repostería.',
-      action: 'Ver Recetas',
-      status: '85% del tiempo transcurrido',
-      progreso: 85
-    },
-    {
-      type: 'yellow',
-      icon: basketOutline,
-      title: 'Huevos (Docena)',
-      time: 'Hace 3 horas',
-      description: 'Quedan solo 2 unidades. Tu consumo promedio indica que necesitarás más en 2 días.',
-      action: 'Comprar'
-    },
-    {
-      type: 'success',
-      icon: cloudOutline,
-      title: 'Inventario Sincronizado',
-      time: 'Hoy, 08:45 AM',
-      description: 'Se han actualizado 12 artículos correctamente después de tu visita al supermercado.',
-      action: 'Ver detalles'
-    }
-  ];
+  // Resumen y alertas cargadas dinámicamente
+  resumen = { criticas: 0, proximos: 0 };
+  alerts: any[] = [];
 
-  // Menú inferior: "Alerts" está ACTIVO (active: true)
+  // Mapeo de nombres de texto a íconos reales de IonIcons
+  private iconMap: { [key: string]: any } = {
+    closeCircleOutline: closeCircleOutline,
+    calendarOutline: calendarOutline,
+    basketOutline: basketOutline,
+    cloudOutline: cloudOutline,
+    alertCircleOutline: alertCircleOutline
+  };
+
+  // Menú inferior
   bottomNavItems = [
     { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
     { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
@@ -91,7 +56,10 @@ export class AlertasPage implements OnInit {
     { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: true }
   ];
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private alertasService: AlertasService // Inyección de servicio
+  ) {
     addIcons({
       settingsOutline,
       alertCircleOutline,
@@ -107,7 +75,32 @@ export class AlertasPage implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.cargarAlertas();
+  }
+
+  cargarAlertas() {
+    this.alertasService.getAlertas().subscribe({
+      next: (res) => {
+        this.resumen = res.resumen;
+        this.alerts = res.alerts.map(alert => ({
+          ...alert,
+          icon: this.iconMap[alert.icon] || alertCircleOutline
+        }));
+      },
+      error: (err) => console.error('Error al cargar alertas:', err)
+    });
+  }
+
+  marcarTodoLeido() {
+    this.alertasService.marcarTodoLeido().subscribe({
+      next: () => {
+        this.alerts = [];
+        this.resumen = { criticas: 0, proximos: 0 };
+      },
+      error: (err) => console.error('Error al marcar todo como leído:', err)
+    });
+  }
 
   irADashboard() {
     this.router.navigate(['/dashboard']);
@@ -115,10 +108,6 @@ export class AlertasPage implements OnInit {
 
   irAConfiguracion() {
     this.router.navigate(['/configuracion']);
-  }
-
-  marcarTodoLeido() {
-    console.log('Marcar todas las alertas como leídas');
   }
 
   irAListaCompras() {
