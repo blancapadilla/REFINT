@@ -1,0 +1,61 @@
+<ion-content class="stats-content">
+  <app-header title="Estadísticas" [showBack]="true" backRoute="/inventario"></app-header>
+
+  <main class="stats-main">
+    <section class="stats-grid">
+      <article class="metric-card">
+        <span class="metric-label">Escaneos</span>
+        <strong>1,248</strong>
+        <span class="metric-note">+12% vs mes anterior</span>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Temp. Promedio</span>
+        <strong>3.8°C</strong>
+        <span class="metric-note">Óptimo</span>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Ahorro Est.</span>
+        <strong>$45.20</strong>
+        <span class="metric-note">vs mes anterior</span>
+      </article>
+      <article class="metric-card danger-card">
+        <span class="metric-label">Desperdicio</span>
+        <strong>2%</strong>
+        <span class="metric-note">Revisar</span>
+      </article>
+    </section>
+
+    <section class="chart-card">
+      <div class="chart-header">
+        <h2>Tendencia de Consumo Semanal</h2>
+      </div>
+      <div class="line-chart">
+        <div class="line-grid"></div>
+        <div class="line-path"></div>
+      </div>
+    </section>
+
+    <section class="chart-card small-card">
+      <h2>Productos Más Consumidos</h2>
+      <div class="bar-chart">
+        <div class="bar-row"><span>Leche</span><div class="bar bar-1"></div></div>
+        <div class="bar-row"><span>Huevos</span><div class="bar bar-2"></div></div>
+        <div class="bar-row"><span>Manzanas</span><div class="bar bar-3"></div></div>
+        <div class="bar-row"><span>Pollo</span><div class="bar bar-4"></div></div>
+        <div class="bar-row"><span>Yogurt</span><div class="bar bar-5"></div></div>
+      </div>
+    </section>
+
+    <section class="chart-card small-card">
+      <h2>Estado de Caducidad</h2>
+      <div class="donut-legend">
+        <div class="donut-chart"></div>
+        <div class="legend-list">
+          <div><span class="legend-swatch green"></span> Seguro (>7 días)</div>
+          <div><span class="legend-swatch blue"></span> Atención (3-7 días)</div>
+          <div><span class="legend-swatch red"></span> Crítico (&lt;3 días)</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</ion-content>

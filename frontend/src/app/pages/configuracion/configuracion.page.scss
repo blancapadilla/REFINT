@@ -11,139 +11,26 @@
   padding-bottom: 80px;
 }
 
-/* Cabecera local de Configuración (Mismo alto rígido de 60px) */
-.dashboard-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: 60px;
-  padding: 0 20px;
-  background-color: #f7f9fb;
-  border-bottom: 1px solid #e0e3e5;
-  box-sizing: border-box;
-
-  .brand-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-
-    .refint-logo-svg {
-      width: 24px;
-      height: 28px;
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: #0053db;
-      line-height: 1;
-      letter-spacing: -0.5px;
-    }
-  }
-
-  .gear-button {
-    background: transparent;
-    border: none;
-    padding: 4px;
-    margin: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-
-    ion-icon {
-      font-size: 24px;
-      color: #0053db; /* Azul resaltado para indicar pantalla de Configuración */
-    }
-
-    &:active {
-      opacity: 0.6;
-    }
-  }
+/* Ajustes visuales para el bloque de perfil */
+.profile-info p {
+  margin: 2px 0 6px 0;
+  font-size: 13px;
+  color: #737686;
 }
 
-.main-settings-body {
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
+.plan-badge {
+  background: rgba(100, 168, 254, 0.2);
+  color: #004883;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
 }
 
-/* Tarjeta de Perfil */
-.profile-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  margin-bottom: 24px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-
-  .avatar-container {
-    position: relative;
-    width: 60px;
-    height: 60px;
-
-    img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .edit-badge {
-      position: absolute;
-      bottom: -2px;
-      right: -2px;
-      background: #004ac6;
-      color: #ffffff;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      border: 2px solid #ffffff;
-    }
-  }
-
-  .profile-info {
-    flex: 1;
-
-    h2 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #191c1e;
-    }
-
-    p {
-      margin: 2px 0 6px 0;
-      font-size: 13px;
-      color: #737686;
-    }
-
-    .plan-badge {
-      background: rgba(100, 168, 254, 0.2);
-      color: #004883;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 12px;
-      text-transform: uppercase;
-    }
-  }
-
-  .chevron-icon {
-    font-size: 20px;
-    color: #737686;
-  }
+.chevron-icon {
+  font-size: 20px;
+  color: #737686;
 }
 
 /* Grupos de Opciones */

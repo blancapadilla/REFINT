@@ -1,0 +1,96 @@
+<ion-content class="system-status-content">
+  <app-header title="Estado del Sistema" [showSettings]="true"></app-header>
+
+  <main class="system-main">
+    <section class="system-heading">
+      <div>
+        <h1>Estado del Sistema</h1>
+        <p>Real-time hardware and network diagnostics.</p>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        System Operational
+      </div>
+    </section>
+
+    <div class="system-grid">
+      <div class="glass-card">
+        <div class="card-row">
+          <div class="icon-box"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+          <div>
+            <p class="card-title">ESP32 Core</p>
+            <p class="card-subtitle">Main Controller</p>
+          </div>
+        </div>
+        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-row">
+          <div class="icon-box"><ion-icon name="camera-outline"></ion-icon></div>
+          <div>
+            <p class="card-title">Vision Module</p>
+            <p class="card-subtitle">Interior Camera</p>
+          </div>
+        </div>
+        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-row">
+          <div class="icon-box"><ion-icon name="thermometer-outline"></ion-icon></div>
+          <div>
+            <p class="card-title">Thermistor</p>
+            <p class="card-subtitle">Zone 1 & 2</p>
+          </div>
+        </div>
+        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-row">
+          <div class="icon-box"><ion-icon name="business-outline"></ion-icon></div>
+          <div>
+            <p class="card-title">Magnetic Contact</p>
+            <p class="card-subtitle">Main Door</p>
+          </div>
+        </div>
+        <span class="card-badge success"><ion-icon name="checkmark-circle-outline"></ion-icon> ONLINE</span>
+      </div>
+    </div>
+
+    <section class="network-section">
+      <h2>Cloud Infrastructure</h2>
+      <div class="cloud-row">
+        <span>Backend API</span>
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+      </div>
+      <div class="cloud-row divider">
+        <span>Supabase DB</span>
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+      </div>
+      <div class="cloud-row warning">
+        <span>WiFi Link <small>(Low Signal)</small></span>
+        <ion-icon name="warning-outline"></ion-icon>
+      </div>
+    </section>
+
+    <section class="device-info">
+      <h2>Device Info</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <span class="label">IP ADDRESS</span>
+          <span class="value">192.168.1.104</span>
+        </div>
+        <div class="info-card">
+          <span class="label">FIRMWARE</span>
+          <span class="value">v2.4.1</span>
+        </div>
+        <div class="info-card span-full">
+          <span class="label">UPTIME</span>
+          <span class="value">14d 08h 22m 15s</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</ion-content>

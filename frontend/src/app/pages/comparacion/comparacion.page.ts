@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { addIcons } from 'ionicons';
 import {
   searchOutline,
@@ -25,7 +26,7 @@ import { SyncService, ItemCritico, FiltroCritico } from 'src/app/services/sync.s
   templateUrl: './comparacion.page.html',
   styleUrls: ['./comparacion.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule]
+  imports: [CommonModule, IonicModule, AppHeaderComponent]
 })
 export class ComparacionPage implements OnInit {
 
@@ -112,6 +113,24 @@ export class ComparacionPage implements OnInit {
     this.donutDashOffset = `${circunferencia - progreso}`;
   }
 
+  iconoEstado(estado: string) {
+    if (estado === 'agotado') return this.closeCircleOutline;
+    if (estado === 'faltante') return this.warningOutline;
+    return this.checkmarkCircleOutline;
+  }
+
+  irADashboard() {
+    this.router.navigate(['/inventario']);
+  }
+
+  irAConfiguracion() {
+    this.router.navigate(['/configuracion']);
+  }
+
+  buscar() {
+    console.log('Abrir búsqueda de comparación');
+  }
+
   // Cambiar categoría de productos críticos
   seleccionarFiltro(id: string) {
     this.filtroSeleccionado = id;
@@ -135,10 +154,15 @@ export class ComparacionPage implements OnInit {
     });
   }
 
-  iconoEstado(estado: string) {
-    if (estado === 'agotado') return this.closeCircleOutline;
-    if (estado === 'faltante') return this.warningOutline;
-    return this.checkmarkCircleOutline;
+  navegar(item: any) {
+    this.bottomNavItems = this.bottomNavItems.map(nav => ({
+      ...nav,
+      active: nav.id === item.id
+    }));
+
+    if (item.path) {
+      this.router.navigate([item.path]);
+    }
   }
 
   irADashboard() { this.router.navigate(['/dashboard']); }

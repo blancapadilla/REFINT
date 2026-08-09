@@ -1,3 +1,5 @@
 export const environment = {
-  production: true
+  production: true,
+  supabaseUrl: 'https://zymplimbswufdgltyokg.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5bXBsaW1ic3d1ZmRnbHR5b2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyMjcwNzYsImV4cCI6MjEwMTgwMzA3Nn0.OWq7r22GF84rdimu7o7X5mhsxdIVxKzFbXMP93rJHWE'
 };
