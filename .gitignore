@@ -1,43 +1,53 @@
 # ==========================================
 # 1. FRONTEND (Angular / Ionic)
 # ==========================================
+
 frontend/node_modules/
 frontend/.angular/
 frontend/www/
 frontend/dist/
 frontend/coverage/
 
+
 # ==========================================
-# 2. BACKEND (Python / FastAPI)
+# 2. PYTHON
 # ==========================================
+
 backend/.venv/
 **/venv/
 **/.venv/
+
 **/__pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# ==========================================
-# 3. VISIÓN ARTIFICIAL & IA (OpenCV / YOLO)
-# ==========================================
-# Oculta los pesos de modelos de IA y resultados de entrenamiento pesados
-ai/*.pt
-ai/runs/
-ai/.onnx
 
 # ==========================================
-# 4. CONFIGURACIÓN Y SEGURIDAD (¡SÚPER IMPORTANTE!)
+# 3. VISIÓN ARTIFICIAL / YOLO
 # ==========================================
-# Oculta claves privadas de Supabase o credenciales de la API
-*.env
+
+ia/models/*.pt
+ia/models/*.onnx
+ia/runs/
+
+
+# ==========================================
+# 4. CONFIGURACIÓN Y SEGURIDAD
+# ==========================================
+
 .env
 .env.*
+*.env
+*.env.*
+
 
 # ==========================================
-# 5. ARCHIVOS DEL SISTEMA OPERATIVO E IDE
+# 5. SISTEMA / IDE
 # ==========================================
+
 .DS_Store
 Thumbs.db
+
 .vscode/
 .idea/
