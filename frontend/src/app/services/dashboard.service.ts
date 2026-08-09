@@ -23,6 +23,42 @@ export interface DeviceStatus {
 export class DashboardService {
   constructor(private supabase: SupabaseService) {}
 
+  /**
+   * Obtiene el resumen consolidado del refrigerador desde v_dashboard_summary
+   */
+  async getSummary() {
+    const { data, error } = await this.supabase.client
+      .from('v_dashboard_summary')
+      .select('*')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error al obtener v_dashboard_summary:', error);
+      return null;
+    }
+
+    return data;
+  }
+
+  /**
+   * Obtiene los productos realmente próximos a caducar o caducados desde v_inventory_current
+   */
+  async getExpiringProducts(limit = 5) {
+    const { data, error } = await this.supabase.client
+      .from('v_inventory_current')
+      .select('*')
+      .or('status.eq.proximo_a_caducar,status.eq.caducado')
+      .order('expires_on', { ascending: true })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error al obtener productos por vencer:', error);
+      return [];
+    }
+
+    return data;
+  }
+
   async getCompletedScanCount(): Promise<number> {
     const { count, error } = await this.supabase.client
       .from('scans')

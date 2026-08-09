@@ -23,6 +23,10 @@ export class AppHeaderComponent {
 
   constructor(private router: Router) {}
 
+  goHome() {
+    this.router.navigate(['/dashboard']);
+  }
+
   navigateSettings() {
     this.router.navigate(['/configuracion']);
   }

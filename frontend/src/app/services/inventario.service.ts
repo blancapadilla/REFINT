@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { SupabaseService } from './supabase';
 import { RefrigeradorService } from './refrigerador.service';
 
@@ -13,6 +11,7 @@ export interface ProductoInventario {
   etiquetaEstado: string;
   vencimiento: string;
   imagen: string;
+  fuente?: 'ai' | 'manual';
 }
 
 export interface Categoria {
@@ -24,22 +23,124 @@ export interface Categoria {
   providedIn: 'root'
 })
 export class InventarioService {
-  private apiUrl = 'http://localhost:8000/api/v1/inventario';
 
   constructor(
-    private http: HttpClient,
     private supabase: SupabaseService,
     private refrigeradorService: RefrigeradorService
   ) {}
 
-  getProductos(): Observable<ProductoInventario[]> {
-    return this.http.get<ProductoInventario[]>(this.apiUrl);
+  /**
+   * Obtiene los datos sin procesar de la vista v_inventory_current
+   */
+  async getInventory() {
+    const { data, error } = await this.supabase.client
+      .from('v_inventory_current')
+      .select('*');
+
+    if (error) {
+      console.error('Error obteniendo inventario:', error);
+      throw error;
+    }
+
+    return data;
   }
 
-  getCategorias(): Observable<Categoria[]> {
-    return this.http.get<Categoria[]>(`${this.apiUrl}/categorias`);
+  /**
+   * Obtiene y mapea los productos desde Supabase formateados para la UI
+   */
+  async getProductos(refrigeratorId?: string): Promise<ProductoInventario[]> {
+    let query = this.supabase.client
+      .from('v_inventory_current')
+      .select('*');
+
+    if (refrigeratorId) {
+      query = query.eq('refrigerator_id', refrigeratorId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error al obtener productos desde Supabase:', error);
+      return [];
+    }
+
+    return (data || []).map((item: any) => {
+      let estadoUI: 'critical' | 'soon' | 'fresh' = 'fresh';
+      let etiqueta = 'FRESH';
+
+      if (item.status === 'caducado' || item.status === 'agotado') {
+        estadoUI = 'critical';
+        etiqueta = 'CRITICAL';
+      } else if (item.status === 'proximo_a_caducar' || item.status === 'bajo') {
+        estadoUI = 'soon';
+        etiqueta = 'SOON';
+      }
+
+      return {
+        id: item.id,
+        nombre: item.product_name ?? 'Producto',
+        cantidad: `${item.quantity ?? 0} ${item.unit ?? ''}`.trim(),
+        categoria: item.category_name ? item.category_name.toLowerCase() : 'otros',
+        estado: estadoUI,
+        etiquetaEstado: etiqueta,
+        vencimiento: item.expires_on ? `Exp: ${item.expires_on}` : 'Sin fecha',
+        imagen: item.product_image_path || item.image_path || 'assets/images/products/default-product.png',
+        fuente: item.source === 'ai' ? 'ai' : 'manual'
+      };
+    });
   }
 
+  /**
+   * Obtiene las categorías configuradas en la BD para las pastillas de filtro
+   */
+  async getCategorias(): Promise<Categoria[]> {
+    const { data, error } = await this.supabase.client
+      .from('product_categories')
+      .select('id, name, slug');
+
+    if (error) {
+      console.error('Error al obtener categorías:', error);
+      return [{ id: 'todos', nombre: 'Todos' }];
+    }
+
+    const categoriasList: Categoria[] = [{ id: 'todos', nombre: 'Todos' }];
+    (data || []).forEach((cat: any) => {
+      categoriasList.push({
+        id: cat.slug || cat.name.toLowerCase(),
+        nombre: cat.name
+      });
+    });
+
+    return categoriasList;
+  }
+
+  /**
+   * Elimina un producto de la tabla inventory_items
+   */
+  async eliminarProducto(id: string): Promise<boolean> {
+    const { error } = await this.supabase.client
+      .from('inventory_items')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error al eliminar producto de Supabase:', error);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Alias de eliminarProducto para dar soporte a llamadas deleteItem()
+   */
+  async deleteItem(id: string): Promise<boolean> {
+    return this.eliminarProducto(id);
+  }
+
+  /**
+   * Conteo de estados para métricas/dashboard
+   */
   async getInventoryStatusCounts(): Promise<{ fresh: number; soon: number; critical: number; expired: number; total: number }> {
     const { data, error } = await this.supabase.client
       .from('inventory_items')
@@ -58,10 +159,13 @@ export class InventarioService {
     return counts;
   }
 
+  /**
+   * Top productos con mayor cantidad
+   */
   async getTopProducts(limit = 5): Promise<Array<{ name: string; quantity: number }>> {
     const { data, error } = await this.supabase.client
       .from('inventory_items')
-      .select('quantity, product(name)')
+      .select('quantity, product:products(name)')
       .order('quantity', { ascending: false })
       .limit(limit);
 
@@ -73,10 +177,9 @@ export class InventarioService {
     }));
   }
 
-  eliminarProducto(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
+  /**
+   * Agrega un nuevo producto a Supabase (crea el producto base si no existe y luego lo inserta en el inventario)
+   */
   async addProducto(payload: {
     nombre: string;
     marca?: string;
@@ -88,7 +191,6 @@ export class InventarioService {
   }): Promise<any> {
     const client = this.supabase.client;
 
-    // 1) Buscar o crear producto en `products`
     const name = (payload.nombre || '').trim();
     const brand = payload.marca && payload.marca.trim().length ? payload.marca.trim() : null;
 
@@ -106,7 +208,7 @@ export class InventarioService {
         productId = (existing as any).id;
       }
     } catch (e) {
-      // ignore not found
+      // Ignorar si no existe
     }
 
     if (!productId) {
@@ -121,15 +223,12 @@ export class InventarioService {
       productId = (data as any).id;
     }
 
-    // 2) Obtener refrigerador activo
     const fridge = await this.refrigeradorService.getMiRefrigerador();
     if (!fridge) throw new Error('No se encontró un refrigerador activo.');
 
-    // 3) Obtener usuario actual (si existe)
     const { data: userRes } = await client.auth.getUser();
     const user = (userRes as any)?.user ?? null;
 
-    // 4) Insertar en inventory_items
     const { data, error } = await client
       .from('inventory_items')
       .insert({

@@ -1,174 +1,98 @@
 ﻿<ion-content class="inventory-content">
   <div class="inventory-container">
-    <app-header title="Inventario" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
 
-    <main class="inventory-main">
-      <section class="hero-row">
-        <div class="hero-copy">
-          <h2>¡Hola, {{ usuario }}!</h2>
-          <p>Tu inventario está actualizado y todo parece estar en orden.</p>
+    <!-- CABECERA DE LA APP (EL LOGO REFINT NAVEGA A /dashboard) -->
+    <app-header title="Refint" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
+
+    <main class="main-body">
+
+      <!-- BARRA DE BÚSQUEDA AVANZADA -->
+      <div class="search-row">
+        <div class="search-bar">
+          <ion-icon [icon]="searchOutline"></ion-icon>
+          <input 
+            type="text" 
+            placeholder="Búsqueda avanzada..." 
+            [(ngModel)]="textoBusqueda" 
+            (input)="aplicarFiltros()" 
+          />
         </div>
-        <div class="hero-actions">
-          <button class="hero-btn hero-btn-primary" type="button" (click)="ejecutarAccion('sync')">
-            <ion-icon [icon]="syncOutline"></ion-icon>
-            <span>Sincronizar</span>
-          </button>
-          <button class="hero-btn hero-btn-secondary" type="button" (click)="ejecutarAccion('alerts')">
-            <ion-icon [icon]="notificationsOutline"></ion-icon>
-            <span>Ver Alertas</span>
-          </button>
-        </div>
-      </section>
+        <button class="filter-btn" type="button" aria-label="Filtro">
+          <ion-icon [icon]="filterOutline"></ion-icon>
+        </button>
+      </div>
 
-      <section class="realtime-grid">
-        <article class="realtime-card kpi-temp">
-          <span class="kpi-label">Temperatura</span>
-          <div class="kpi-value-row">
-            <strong>3</strong>
-            <span class="kpi-unit">°C</span>
+      <!-- PASTILLAS DE CATEGORÍAS -->
+      <div class="categories-pills">
+        <button
+          *ngFor="let cat of categorias"
+          type="button"
+          class="pill-button"
+          [class.active]="categoriaSeleccionada === cat.id"
+          (click)="seleccionarCategoria(cat.id)"
+        >
+          {{ cat.nombre }}
+        </button>
+      </div>
+
+      <!-- LISTA DE PRODUCTOS DE INVENTARIO -->
+      <div class="products-list">
+        <div *ngFor="let item of productosFiltrados" class="product-card">
+          <div class="product-thumb">
+            <img 
+              [src]="item.imagen" 
+              [alt]="item.nombre" 
+              (error)="onImageError($event)" 
+            />
           </div>
-          <div class="kpi-foot success">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-            <span>Óptima</span>
-          </div>
-        </article>
 
-        <article class="realtime-card kpi-humidity">
-          <span class="kpi-label">Humedad</span>
-          <div class="kpi-value-row">
-            <strong>45</strong>
-            <span class="kpi-unit">%</span>
-          </div>
-          <div class="kpi-foot neutral">
-            <ion-icon name="water-outline"></ion-icon>
-            <span>Nivel Estable</span>
-          </div>
-        </article>
-
-        <article class="realtime-card kpi-esp">
-          <span class="kpi-label">ESP32 Status</span>
-          <div class="status-live-row">
-            <span class="live-dot"></span>
-            <strong>Online</strong>
-          </div>
-          <span class="kpi-note">Potencia de señal: Excelente</span>
-        </article>
-
-        <article class="realtime-card kpi-sync">
-          <span class="kpi-label">Última Sinc.</span>
-          <div class="status-live-row">
-            <ion-icon [icon]="timeOutline"></ion-icon>
-            <strong>{{ deviceStatus.lastSync }}</strong>
-          </div>
-          <span class="kpi-note">Auto-update habilitado</span>
-        </article>
-      </section>
-
-      <section class="dashboard-layout">
-        <div class="dashboard-left">
-          <section class="stats-cards">
-            <article class="total-products-card">
-              <div class="total-copy">
-                <span>TOTAL PRODUCTOS</span>
-                <h1>{{ totalProductos }}</h1>
-                <p class="total-subtext">+4 agregados hoy</p>
-              </div>
-              <div class="total-icon">
-                <ion-icon [icon]="cubeOutline"></ion-icon>
-              </div>
-            </article>
-
-            <article *ngFor="let summary of summaryCards" class="summary-card summary-{{ summary.type }}">
-              <div class="summary-copy">
-                <span>{{ summary.title }}</span>
-                <h2>{{ summary.value }}</h2>
-                <small>{{ summary.subtitle }}</small>
-                <div class="summary-action">
-                  <ion-icon [icon]="summary.title === 'Por vencer' ? alertCircleOutline : notificationsOutline"></ion-icon>
-                  <span>{{ summary.title === 'Por vencer' ? 'Consumir pronto' : 'Añadir a Shopping List' }}</span>
-                </div>
-              </div>
-            </article>
-          </section>
-
-          <section class="expiring-products">
-            <div class="section-header">
-              <h2>Productos Próximos a Vencer</h2>
-              <button class="see-all" type="button" (click)="irA('/inventario')">Ver todos</button>
+          <div class="product-info">
+            <div class="title-row">
+              <h3>{{ item.nombre }}</h3>
+              <span class="status-badge" [ngClass]="'badge-' + item.estado">
+                {{ item.etiquetaEstado }}
+              </span>
             </div>
-            <div *ngFor="let producto of expiringProducts" class="product-item">
-              <div class="product-image" [ngClass]="producto.clase">
-                <img [src]="producto.image" [alt]="producto.nombre" />
-              </div>
-              <div class="product-info">
-                <div class="product-title-row">
-                  <h3>{{ producto.nombre }}</h3>
-                  <span class="product-expiry-text">{{ producto.vence }}</span>
-                </div>
-                <div class="product-progress">
-                  <span [style.width.%]="producto.progreso"></span>
-                </div>
-              </div>
+
+            <p class="quantity">{{ item.cantidad }}</p>
+
+            <!-- BANDEROLA DE BÚSQUEDA/DETECCIÓN -->
+            <div class="detection-pill">
+              <ion-icon [icon]="item.fuente === 'ai' ? cameraOutline : createOutline"></ion-icon>
+              <span>{{ item.fuente === 'ai' ? 'Detectado automáticamente' : 'Agregado manualmente' }}</span>
             </div>
-          </section>
+
+            <div class="expiry-row">
+              <ion-icon [icon]="calendarOutline"></ion-icon>
+              <span class="expiry-text" [class.critical-text]="item.estado === 'critical'">
+                {{ item.vencimiento }}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button type="button" class="icon-action-btn" (click)="editarProducto(item)" aria-label="Editar">
+              <ion-icon [icon]="createOutline"></ion-icon>
+            </button>
+            <button type="button" class="icon-action-btn delete" (click)="eliminarProducto(item)" aria-label="Eliminar">
+              <ion-icon [icon]="trashOutline"></ion-icon>
+            </button>
+          </div>
         </div>
 
-        <aside class="dashboard-right">
-          <section class="inventory-chart">
-            <div class="section-header">
-              <h2>Distribución de Inventario</h2>
-            </div>
-            <article class="chart-card">
-              <div class="chart-preview">
-                <div class="chart-circle" [style.background]="chartGradient">
-                  <div class="chart-center">
-                    <span class="chart-value">{{ totalProductos }}</span>
-                    <span class="chart-label">TOTAL</span>
-                  </div>
-                </div>
-              </div>
-              <div class="chart-legend">
-                <div *ngFor="let item of distributionLegend" class="legend-item">
-                  <div class="legend-row">
-                    <span class="legend-swatch legend-{{ item.color }}"></span>
-                    <span class="legend-name">{{ item.label }}</span>
-                  </div>
-                  <span class="legend-percent">{{ item.percent }}%</span>
-                </div>
-              </div>
-            </article>
-          </section>
-        </aside>
-      </section>
+        <div *ngIf="productosFiltrados.length === 0" class="empty-state">
+          <p>No se encontraron alimentos en el inventario.</p>
+        </div>
+      </div>
 
-      <section class="recipes-section">
-        <div class="section-header">
-          <h2>Sugerencias basadas en tu inventario</h2>
-        </div>
-        <div class="recipes-hero">
-          <article
-            *ngFor="let recipe of recipeSuggestions"
-            class="recipe-hero"
-            [ngStyle]="{ 'background-image': recipe.image ? 'url(' + recipe.image + ')' : 'linear-gradient(135deg, rgba(0,0,0,0.08), rgba(0,0,0,0.02))' }"
-          >
-            <div class="recipe-overlay">
-              <span class="recipe-badge" [class.orange]="recipe.variant === 'orange'">{{ recipe.variant === 'orange' ? 'Lácteos por vencer' : 'Usa tus Espinacas' }}</span>
-              <h3>{{ recipe.title }}</h3>
-            </div>
-          </article>
-        </div>
-      </section>
     </main>
 
-<<<<<<< HEAD:frontend/src/app/pages/inventario/inventario.page.html
     <!-- BOTÓN FLOTANTE (+) PARA AGREGAR PRODUCTO -->
     <button class="fab-add-button" type="button" (click)="agregarProducto()" aria-label="Agregar Producto">
       <ion-icon [icon]="addOutline"></ion-icon>
     </button>
 
-    <!-- MENÚ INFERIOR (INVENTORY RESALTADO CON FONDO AZUL) -->
-=======
->>>>>>> ce9acbf (Cambios de mi parte):src/app/pages/inventario/inventario.page.html
+    <!-- MENÚ INFERIOR (INVENTARIO ACTIVO) -->
     <nav class="bottom-nav">
       <button
         *ngFor="let nav of bottomNavItems"
@@ -193,5 +117,6 @@
         <span>{{ nav.label }}</span>
       </button>
     </nav>
+
   </div>
 </ion-content>
