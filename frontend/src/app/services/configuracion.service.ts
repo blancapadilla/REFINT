@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom, catchError, of } from 'rxjs';
 
 export interface UsuarioPerfil {
   nombre: string;
@@ -43,5 +43,14 @@ export class ConfiguracionService {
 
   logout(): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/logout`, {});
+  }
+
+  async checkBackendApi(): Promise<boolean> {
+    try {
+      await firstValueFrom(this.http.get(`${this.apiUrl}`));
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
