@@ -1,0 +1,9 @@
+path: C:/Users/PC/Downloads/refint/REFINT/ia/dataset
+
+train: images/train
+val: images/val
+
+names:
+  0: milk_carton
+  1: egg_carton
+  2: greek_yogurt
