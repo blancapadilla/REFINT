@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, dashboard, inventario, compras
+from app.routers import auth, dashboard, inventario, compras, sync
 
 app = FastAPI(
     title="FreshFocus AI - Backend API",
@@ -22,6 +22,7 @@ app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(inventario.router)
 app.include_router(compras.router)
+app.include_router(sync.router)
 
 
 @app.get("/")
