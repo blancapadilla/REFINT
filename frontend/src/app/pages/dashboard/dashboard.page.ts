@@ -5,31 +5,23 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
-import { InventarioService } from '../../services/inventario.service';
+import { DashboardService } from '../../services/dashboard.service';
 import { AuthService } from '../../services/auth';
-import { RefrigeradorService } from '../../services/refrigerador.service';
-
 import { addIcons } from 'ionicons';
 
 import {
-  snowOutline,
-  settingsOutline,
-  searchOutline,
-  filterOutline,
   calendarOutline,
-  createOutline,
-  trashOutline,
   addOutline,
+  syncOutline,
+  analyticsOutline,
+  barChartOutline,
+  notificationsOutline,
   cubeOutline,
   cartOutline,
-  syncOutline,
   timeOutline,
-  notificationsOutline,
-  analyticsOutline,
   alertCircleOutline,
-  barChartOutline,
-  wifiOutline,
-  cameraOutline
+  checkmarkCircleOutline,
+  waterOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -37,54 +29,42 @@ import {
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    AppHeaderComponent
-  ]
+  imports: [CommonModule, FormsModule, IonicModule, AppHeaderComponent]
 })
 export class DashboardPage implements OnInit {
 
-  textoBusqueda: string = '';
-  categoriaSeleccionada: string = 'todos';
   usuario = 'Vanessa';
   totalProductos = 0;
   chartGradient = 'conic-gradient(#004ac6 0% 65%, #64a8fe 65% 85%, #006229 85% 100%)';
 
-  snowOutline = snowOutline;
-  settingsOutline = settingsOutline;
-  searchOutline = searchOutline;
-  filterOutline = filterOutline;
-  calendarOutline = calendarOutline;
-  createOutline = createOutline;
-  trashOutline = trashOutline;
-  addOutline = addOutline;
-  cubeOutline = cubeOutline;
-  cartOutline = cartOutline;
   syncOutline = syncOutline;
-  timeOutline = timeOutline;
   notificationsOutline = notificationsOutline;
-  analyticsOutline = analyticsOutline;
+  cubeOutline = cubeOutline;
   alertCircleOutline = alertCircleOutline;
-  barChartOutline = barChartOutline;
-  wifiOutline = wifiOutline;
-  cameraOutline = cameraOutline;
+  timeOutline = timeOutline;
 
-  statusCards = [
-    { color: 'primary', icon: this.calendarOutline, title: 'Temperatura', value: '3 °C', subtitle: 'Óptima' },
-    { color: 'secondary', icon: this.addOutline, title: 'Humedad', value: '45 %', subtitle: 'Nivel Estable' }
-  ];
+  // Datos dinámicos conectados
+  temperatura = '3';
+  humedad = '45';
+
+  deviceStatus = {
+    esp: { label: 'ESP32 STATUS', value: 'Offline', state: 'offline' },
+    camera: { label: 'CÁMARA', value: 'Inactiva', state: 'offline' },
+    lastSync: 'Sin datos'
+  };
 
   summaryCards = [
-    { type: 'warning', title: 'Por vencer', value: '3', subtitle: 'Alimentos próximos a caducar' },
-    { type: 'danger', title: 'Escaseando', value: '5', subtitle: 'Productos por reabastecer' }
+    { type: 'warning', title: 'Por vencer', value: '0', subtitle: 'Alimentos próximos a caducar' },
+    { type: 'danger', title: 'Escaseando', value: '0', subtitle: 'Productos por reabastecer' }
   ];
 
-  expiringProducts = [
-    { nombre: 'Leche Entera', image: 'assets/images/products/lecheentera.webp', vence: '1 día restante', progreso: 10, clase: 'danger' },
-    { nombre: 'Espinacas', image: 'assets/images/products/espinacas.png', vence: '3 días restantes', progreso: 30, clase: 'warning' }
-  ];
+  expiringProducts: Array<{
+    nombre: string;
+    image: string;
+    vence: string;
+    progreso: number;
+    clase: string;
+  }> = [];
 
   distributionLegend = [
     { color: 'primary', label: 'Lácteos & Huevos', percent: 65 },
@@ -97,14 +77,6 @@ export class DashboardPage implements OnInit {
     { title: 'Quiche de Tres Quesos', description: 'Lácteos por vencer', variant: 'orange', image: 'assets/images/recipes/quiche.jpg' }
   ];
 
-  deviceStatus = {
-    esp: { label: 'ESP32 STATUS', value: 'Online', state: 'online' },
-    camera: { label: 'CÁMARA', value: 'Activa', state: 'online' },
-    wifi: { label: 'WIFI', value: 'Excelente', state: 'online' },
-    temperature: { label: 'TEMPERATURA', value: '3°C Óptima', state: 'online' },
-    lastSync: 'Hace 2 min'
-  };
-
   bottomNavItems = [
     { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
     { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
@@ -115,29 +87,22 @@ export class DashboardPage implements OnInit {
 
   constructor(
     private router: Router,
-    private inventarioService: InventarioService,
-    private authService: AuthService,
-    private refrigeradorService: RefrigeradorService
+    private dashboardService: DashboardService,
+    private authService: AuthService
   ) {
     addIcons({
-      snowOutline,
-      settingsOutline,
-      searchOutline,
-      filterOutline,
       calendarOutline,
-      createOutline,
-      trashOutline,
       addOutline,
+      syncOutline,
+      analyticsOutline,
+      barChartOutline,
+      notificationsOutline,
       cubeOutline,
       cartOutline,
-      syncOutline,
       timeOutline,
-      notificationsOutline,
-      analyticsOutline,
       alertCircleOutline,
-      barChartOutline,
-      wifiOutline,
-      cameraOutline
+      checkmarkCircleOutline,
+      waterOutline
     });
   }
 
@@ -146,6 +111,63 @@ export class DashboardPage implements OnInit {
     if (!session) {
       await this.router.navigate(['/login']);
       return;
+    }
+
+    await this.cargarDashboard();
+  }
+
+  async cargarDashboard() {
+    try {
+      // 1. Obtener resumen de v_dashboard_summary
+      const summary = await this.dashboardService.getSummary();
+
+      if (summary) {
+        this.totalProductos = summary.total_products ?? 0;
+        this.temperatura = summary.current_temperature_c != null ? `${summary.current_temperature_c}` : '3';
+
+        this.summaryCards = [
+          { 
+            type: 'warning', 
+            title: 'Por vencer', 
+            value: `${summary.expiring_products ?? 0}`, 
+            subtitle: 'Alimentos próximos a caducar' 
+          },
+          { 
+            type: 'danger', 
+            title: 'Escaseando', 
+            value: `${summary.low_stock_products ?? summary.missing_products ?? 0}`, 
+            subtitle: 'Productos por reabastecer' 
+          }
+        ];
+
+        this.deviceStatus = {
+          esp: { 
+            label: 'ESP32 STATUS', 
+            value: summary.esp32_status === 'online' ? 'Online' : 'Offline', 
+            state: summary.esp32_status ?? 'offline' 
+          },
+          camera: { 
+            label: 'CÁMARA', 
+            value: summary.camera_status === 'online' ? 'Activa' : 'Inactiva', 
+            state: summary.camera_status ?? 'offline' 
+          },
+          lastSync: summary.last_sync_at ? 'Reciente' : 'Hace 2 min'
+        };
+      }
+
+      // 2. Obtener lista real de productos por vencer
+      const expiringData = await this.dashboardService.getExpiringProducts();
+      
+      this.expiringProducts = (expiringData || []).map((item: any) => ({
+        nombre: item.product_name ?? 'Producto',
+        image: item.product_image_path || item.image_path || 'assets/images/products/default-product.png',
+        vence: item.expires_on ? `Vence: ${item.expires_on}` : 'Próximo a vencer',
+        progreso: item.days_to_expiry != null ? Math.max(10, Math.min(100, item.days_to_expiry * 20)) : 30,
+        clase: item.status === 'caducado' ? 'danger' : 'warning'
+      }));
+
+    } catch (error) {
+      console.error('Error al cargar datos del Dashboard:', error);
     }
   }
 
