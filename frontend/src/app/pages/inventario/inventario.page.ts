@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { InventoryService } from '../../services/inventory';
 import { AuthService } from '../../services/auth';
+import { RefrigeradorService } from '../../services/refrigerador.service';
 
 import { addIcons } from 'ionicons';
 
@@ -391,7 +392,8 @@ export class InventarioPage implements OnInit {
   constructor(
     private router: Router,
     private inventoryService: InventoryService,
-    private authService: AuthService
+    private authService: AuthService,
+    private refrigeradorService: RefrigeradorService
   ) {
 
     addIcons({
@@ -428,6 +430,12 @@ export class InventarioPage implements OnInit {
 
     if (!session) {
       await this.router.navigate(['/login']);
+      return;
+    }
+
+    const tieneRefri = await this.refrigeradorService.tieneRefrigerador();
+    if (!tieneRefri) {
+      await this.router.navigate(['/registro-refri']);
       return;
     }
 

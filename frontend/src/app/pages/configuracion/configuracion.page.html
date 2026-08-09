@@ -48,15 +48,35 @@
             <ion-icon [icon]="chevronForwardOutline" class="chevron"></ion-icon>
           </div>
 
-          <div class="settings-item">
+          <!-- Refrigerador vinculado o botón para vincular -->
+          <div class="settings-item" (click)="irARegistroRefri()">
+            <div class="item-left">
+              <div class="icon-bubble refri">
+                <ion-icon [icon]="snowOutline"></ion-icon>
+              </div>
+              <div class="item-text-group">
+                <span>{{ refrigerador ? refrigerador.name : 'Vincular Refrigerador' }}</span>
+                <span *ngIf="refrigerador" class="status-badge" [class.connected]="camaraConectada">
+                  <span class="dot" [style.background]="camaraConectada ? '#007e37' : '#737686'"></span>
+                  Cód: {{ refrigerador.code }}
+                </span>
+                <span *ngIf="!refrigerador" class="status-badge">
+                  Toca para registrar tu dispositivo
+                </span>
+              </div>
+            </div>
+            <ion-icon [icon]="refrigerador ? chevronForwardOutline : addCircleOutline" class="chevron" [style.color]="refrigerador ? '#737686' : '#004ac6'"></ion-icon>
+          </div>
+
+          <div class="settings-item no-border">
             <div class="item-left">
               <div class="icon-bubble tertiary">
                 <ion-icon [icon]="cameraOutline"></ion-icon>
               </div>
               <div class="item-text-group">
-                <span>Configuración Wi-Fi ESP32-CAM</span>
+                <span>Cámara ESP32-CAM</span>
                 <span class="status-badge" [class.connected]="camaraConectada">
-                  <span class="dot"></span> {{ camaraConectada ? 'CONECTADO' : 'DESCONECTADO' }}
+                  <span class="dot"></span> {{ camaraConectada ? 'CONECTADA' : 'DESCONECTADA' }}
                 </span>
               </div>
             </div>

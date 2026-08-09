@@ -67,4 +67,12 @@ export const routes: Routes = [
     path: 'estadisticas',
     loadComponent: () => import('./pages/estadisticas/estadisticas.page').then((m) => m.EstadisticasPage),
   },
+  {
+    path: 'agregar-producto',
+    loadComponent: () => import('./pages/agregar-producto/agregar-producto.page').then((m) => m.AgregarProductoPage),
+  },
+  {
+    path: 'registro-refri',
+    loadComponent: () => import('./pages/registro-refri/registro-refri.page').then((m) => m.RegistroRefriPage),
+  },
 ];

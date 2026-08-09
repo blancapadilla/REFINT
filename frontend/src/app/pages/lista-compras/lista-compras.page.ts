@@ -112,15 +112,7 @@ export class ListaComprasPage implements OnInit {
 
   // Generación predictiva con FreshIQ
   generarListaAutomatica() {
-    this.comprasService.generarListaAutomatica().subscribe({
-      next: (res) => {
-        this.categorias = res.categorias.map(cat => ({
-          ...cat,
-          icono: this.iconMap[cat.icono] || leafOutline
-        }));
-      },
-      error: (err) => console.error('Error al generar lista con FreshIQ:', err)
-    });
+    this.router.navigate(['/escaneo-inteligente']);
   }
 
   irADashboard() {
@@ -136,7 +128,7 @@ export class ListaComprasPage implements OnInit {
   }
 
   agregarItem() {
-    console.log('Abrir formulario para agregar item a la lista');
+    this.router.navigate(['/agregar-producto']);
   }
 
   navegar(item: any) {

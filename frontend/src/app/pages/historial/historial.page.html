@@ -1,55 +1,122 @@
-<app-header title="Historial" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
+﻿<ion-content class="historial-content">
 
-<ion-content class="ion-padding">
-  <section class="activity-header">
-    <h1>Historial de Actividad</h1>
-    <p>Seguimiento en tiempo real de tu inventario inteligente.</p>
-  </section>
+  <app-header title="Historial" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
 
-  <ion-list class="timeline-list">
-    <div class="date-label">Hoy</div>
+  <main class="historial-main">
 
-    <ion-item
-      *ngFor="let item of todayActivities"
-      class="timeline-item"
-      lines="none"
-    >
-      <div slot="start" class="timeline-icon" [ngClass]="item.color">
-        <ion-icon [name]="item.icon"></ion-icon>
+    <div class="page-intro">
+      <h2>Historial</h2>
+      <p>Seguimiento en tiempo real de tu inventario inteligente.</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-row">
+      <button class="tab-btn" [class.active]="tabActivo === 'actividad'" type="button" (click)="tabActivo = 'actividad'">
+        Actividad
+      </button>
+      <button class="tab-btn" [class.active]="tabActivo === 'escaneos'" type="button" (click)="tabActivo = 'escaneos'">
+        Escaneos
+      </button>
+    </div>
+
+    <!-- ESTADO DE CARGA / ERROR -->
+    <div *ngIf="cargando" class="state-msg">
+      <ion-icon name="sync-outline" class="spin"></ion-icon>
+      <span>Cargando...</span>
+    </div>
+    <div *ngIf="!cargando && error" class="state-msg state-error">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- TAB: ACTIVIDAD (timeline) -->
+    <div *ngIf="!cargando && !error && tabActivo === 'actividad'" class="timeline-container">
+
+      <div class="timeline-line"></div>
+
+      <div class="date-group">
+        <div class="date-chip">Hoy</div>
+
+        <div class="space-y">
+          <div *ngFor="let item of todayActivities" class="timeline-item">
+            <div class="timeline-dot" [ngClass]="'dot-' + item.color">
+              <ion-icon [name]="item.icon"></ion-icon>
+            </div>
+            <div class="timeline-body">
+              <div class="timeline-card" [ngClass]="'card-' + item.color">
+                <h3 [ngClass]="'text-' + item.color">{{ item.title }}</h3>
+                <p>{{ item.description }}</p>
+                <span class="timeline-time">{{ item.time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <ion-label>
-        <h2 [ngClass]="item.color + '-text'">{{ item.title }}</h2>
-        <p>{{ item.description }}</p>
-      </ion-label>
+      <div class="date-group">
+        <div class="date-chip">Ayer</div>
 
-      <ion-note slot="end">{{ item.time }}</ion-note>
-    </ion-item>
-
-    <div class="date-label">Ayer</div>
-
-    <ion-item
-      *ngFor="let item of yesterdayActivities"
-      class="timeline-item"
-      lines="none"
-    >
-      <div slot="start" class="timeline-icon" [ngClass]="item.color">
-        <ion-icon [name]="item.icon"></ion-icon>
+        <div class="space-y">
+          <div *ngFor="let item of yesterdayActivities" class="timeline-item">
+            <div class="timeline-dot" [ngClass]="'dot-' + item.color">
+              <ion-icon [name]="item.icon"></ion-icon>
+            </div>
+            <div class="timeline-body">
+              <div class="timeline-card" [ngClass]="'card-' + item.color">
+                <h3 [ngClass]="'text-' + item.color">{{ item.title }}</h3>
+                <p>{{ item.description }}</p>
+                <span class="timeline-time">{{ item.time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <ion-label>
-        <h2 [ngClass]="item.color + '-text'">{{ item.title }}</h2>
-        <p>{{ item.description }}</p>
-      </ion-label>
+      <button class="load-more-btn" type="button">
+        Cargar más actividad
+        <ion-icon name="chevron-down-outline"></ion-icon>
+      </button>
+    </div>
 
-      <ion-note slot="end">{{ item.time }}</ion-note>
-    </ion-item>
-  </ion-list>
+    <!-- TAB: ESCANEOS -->
+    <div *ngIf="!cargando && !error && tabActivo === 'escaneos'" class="scans-container">
 
-  <ion-button class="load-more" expand="block" fill="outline">
-    Cargar más actividad
-    <ion-icon slot="end" name="chevron-down-outline"></ion-icon>
-  </ion-button>
+      <div *ngFor="let scan of escaneos" class="scan-card">
+        <div class="scan-card-top">
+          <div class="scan-thumb">
+            <ion-icon name="camera-outline"></ion-icon>
+          </div>
+          <div class="scan-info">
+            <div class="scan-title-row">
+              <h3>{{ scan.fecha }}</h3>
+              <ion-icon name="camera-outline" class="scan-cam-icon"></ion-icon>
+            </div>
+            <p>{{ scan.productos }} productos detectados</p>
+            <div class="scan-tags">
+              <span *ngIf="scan.agregados > 0" class="scan-tag tag-added">
+                <ion-icon name="add-outline"></ion-icon>
+                {{ scan.agregados }} {{ scan.agregados === 1 ? 'Añadido' : 'Añadidos' }}
+              </span>
+              <span *ngIf="scan.retirados > 0" class="scan-tag tag-removed">
+                <ion-icon name="remove-outline"></ion-icon>
+                {{ scan.retirados }} {{ scan.retirados === 1 ? 'Retirado' : 'Retirados' }}
+              </span>
+              <span *ngIf="scan.agregados === 0 && scan.retirados === 0" class="scan-tag tag-none">
+                Sin cambios
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="scan-card-footer">
+          <button type="button" class="ver-detalles-btn">
+            Ver detalles <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
 
   <nav class="bottom-nav">
     <button
@@ -66,12 +133,11 @@
           <line x1="10" y1="13" x2="14" y2="13" />
         </svg>
       </ng-container>
-
       <ng-template #standardIcon>
         <ion-icon [icon]="nav.icon"></ion-icon>
       </ng-template>
-
       <span>{{ nav.label }}</span>
     </button>
   </nav>
+
 </ion-content>

@@ -17,4 +17,8 @@ export class DeteccionManualPage {
   volverAtras() {
     this.router.navigate(['/inventario']);
   }
+
+  irAAgregar() {
+    this.router.navigate(['/agregar-producto']);
+  }
 }

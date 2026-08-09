@@ -11,11 +11,82 @@
   padding-bottom: 80px;
 }
 
-/* Ajustes visuales para el bloque de perfil */
-.profile-info p {
-  margin: 2px 0 6px 0;
-  font-size: 13px;
-  color: #737686;
+.main-settings-body {
+  padding: 16px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Tarjeta de Perfil */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+}
+
+.avatar-container {
+  position: relative;
+  flex-shrink: 0;
+
+  img {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+  }
+
+  .edit-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: #004ac6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #f7f9fb;
+
+    ion-icon {
+      font-size: 10px;
+      color: #ffffff;
+    }
+  }
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 2px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #191c1e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  p {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: #737686;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .plan-badge {
@@ -26,11 +97,13 @@
   padding: 2px 8px;
   border-radius: 12px;
   text-transform: uppercase;
+  display: inline-block;
 }
 
 .chevron-icon {
   font-size: 20px;
   color: #737686;
+  flex-shrink: 0;
 }
 
 /* Grupos de Opciones */
@@ -94,6 +167,11 @@
           &.tertiary {
             background: #6bff8f;
             color: #005321;
+          }
+
+          &.refri {
+            background: #dbe1ff;
+            color: #004ac6;
           }
         }
 

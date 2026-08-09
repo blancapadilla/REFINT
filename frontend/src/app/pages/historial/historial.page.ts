@@ -1,133 +1,77 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
-
+import { HistorialService, ActivityItem, ScanItem } from '../../services/historial.service';
 import { addIcons } from 'ionicons';
 import {
-  settingsOutline,
-  searchOutline,
-  notificationsOutline,
-  cubeOutline,
-  cartOutline,
-  syncOutline,
-  chevronDownOutline,
-  homeOutline,
-  listOutline,
-  timeOutline,
-  alertCircleOutline
+  notificationsOutline, cubeOutline, cartOutline, syncOutline,
+  chevronDownOutline, timeOutline, alertCircleOutline, cameraOutline,
+  addOutline, removeOutline, chevronForwardOutline, searchOutline, settingsOutline
 } from 'ionicons/icons';
-
-interface Activity {
-  title: string;
-  description: string;
-  time: string;
-  icon: string;
-  color: 'danger' | 'primary' | 'gray';
-}
 
 @Component({
   selector: 'app-historial',
   templateUrl: './historial.page.html',
   styleUrls: ['./historial.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    IonicModule,
-    AppHeaderComponent
-  ]
+  imports: [CommonModule, IonicModule, AppHeaderComponent]
 })
 export class HistorialPage implements OnInit {
-  todayActivities: Activity[] = [
-    {
-      title: 'Alerta de caducidad',
-      description: 'Yogur Griego está a punto de vencer.',
-      time: '10:45 AM',
-      icon: 'notifications-outline',
-      color: 'danger'
-    },
-    {
-      title: 'Leche agregada',
-      description: 'Se detectaron 2 unidades nuevas.',
-      time: '09:20 AM',
-      icon: 'cube-outline',
-      color: 'primary'
-    }
-  ];
+  tabActivo: 'actividad' | 'escaneos' = 'actividad';
+  cargando = true;
+  error = '';
 
-  yesterdayActivities: Activity[] = [
-    {
-      title: 'Espinacas agotadas',
-      description: 'Añadido automáticamente a Shopping.',
-      time: '07:15 PM',
-      icon: 'cart-outline',
-      color: 'gray'
-    },
-    {
-      title: 'Sincronización completa',
-      description: 'Base de datos actualizada...',
-      time: '12:30 PM',
-      icon: 'sync-outline',
-      color: 'gray'
-    }
-  ];
+  todayActivities: ActivityItem[] = [];
+  yesterdayActivities: ActivityItem[] = [];
+  escaneos: ScanItem[] = [];
 
   bottomNavItems = [
-    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false, badge: false },
-    { id: 'shopping', label: 'Lista', icon: cartOutline, path: '/lista-compras', active: false, badge: false },
-    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false, badge: false },
-    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: true, badge: false },
-    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false, badge: false }
+    { id: 'inventory',  label: 'Inventario',      icon: cubeOutline,          path: '/inventario',   active: false },
+    { id: 'shopping',   label: 'Lista',            icon: cartOutline,          path: '/lista-compras',active: false },
+    { id: 'sync',       label: 'Sincronizar',      icon: syncOutline,          path: '/comparacion',  active: false },
+    { id: 'history',    label: 'Historial',        icon: timeOutline,          path: '/historial',    active: true  },
+    { id: 'alerts',     label: 'Alertas',          icon: notificationsOutline, path: '/alertas',      active: false }
   ];
 
-  searchOutline = searchOutline;
-  settingsOutline = settingsOutline;
-
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private historialService: HistorialService
+  ) {
     addIcons({
-      'settings-outline': settingsOutline,
-      'search-outline': searchOutline,
-      'notifications-outline': notificationsOutline,
-      'cube-outline': cubeOutline,
-      'cart-outline': cartOutline,
-      'sync-outline': syncOutline,
-      'chevron-down-outline': chevronDownOutline,
-      'home-outline': homeOutline,
-      'list-outline': listOutline,
-      'time-outline': timeOutline,
-      'alert-circle-outline': alertCircleOutline
+      notificationsOutline, cubeOutline, cartOutline, syncOutline,
+      chevronDownOutline, timeOutline, alertCircleOutline, cameraOutline,
+      addOutline, removeOutline, chevronForwardOutline, searchOutline, settingsOutline
     });
   }
 
-  irADashboard() {
-    this.router.navigate(['/inventario']);
+  async ngOnInit() {
+    try {
+      await this.cargarDatos();
+    } catch (e: any) {
+      this.error = e?.message ?? 'Error al cargar historial.';
+    } finally {
+      this.cargando = false;
+    }
   }
 
-  irAConfiguracion() {
-    this.router.navigate(['/configuracion']);
+  async cargarDatos() {
+    const [actividades, escaneos] = await Promise.all([
+      this.historialService.getActividades(),
+      this.historialService.getEscaneos()
+    ]);
+    this.todayActivities     = actividades.hoy;
+    this.yesterdayActivities = actividades.ayer;
+    this.escaneos            = escaneos;
   }
 
   buscar() {
     console.log('Buscar en historial');
   }
 
-  ngOnInit() {
-    const currentPath = this.router.url;
-    this.bottomNavItems = this.bottomNavItems.map(nav => ({
-      ...nav,
-      active: nav.path === currentPath
-    }));
-  }
-
   navegar(item: any) {
-    this.bottomNavItems = this.bottomNavItems.map(nav => ({
-      ...nav,
-      active: nav.id === item.id
-    }));
-
-    if (item.path) {
-      this.router.navigate([item.path]);
-    }
+    this.bottomNavItems = this.bottomNavItems.map(nav => ({ ...nav, active: nav.id === item.id }));
+    if (item.path) this.router.navigate([item.path]);
   }
 }
