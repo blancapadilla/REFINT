@@ -13,13 +13,8 @@ import {
   timeOutline
 } from 'ionicons/icons';
 
-interface Actividad {
-  title: string;
-  description: string;
-  time: string;
-  icon: string;
-  color: 'danger' | 'primary' | 'gray';
-}
+// Importamos el servicio
+import { HistorialService } from 'src/app/services/historial.service';
 
 @Component({
   selector: 'app-historial',
@@ -34,42 +29,19 @@ export class HistorialPage implements OnInit {
   settingsOutline = settingsOutline;
   chevronDownOutline = chevronDownOutline;
 
-  // Actividades de ejemplo
-  todayActivities: Actividad[] = [
-    {
-      title: 'Alerta de caducidad',
-      description: 'Yogur Griego está a punto de vencer.',
-      time: '10:45 AM',
-      icon: notificationsOutline,
-      color: 'danger'
-    },
-    {
-      title: 'Leche agregada',
-      description: 'Se detectaron 2 unidades nuevas.',
-      time: '09:20 AM',
-      icon: cubeOutline,
-      color: 'primary'
-    }
-  ];
+  // Listas de actividades cargadas desde FastAPI
+  todayActivities: any[] = [];
+  yesterdayActivities: any[] = [];
 
-  yesterdayActivities: Actividad[] = [
-    {
-      title: 'Espinacas agotadas',
-      description: 'Añadido automáticamente a Shopping.',
-      time: '07:15 PM',
-      icon: cartOutline,
-      color: 'gray'
-    },
-    {
-      title: 'Sincronización completa',
-      description: 'Base de datos actualizada...',
-      time: '12:30 PM',
-      icon: syncOutline,
-      color: 'gray'
-    }
-  ];
+  // Mapeo de strings recibidos del backend a objetos de íconos de Ionic
+  private iconMap: { [key: string]: any } = {
+    notificationsOutline: notificationsOutline,
+    cubeOutline: cubeOutline,
+    cartOutline: cartOutline,
+    syncOutline: syncOutline
+  };
 
-  // Menú inferior: "History" está ACTIVO (active: true)
+  // Menú inferior
   bottomNavItems = [
     { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
     { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
@@ -78,7 +50,10 @@ export class HistorialPage implements OnInit {
     { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
   ];
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private historialService: HistorialService // Inyección de servicio
+  ) {
     addIcons({
       settingsOutline,
       notificationsOutline,
@@ -90,7 +65,40 @@ export class HistorialPage implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.cargarHistorial();
+  }
+
+  // Cargar lista inicial de actividades
+  cargarHistorial() {
+    this.historialService.getHistorial().subscribe({
+      next: (res) => {
+        this.todayActivities = res.todayActivities.map(item => ({
+          ...item,
+          icon: this.iconMap[item.icon] || notificationsOutline
+        }));
+
+        this.yesterdayActivities = res.yesterdayActivities.map(item => ({
+          ...item,
+          icon: this.iconMap[item.icon] || syncOutline
+        }));
+      },
+      error: (err) => console.error('Error al obtener el historial:', err)
+    });
+  }
+
+  // Acción del botón "Cargar más actividad"
+  cargarMasActividad() {
+    this.historialService.cargarMasActividad().subscribe({
+      next: (res) => {
+        this.yesterdayActivities = res.yesterdayActivities.map(item => ({
+          ...item,
+          icon: this.iconMap[item.icon] || syncOutline
+        }));
+      },
+      error: (err) => console.error('Error al cargar más historial:', err)
+    });
+  }
 
   irADashboard() {
     this.router.navigate(['/dashboard']);
@@ -98,10 +106,6 @@ export class HistorialPage implements OnInit {
 
   irAConfiguracion() {
     this.router.navigate(['/configuracion']);
-  }
-
-  cargarMasActividad() {
-    console.log('Cargar más actividades del historial');
   }
 
   navegar(item: any) {

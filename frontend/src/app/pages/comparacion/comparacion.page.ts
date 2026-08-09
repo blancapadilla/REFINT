@@ -18,12 +18,8 @@ import {
   notificationsOutline
 } from 'ionicons/icons';
 
-interface ItemCritico {
-  nombre: string;
-  subtexto: string;
-  estado: 'disponible' | 'faltante' | 'agotado';
-  colorPlaceholder: '1' | '2' | '3';
-}
+// Importamos el servicio e interfaces
+import { SyncService, ItemCritico, FiltroCritico } from 'src/app/services/sync.service';
 
 @Component({
   selector: 'app-comparacion',
@@ -42,43 +38,20 @@ export class ComparacionPage implements OnInit {
   closeCircleOutline = closeCircleOutline;
   eyeOutline = eyeOutline;
 
-  // Resumen superior
-  resumen = {
-    disponible: 24,
-    faltante: 8,
-    agotado: 3
-  };
-
-  // Filtros de categoría dentro de "Estado de Inventario Crítico"
-  filtrosCriticos = [
-    { id: 'lacteos', nombre: 'Lácteos' },
-    { id: 'frutas', nombre: 'Frutas' }
-  ];
+  // Variables alimentadas dinámicamente desde FastAPI
+  resumen = { disponible: 0, faltante: 0, agotado: 0 };
+  filtrosCriticos: FiltroCritico[] = [];
   filtroSeleccionado: string = 'lacteos';
+  todosItemsCriticos: ItemCritico[] = [];
+  itemsCriticos: ItemCritico[] = [];
+  articulosReposicion: string[] = [];
+  uso = { frutas: 0, lacteos: 0, carnes: 0, otros: 0, lleno: 0 };
 
-  // Listado visual de ejemplo
-  itemsCriticos: ItemCritico[] = [
-    { nombre: 'Leche Entera 1L', subtexto: 'Última compra: hace 7 días', estado: 'agotado', colorPlaceholder: '1' },
-    { nombre: 'Huevos Orgánicos (12)', subtexto: 'Quedan: 2 unidades', estado: 'faltante', colorPlaceholder: '2' },
-    { nombre: 'Manzanas Verdes', subtexto: 'Quedan: 6 unidades', estado: 'disponible', colorPlaceholder: '3' }
-  ];
-
-  // Sincronización de lista
-  articulosReposicion: string[] = ['Pan Integral', 'Yogurt Griego'];
-
-  // Uso de inventario (donut)
-  uso = {
-    frutas: 12,
-    lacteos: 40,
-    carnes: 16,
-    otros: 32,
-    lleno: 68
-  };
-
+  // Trazo SVG para la gráfica de dona
   donutDashArray: string = '';
   donutDashOffset: string = '';
 
-  // Menú inferior: "Sync" está ACTIVO (active: true)
+  // Menú inferior
   bottomNavItems = [
     { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false, badge: false },
     { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false, badge: false },
@@ -87,7 +60,10 @@ export class ComparacionPage implements OnInit {
     { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false, badge: false }
   ];
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private syncService: SyncService // Inyección del servicio
+  ) {
     addIcons({
       searchOutline,
       settingsOutline,
@@ -104,6 +80,32 @@ export class ComparacionPage implements OnInit {
   }
 
   ngOnInit() {
+    this.cargarDatos();
+  }
+
+  // Cargar datos desde FastAPI
+  cargarDatos() {
+    this.syncService.getComparacionData().subscribe({
+      next: (data) => {
+        this.resumen = data.resumen;
+        this.filtrosCriticos = data.filtrosCriticos;
+        this.todosItemsCriticos = data.itemsCriticos;
+        this.articulosReposicion = data.articulosReposicion;
+        this.uso = data.uso;
+
+        if (this.filtrosCriticos.length > 0) {
+          this.filtroSeleccionado = this.filtrosCriticos[0].id;
+        }
+
+        this.filtrarItems();
+        this.calcularGraficaDona();
+      },
+      error: (err) => console.error('Error al cargar datos de sincronización:', err)
+    });
+  }
+
+  // Calcula el porcentaje visual del círculo SVG según uso.lleno
+  calcularGraficaDona() {
     const radio = 58;
     const circunferencia = 2 * Math.PI * radio;
     const progreso = (this.uso.lleno / 100) * circunferencia;
@@ -129,12 +131,27 @@ export class ComparacionPage implements OnInit {
     console.log('Abrir búsqueda de comparación');
   }
 
+  // Cambiar categoría de productos críticos
   seleccionarFiltro(id: string) {
     this.filtroSeleccionado = id;
+    this.filtrarItems();
   }
 
+  filtrarItems() {
+    this.itemsCriticos = this.todosItemsCriticos.filter(
+      item => item.categoria_id === this.filtroSeleccionado
+    );
+  }
+
+  // Sincronización real enviando POST al Backend y redirigiendo a la lista de compras
   actualizarShoppingList() {
-    console.log('Actualizar Shopping List con artículos sugeridos');
+    this.syncService.actualizarShoppingList().subscribe({
+      next: (res) => {
+        console.log('Sincronización exitosa:', res.mensaje);
+        this.router.navigate(['/lista-compras']);
+      },
+      error: (err) => console.error('Error al actualizar shopping list:', err)
+    });
   }
 
   navegar(item: any) {
@@ -147,4 +164,9 @@ export class ComparacionPage implements OnInit {
       this.router.navigate([item.path]);
     }
   }
+
+  irADashboard() { this.router.navigate(['/dashboard']); }
+  irAConfiguracion() { this.router.navigate(['/configuracion']); }
+  buscar() { console.log('Abrir búsqueda de comparación'); }
+  navegar(item: any) { if (item.path) this.router.navigate([item.path]); }
 }
