@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { addIcons } from 'ionicons';
 import {
   searchOutline,
@@ -29,7 +30,7 @@ interface ItemCritico {
   templateUrl: './comparacion.page.html',
   styleUrls: ['./comparacion.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule]
+  imports: [CommonModule, IonicModule, AppHeaderComponent]
 })
 export class ComparacionPage implements OnInit {
 
@@ -117,7 +118,7 @@ export class ComparacionPage implements OnInit {
   }
 
   irADashboard() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/inventario']);
   }
 
   irAConfiguracion() {
@@ -137,6 +138,11 @@ export class ComparacionPage implements OnInit {
   }
 
   navegar(item: any) {
+    this.bottomNavItems = this.bottomNavItems.map(nav => ({
+      ...nav,
+      active: nav.id === item.id
+    }));
+
     if (item.path) {
       this.router.navigate([item.path]);
     }

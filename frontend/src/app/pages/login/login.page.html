@@ -59,10 +59,13 @@
       </div>
 
       <!-- Botón Principal Iniciar Sesión -->
-      <button type="submit" class="primary-btn">
-        <span>Iniciar Sesión</span>
+      <button type="submit" class="primary-btn" [disabled]="loading">
+        <span>{{ loading ? 'Ingresando...' : 'Iniciar Sesión' }}</span>
         <ion-icon [icon]="arrowForwardOutline"></ion-icon>
       </button>
+
+      <p *ngIf="authError" class="auth-error">{{ authError }}</p>
+      <p *ngIf="authInfo" class="auth-info">{{ authInfo }}</p>
     </form>
 
     <!-- SEPARADOR -->
@@ -95,7 +98,7 @@
     <!-- PIE DE PÁGINA -->
     <div class="login-footer">
       <p class="register-text">
-        ¿No tienes una cuenta? <a (click)="irARegistro()">Registrarse</a>
+        ¿No tienes una cuenta? <a (click)="irARegistro()">{{ loading ? 'Procesando...' : 'Registrarse' }}</a>
       </p>
       <p class="copyright-text">
         FreshFocus AI Smart Kitchen Ecosystem © 2026

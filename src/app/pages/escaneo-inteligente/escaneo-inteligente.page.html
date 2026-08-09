@@ -1,0 +1,95 @@
+<ion-content class="scan-content">
+  <app-header title="Escaneo Inteligente" [showBack]="true" backRoute="/inventario"></app-header>
+
+  <main class="scan-main">
+    <section class="scan-panel">
+      <div class="scan-summary">
+        <h2>Análisis de Refrigerador</h2>
+        <p id="scan-status">{{ scanStatus }}</p>
+      </div>
+
+      <div class="scan-visual">
+        <div class="pulse-ring pulse-ring-large"></div>
+        <div class="pulse-ring pulse-ring-small"></div>
+        <div class="scanner-core">
+          <ion-icon name="kitchen-outline"></ion-icon>
+          <div class="scan-line"></div>
+        </div>
+      </div>
+
+      <div class="scan-log">
+        <div *ngFor="let log of scanLog" class="log-row">
+          <ion-icon [name]="log.icon"></ion-icon>
+          <span>{{ log.text }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="scan-results" [class.visible]="resultsReady">
+      <div class="detected-heading">
+        <h2>Productos Detectados</h2>
+        <span class="badge">En vivo</span>
+      </div>
+
+      <div class="result-item fresh">
+        <div class="result-icon"><ion-icon name="water-outline"></ion-icon></div>
+        <div class="result-copy">
+          <h3>Leche Entera</h3>
+          <p>1 Litro • Fresco</p>
+        </div>
+        <span class="result-status new"><ion-icon name="add-circle-outline"></ion-icon> Nuevo</span>
+      </div>
+
+      <div class="result-item updated">
+        <div class="result-icon"><ion-icon name="egg-outline"></ion-icon></div>
+        <div class="result-copy">
+          <h3>Huevos</h3>
+          <p>Docena • ~5 restantes</p>
+        </div>
+        <span class="result-status modified"><ion-icon name="refresh-outline"></ion-icon> Modificado</span>
+      </div>
+
+      <div class="result-item neutral">
+        <div class="result-icon"><ion-icon name="document-text-outline"></ion-icon></div>
+        <div class="result-copy">
+          <h3>Queso Cheddar</h3>
+          <p>Bloque 250g</p>
+        </div>
+        <span class="result-status">Sin cambios</span>
+      </div>
+
+      <div class="result-item removed">
+        <div class="result-icon"><ion-icon name="breakfast-outline"></ion-icon></div>
+        <div class="result-copy">
+          <h3>Mantequilla</h3>
+          <p>No detectado en esta zona</p>
+        </div>
+        <span class="result-status deleted"><ion-icon name="remove-circle-outline"></ion-icon> Eliminado</span>
+      </div>
+
+      <div class="scan-summary-card">
+        <div class="summary-row">
+          <span>Agregados</span>
+          <strong>1</strong>
+        </div>
+        <div class="summary-row">
+          <span>Eliminados</span>
+          <strong>1</strong>
+        </div>
+        <div class="summary-row">
+          <span>Modificados</span>
+          <strong>1</strong>
+        </div>
+        <div class="summary-row">
+          <span>Sin Cambios</span>
+          <strong>14</strong>
+        </div>
+      </div>
+
+      <button class="update-button" type="button" [disabled]="updateDisabled" (click)="confirmarCambios()">
+        <ion-icon name="save-outline"></ion-icon>
+        Confirmar Cambios
+      </button>
+    </section>
+  </main>
+</ion-content>

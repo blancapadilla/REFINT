@@ -1,22 +1,7 @@
 <ion-content class="shopping-content">
   <div class="shopping-container">
 
-    <!-- CABECERA DE LA APP (idéntica a Inventario) -->
-    <header class="dashboard-header">
-      <div class="brand-group" (click)="irADashboard()">
-        <svg class="refint-logo-svg" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="20" height="24" rx="4" stroke="#0053db" stroke-width="2.5"/>
-          <line x1="2" y1="12" x2="22" y2="12" stroke="#0053db" stroke-width="2.5"/>
-          <line x1="6" y1="5.5" x2="6" y2="9.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="6" y1="15.5" x2="6" y2="20.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-        <span class="brand-title">Refint</span>
-      </div>
-
-      <button class="gear-button" type="button" aria-label="Ajustes" (click)="irAConfiguracion()">
-        <ion-icon [icon]="settingsOutline"></ion-icon>
-      </button>
-    </header>
+    <app-header title="Lista de Compras" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
 
     <main class="main-shopping-body">
 

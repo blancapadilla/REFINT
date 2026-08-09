@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { addIcons } from 'ionicons';
 import {
   settingsOutline,
+  searchOutline,
   sparklesOutline,
   trendingDownOutline,
   leafOutline,
@@ -42,12 +44,13 @@ interface CategoriaCompra {
   templateUrl: './lista-compras.page.html',
   styleUrls: ['./lista-compras.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule]
+  imports: [CommonModule, IonicModule, AppHeaderComponent]
 })
 export class ListaComprasPage implements OnInit {
 
   // Iconos
   settingsOutline = settingsOutline;
+  searchOutline = searchOutline;
   sparklesOutline = sparklesOutline;
   trendingDownOutline = trendingDownOutline;
   leafOutline = leafOutline;
@@ -116,7 +119,11 @@ export class ListaComprasPage implements OnInit {
   ngOnInit() {}
 
   irADashboard() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/inventario']);
+  }
+
+  buscar() {
+    console.log('Buscar en lista de compras');
   }
 
   irAConfiguracion() {
@@ -136,6 +143,11 @@ export class ListaComprasPage implements OnInit {
   }
 
   navegar(item: any) {
+    this.bottomNavItems = this.bottomNavItems.map(nav => ({
+      ...nav,
+      active: nav.id === item.id
+    }));
+
     if (item.path) {
       this.router.navigate([item.path]);
     }

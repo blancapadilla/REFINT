@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { addIcons } from 'ionicons';
 import { 
   snowOutline, 
@@ -28,7 +29,7 @@ import {
   templateUrl: './configuracion.page.html',
   styleUrls: ['./configuracion.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, IonicModule, AppHeaderComponent]
 })
 export class ConfiguracionPage implements OnInit {
   // Datos de usuario
@@ -89,7 +90,7 @@ export class ConfiguracionPage implements OnInit {
   ngOnInit() {}
 
   irADashboard() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/inventario']);
   }
 
   irAConfiguracion() {
