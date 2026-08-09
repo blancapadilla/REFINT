@@ -5,7 +5,7 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
-import { InventoryService } from '../../services/inventory';
+import { InventarioService } from '../../services/inventario.service';
 import { AuthService } from '../../services/auth';
 import { RefrigeradorService } from '../../services/refrigerador.service';
 
@@ -42,6 +42,7 @@ interface ProductoInventario {
   etiquetaEstado: string;
   vencimiento: string;
   imagen: string;
+  fuente?: 'ai' | 'manual';
 }
 
 
@@ -391,7 +392,7 @@ export class InventarioPage implements OnInit {
 
   constructor(
     private router: Router,
-    private inventoryService: InventoryService,
+    private inventoryService: InventarioService,
     private authService: AuthService,
     private refrigeradorService: RefrigeradorService
   ) {
@@ -496,7 +497,10 @@ export class InventarioPage implements OnInit {
               ),
 
             imagen:
-              this.obtenerImagenProducto(item)
+              this.obtenerImagenProducto(item),
+
+            fuente:
+              item.source === 'ai' ? 'ai' : 'manual'
 
           };
 
@@ -683,17 +687,17 @@ export class InventarioPage implements OnInit {
 
       case 'critical':
 
-        return 'Crítico';
+        return 'CRITICAL';
 
 
       case 'soon':
 
-        return 'Pronto';
+        return 'SOON';
 
 
       default:
 
-        return 'Fresco';
+        return 'FRESH';
 
     }
 
@@ -752,7 +756,7 @@ export class InventarioPage implements OnInit {
       diasNumero === 1
     ) {
 
-      return 'Vence: Mañana';
+      return 'Expires: Tomorrow';
 
     }
 
@@ -761,7 +765,7 @@ export class InventarioPage implements OnInit {
       diasNumero <= 7
     ) {
 
-      return `Vence en ${diasNumero} días`;
+      return `Exp: ${diasNumero} days left`;
 
     }
 
@@ -779,7 +783,7 @@ export class InventarioPage implements OnInit {
       );
 
 
-    return `Vence: ${fechaFormateada}`;
+    return `Exp: ${fechaFormateada}`;
 
   }
 
@@ -791,9 +795,6 @@ export class InventarioPage implements OnInit {
   obtenerImagenProducto(
     item: any
   ): string {
-
-    // Si Supabase ya devuelve una URL completa,
-    // utilizarla directamente.
 
     if (
       item.product_image_path &&
@@ -821,9 +822,6 @@ export class InventarioPage implements OnInit {
     }
 
 
-    // Imágenes locales temporales
-    // para los datos demo.
-
     const nombre =
       (item.product_name ?? '')
         .toLowerCase();
@@ -847,11 +845,25 @@ export class InventarioPage implements OnInit {
     }
 
 
-    // Imagen genérica si todavía
-    // no existe fotografía del producto.
-
     return 'assets/images/products/default-product.png';
 
+  }
+
+
+  onImageError(
+    event: any
+  ) {
+
+    event.target.src =
+      'assets/images/products/default-product.png';
+
+    const imgElement = event.target as HTMLImageElement;
+
+    // 1. Desactivamos el handler de error para DETENER el bucle infinito inmediatamente
+    imgElement.onerror = null;
+
+    // 2. Asignamos un icono vectorial SVG integrado (no genera peticiones HTTP ni 404)
+    imgElement.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Crect x="3" y="3" width="18" height="18" rx="4" fill="%23f1f5f9" stroke="none"/%3E%3Cpath d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/%3E%3Cpolyline points="3.27 6.96 12 12.01 20.73 6.96"/%3E%3Cline x1="12" y1="22.08" x2="12" y2="12"/%3E%3C/svg%3E';
   }
 
 
@@ -911,8 +923,9 @@ export class InventarioPage implements OnInit {
 
   irADashboard() {
 
+    // Redirige al Dashboard de inicio
     this.router.navigate([
-      '/inventario'
+      '/dashboard'
     ]);
 
   }
@@ -983,7 +996,7 @@ export class InventarioPage implements OnInit {
   aplicarFiltros() {
 
     const busqueda =
-      this.textoBusqueda
+      (this.textoBusqueda || '')
         .trim()
         .toLowerCase();
 
@@ -1021,16 +1034,13 @@ export class InventarioPage implements OnInit {
 
   // =====================================================
   // PRODUCTOS
-  // Por ahora estos botones mantienen el comportamiento
-  // visual existente.
-  // Después conectaremos INSERT / UPDATE / DELETE.
   // =====================================================
 
   agregarProducto() {
 
-    console.log(
-      'Abrir formulario para agregar alimento'
-    );
+    this.router.navigate([
+      '/agregar-producto'
+    ]);
 
   }
 
@@ -1047,31 +1057,39 @@ export class InventarioPage implements OnInit {
   }
 
 
-  eliminarProducto(
+  async eliminarProducto(
     item: ProductoInventario
   ) {
 
-    console.log(
-      'Eliminar producto:',
-      item.nombre
-    );
+    try {
 
-
-    // Por ahora lo quitamos visualmente.
-    // Luego conectaremos DELETE con Supabase.
-
-    this.productos =
-      this.productos.filter(
-        producto =>
-          producto.id !== item.id
+      // Llama a Supabase para eliminar el ítem real
+      await this.inventoryService.deleteItem(
+        item.id
       );
 
 
-    this.totalProductos =
-      this.productos.length;
+      this.productos =
+        this.productos.filter(
+          producto =>
+            producto.id !== item.id
+        );
 
 
-    this.aplicarFiltros();
+      this.totalProductos =
+        this.productos.length;
+
+
+      this.aplicarFiltros();
+
+    } catch (error) {
+
+      console.error(
+        'Error al eliminar el producto:',
+        error
+      );
+
+    }
 
   }
 
