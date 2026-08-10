@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -7,6 +7,9 @@ import { Router } from '@angular/router';
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { DashboardService } from '../../services/dashboard.service';
 import { AuthService } from '../../services/auth';
+import { HardwareService } from '../../services/hardware.service';
+import { RefrigeradorService } from '../../services/refrigerador.service';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { addIcons } from 'ionicons';
 
 import {
@@ -31,7 +34,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, AppHeaderComponent]
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage implements OnInit, OnDestroy {
 
   usuario = 'Vanessa';
   totalProductos = 0;
@@ -44,7 +47,7 @@ export class DashboardPage implements OnInit {
   timeOutline = timeOutline;
 
   // Datos dinámicos conectados
-  temperatura = '3';
+  temperatura = '--';
   humedad = '45';
 
   deviceStatus = {
@@ -88,7 +91,9 @@ export class DashboardPage implements OnInit {
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
-    private authService: AuthService
+    private authService: AuthService,
+    private hardwareService: HardwareService,
+    private refrigeradorService: RefrigeradorService
   ) {
     addIcons({
       calendarOutline,
@@ -114,6 +119,26 @@ export class DashboardPage implements OnInit {
     }
 
     await this.cargarDashboard();
+    await this.conectarTemperatura();
+  }
+
+  private temperatureChannel: RealtimeChannel | null = null;
+
+  async conectarTemperatura() {
+    const refrigerator = await this.refrigeradorService.getMiRefrigerador();
+    if (!refrigerator) return;
+    const latest = await this.hardwareService.getLatestTemperature(refrigerator.id);
+    if (latest != null) this.temperatura = latest.toFixed(2);
+    this.temperatureChannel = this.hardwareService.subscribeToTemperature(
+      refrigerator.id,
+      value => this.temperatura = value.toFixed(2)
+    );
+  }
+
+  ngOnDestroy() {
+    if (this.temperatureChannel) {
+      void this.hardwareService.unsubscribe(this.temperatureChannel);
+    }
   }
 
   async cargarDashboard() {
@@ -123,7 +148,9 @@ export class DashboardPage implements OnInit {
 
       if (summary) {
         this.totalProductos = summary.total_products ?? 0;
-        this.temperatura = summary.current_temperature_c != null ? `${summary.current_temperature_c}` : '3';
+        if (summary.current_temperature_c != null) {
+          this.temperatura = Number(summary.current_temperature_c).toFixed(2);
+        }
 
         this.summaryCards = [
           { 

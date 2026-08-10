@@ -1,4 +1,4 @@
-from services.supabase_service import supabase
+from iA.services.supabase_service import supabase
 
 
 def create_detection(

@@ -59,6 +59,17 @@
   color: #4b5563;
 }
 
+.scan-summary .scan-error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.scan-visual:not(.is-running) .pulse-ring,
+.scan-visual:not(.is-running) .scan-line {
+  animation-play-state: paused;
+  opacity: 0.2;
+}
+
 .scan-visual {
   position: relative;
   width: min(340px, 100%);

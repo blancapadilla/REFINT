@@ -1,4 +1,4 @@
-from services.supabase_service import supabase
+from iA.services.supabase_service import supabase
 
 
 def compare_scan_with_inventory(scan_id: str, refrigerator_id: str):
