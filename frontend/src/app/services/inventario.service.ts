@@ -29,10 +29,12 @@ export class InventarioService {
     private refrigeradorService: RefrigeradorService
   ) {}
 
+
   /**
    * Obtiene los datos sin procesar de la vista v_inventory_current
    */
   async getInventory() {
+
     const { data, error } = await this.supabase.client
       .from('v_inventory_current')
       .select('*');
@@ -45,10 +47,15 @@ export class InventarioService {
     return data;
   }
 
+
   /**
-   * Obtiene y mapea los productos desde Supabase formateados para la UI
+   * Obtiene y mapea los productos desde Supabase
+   * formateados para la interfaz
    */
-  async getProductos(refrigeratorId?: string): Promise<ProductoInventario[]> {
+  async getProductos(
+    refrigeratorId?: string
+  ): Promise<ProductoInventario[]> {
+
     let query = this.supabase.client
       .from('v_inventory_current')
       .select('*');
@@ -60,125 +67,253 @@ export class InventarioService {
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error al obtener productos desde Supabase:', error);
+      console.error(
+        'Error al obtener productos desde Supabase:',
+        error
+      );
+
       return [];
     }
 
     return (data || []).map((item: any) => {
+
       let estadoUI: 'critical' | 'soon' | 'fresh' = 'fresh';
       let etiqueta = 'FRESH';
 
-      if (item.status === 'caducado' || item.status === 'agotado') {
+      if (
+        item.status === 'caducado' ||
+        item.status === 'agotado'
+      ) {
         estadoUI = 'critical';
         etiqueta = 'CRITICAL';
-      } else if (item.status === 'proximo_a_caducar' || item.status === 'bajo') {
+
+      } else if (
+        item.status === 'proximo_a_caducar' ||
+        item.status === 'bajo'
+      ) {
         estadoUI = 'soon';
         etiqueta = 'SOON';
       }
 
       return {
         id: item.id,
+
         nombre: item.product_name ?? 'Producto',
-        cantidad: `${item.quantity ?? 0} ${item.unit ?? ''}`.trim(),
-        categoria: item.category_name ? item.category_name.toLowerCase() : 'otros',
+
+        cantidad:
+          `${item.quantity ?? 0} ${item.unit ?? ''}`.trim(),
+
+        categoria:
+          item.category_name
+            ? item.category_name.toLowerCase()
+            : 'otros',
+
         estado: estadoUI,
+
         etiquetaEstado: etiqueta,
-        vencimiento: item.expires_on ? `Exp: ${item.expires_on}` : 'Sin fecha',
-        imagen: item.product_image_path || item.image_path || 'assets/images/products/default-product.png',
-        fuente: item.source === 'ai' ? 'ai' : 'manual'
+
+        vencimiento:
+          item.expires_on
+            ? `Exp: ${item.expires_on}`
+            : 'Sin fecha',
+
+        imagen:
+          item.product_image_path ||
+          item.image_path ||
+          'assets/images/products/default-product.png',
+
+        fuente:
+          item.source === 'ai'
+            ? 'ai'
+            : 'manual'
       };
     });
   }
 
+
   /**
-   * Obtiene las categorías configuradas en la BD para las pastillas de filtro
+   * Obtiene las categorías configuradas en la BD
+   * para las pastillas de filtro.
    */
   async getCategorias(): Promise<Categoria[]> {
+
     const { data, error } = await this.supabase.client
       .from('product_categories')
       .select('id, name, slug');
 
     if (error) {
-      console.error('Error al obtener categorías:', error);
-      return [{ id: 'todos', nombre: 'Todos' }];
+
+      console.error(
+        'Error al obtener categorías:',
+        error
+      );
+
+      return [
+        {
+          id: 'todos',
+          nombre: 'Todos'
+        }
+      ];
     }
 
-    const categoriasList: Categoria[] = [{ id: 'todos', nombre: 'Todos' }];
+    const categoriasList: Categoria[] = [
+      {
+        id: 'todos',
+        nombre: 'Todos'
+      }
+    ];
+
     (data || []).forEach((cat: any) => {
+
       categoriasList.push({
         id: cat.slug || cat.name.toLowerCase(),
         nombre: cat.name
       });
+
     });
 
     return categoriasList;
   }
 
+
   /**
-   * Elimina un producto de la tabla inventory_items
+   * Elimina un producto de inventory_items.
+   *
+   * El trigger de Supabase registrará automáticamente
+   * el movimiento correspondiente en inventory_movements.
    */
   async eliminarProducto(id: string): Promise<boolean> {
+
     const { error } = await this.supabase.client
       .from('inventory_items')
       .delete()
       .eq('id', id);
 
     if (error) {
-      console.error('Error al eliminar producto de Supabase:', error);
+
+      console.error(
+        'Error al eliminar producto de Supabase:',
+        error
+      );
+
       return false;
     }
 
     return true;
   }
 
+
   /**
-   * Alias de eliminarProducto para dar soporte a llamadas deleteItem()
+   * Alias de eliminarProducto
+   * para dar soporte a llamadas deleteItem().
    */
   async deleteItem(id: string): Promise<boolean> {
+
     return this.eliminarProducto(id);
   }
 
+
   /**
-   * Conteo de estados para métricas/dashboard
+   * Conteo de estados para métricas/dashboard.
    */
-  async getInventoryStatusCounts(): Promise<{ fresh: number; soon: number; critical: number; expired: number; total: number }> {
+  async getInventoryStatusCounts(): Promise<{
+    fresh: number;
+    soon: number;
+    critical: number;
+    expired: number;
+    total: number;
+  }> {
+
     const { data, error } = await this.supabase.client
       .from('inventory_items')
       .select('status');
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
-    const rows = (data ?? []) as Array<{ status: string }>;
-    const counts = { fresh: 0, soon: 0, critical: 0, expired: 0, total: rows.length };
+    const rows =
+      (data ?? []) as Array<{ status: string }>;
+
+    const counts = {
+      fresh: 0,
+      soon: 0,
+      critical: 0,
+      expired: 0,
+      total: rows.length
+    };
+
     rows.forEach(row => {
-      if (row.status === 'disponible') counts.fresh += 1;
-      if (row.status === 'proximo_a_caducar' || row.status === 'bajo') counts.soon += 1;
-      if (row.status === 'agotado') counts.critical += 1;
-      if (row.status === 'caducado') counts.expired += 1;
+
+      if (row.status === 'disponible') {
+        counts.fresh++;
+      }
+
+      if (
+        row.status === 'proximo_a_caducar' ||
+        row.status === 'bajo'
+      ) {
+        counts.soon++;
+      }
+
+      if (row.status === 'agotado') {
+        counts.critical++;
+      }
+
+      if (row.status === 'caducado') {
+        counts.expired++;
+      }
+
     });
+
     return counts;
   }
 
+
   /**
-   * Top productos con mayor cantidad
+   * Obtiene los productos con mayor cantidad.
    */
-  async getTopProducts(limit = 5): Promise<Array<{ name: string; quantity: number }>> {
+  async getTopProducts(
+    limit = 5
+  ): Promise<Array<{
+    name: string;
+    quantity: number;
+  }>> {
+
     const { data, error } = await this.supabase.client
       .from('inventory_items')
       .select('quantity, product:products(name)')
-      .order('quantity', { ascending: false })
+      .order('quantity', {
+        ascending: false
+      })
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return (data ?? []).map((row: any) => ({
-      name: row.product?.name ?? 'Sin nombre',
-      quantity: Number(row.quantity ?? 0)
+
+      name:
+        row.product?.name ??
+        'Sin nombre',
+
+      quantity:
+        Number(row.quantity ?? 0)
+
     }));
   }
 
+
   /**
-   * Agrega un nuevo producto a Supabase (crea el producto base si no existe y luego lo inserta en el inventario)
+   * Agrega un nuevo producto a Supabase.
+   *
+   * IMPORTANTE:
+   * Aquí YA NO se registra manualmente el movimiento
+   * en inventory_movements.
+   *
+   * El trigger de Supabase lo hace automáticamente
+   * cuando se inserta el registro en inventory_items.
    */
   async addProducto(payload: {
     nombre: string;
@@ -189,63 +324,231 @@ export class InventarioService {
     fechaVencimiento?: string;
     notas?: string;
   }): Promise<any> {
+
     const client = this.supabase.client;
 
-    const name = (payload.nombre || '').trim();
-    const brand = payload.marca && payload.marca.trim().length ? payload.marca.trim() : null;
+
+    // =====================================================
+    // 1. VALIDAR NOMBRE
+    // =====================================================
+
+    const name =
+      (payload.nombre || '').trim();
+
+    if (!name) {
+      throw new Error(
+        'El nombre del producto es obligatorio.'
+      );
+    }
+
+
+    // =====================================================
+    // 2. OBTENER MARCA
+    // =====================================================
+
+    const brand =
+      payload.marca &&
+      payload.marca.trim().length > 0
+        ? payload.marca.trim()
+        : null;
+
+
+    // =====================================================
+    // 3. BUSCAR SI EL PRODUCTO YA EXISTE
+    // =====================================================
 
     let productId: string | null = null;
 
-    try {
-      const { data: existing } = await client
-        .from('products')
-        .select('id')
-        .match({ name, brand })
-        .limit(1)
-        .single();
+    let existingQuery = client
+      .from('products')
+      .select('id')
+      .eq('name', name);
 
-      if (existing && (existing as any).id) {
-        productId = (existing as any).id;
-      }
-    } catch (e) {
-      // Ignorar si no existe
+    if (brand === null) {
+
+      existingQuery =
+        existingQuery.is('brand', null);
+
+    } else {
+
+      existingQuery =
+        existingQuery.eq('brand', brand);
+
     }
+
+    const {
+      data: existingProduct,
+      error: searchError
+    } = await existingQuery
+      .limit(1)
+      .maybeSingle();
+
+    if (searchError) {
+
+      console.error(
+        'Error buscando producto:',
+        searchError
+      );
+
+    }
+
+    if (existingProduct) {
+
+      productId =
+        existingProduct.id;
+
+    }
+
+
+    // =====================================================
+    // 4. CREAR PRODUCTO BASE SI NO EXISTE
+    // =====================================================
 
     if (!productId) {
-      const { data, error } = await client
+
+      const {
+        data: newProduct,
+        error: productError
+      } = await client
         .from('products')
-        .insert({ name, brand, default_unit: payload.unidad || 'unidad' })
+        .insert({
+          name: name,
+          brand: brand,
+          default_unit:
+            payload.unidad || 'unidad'
+        })
         .select('id')
-        .limit(1)
         .single();
 
-      if (error) throw error;
-      productId = (data as any).id;
+      if (productError) {
+
+        console.error(
+          'Error creando producto:',
+          productError
+        );
+
+        throw productError;
+      }
+
+      productId =
+        newProduct.id;
     }
 
-    const fridge = await this.refrigeradorService.getMiRefrigerador();
-    if (!fridge) throw new Error('No se encontró un refrigerador activo.');
 
-    const { data: userRes } = await client.auth.getUser();
-    const user = (userRes as any)?.user ?? null;
+    // =====================================================
+    // 5. OBTENER REFRIGERADOR DEL USUARIO
+    // =====================================================
 
-    const { data, error } = await client
+    const fridge =
+      await this.refrigeradorService
+        .getMiRefrigerador();
+
+    if (!fridge) {
+
+      throw new Error(
+        'No se encontró un refrigerador activo para este usuario.'
+      );
+    }
+
+
+    // =====================================================
+    // 6. OBTENER USUARIO ACTUAL
+    // =====================================================
+
+    const {
+      data: userResponse,
+      error: userError
+    } = await client.auth.getUser();
+
+    if (userError) {
+
+      console.error(
+        'Error obteniendo usuario:',
+        userError
+      );
+
+      throw userError;
+    }
+
+    const user =
+      userResponse?.user;
+
+    if (!user) {
+
+      throw new Error(
+        'No hay un usuario autenticado.'
+      );
+    }
+
+
+    // =====================================================
+    // 7. INSERTAR EN INVENTORY_ITEMS
+    // =====================================================
+
+    const {
+      data,
+      error
+    } = await client
       .from('inventory_items')
       .insert({
-        refrigerator_id: fridge.id,
-        product_id: productId,
-        quantity: payload.cantidad ?? 1,
-        unit: payload.unidad || 'unidad',
-        expires_on: payload.fechaVencimiento || null,
-        source: 'manual',
-        image_path: null,
-        created_by: user?.id ?? null
+
+        refrigerator_id:
+          fridge.id,
+
+        product_id:
+          productId,
+
+        quantity:
+          payload.cantidad ?? 1,
+
+        unit:
+          payload.unidad || 'unidad',
+
+        expires_on:
+          payload.fechaVencimiento || null,
+
+        source:
+          'manual',
+
+        image_path:
+          null,
+
+        created_by:
+          user.id
+
       })
       .select('*')
-      .limit(1)
       .single();
 
-    if (error) throw error;
+
+    // =====================================================
+    // 8. VALIDAR INSERCIÓN
+    // =====================================================
+
+    if (error) {
+
+      console.error(
+        'Error guardando producto en inventory_items:',
+        error
+      );
+
+      throw error;
+    }
+
+
+    // =====================================================
+    // 9. EL HISTORIAL LO CREA SUPABASE AUTOMÁTICAMENTE
+    // =====================================================
+
+    console.log(
+      'Producto guardado correctamente:',
+      data
+    );
+
+    console.log(
+      'Movimiento de inventario registrado automáticamente por el trigger.'
+    );
+
 
     return data;
   }
