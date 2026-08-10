@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { SupabaseService } from './supabase';
 
 export interface ItemBadge {
   texto: string;
@@ -12,6 +11,8 @@ export interface ItemCompra {
   nombre: string;
   marcado: boolean;
   badge?: ItemBadge;
+  cantidad?: number;
+  unidad?: string;
 }
 
 export interface CategoriaCompra {
@@ -36,19 +37,267 @@ export interface ShoppingListResponse {
   providedIn: 'root'
 })
 export class ComprasService {
-  private apiUrl = 'http://localhost:8000/api/v1/compras';
 
-  constructor(private http: HttpClient) {}
+  constructor(private supabase: SupabaseService) {}
 
-  getListaCompras(): Observable<ShoppingListResponse> {
-    return this.http.get<ShoppingListResponse>(this.apiUrl);
+  async getListaCompras(): Promise<ShoppingListResponse> {
+
+    // ==========================================
+    // 1. Obtener la lista de compras activa
+    // ==========================================
+
+    const { data: listas, error: listaError } =
+      await this.supabase.client
+        .from('shopping_lists')
+        .select('id, name, status')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+    if (listaError) {
+      console.error('Error obteniendo lista de compras:', listaError);
+      throw listaError;
+    }
+
+    if (!listas || listas.length === 0) {
+      return {
+        categorias: [],
+        estadisticas: {
+          ahorro_proyectado: '20%',
+          plan_optimizado: 'Zero Waste'
+        }
+      };
+    }
+
+    const listaId = listas[0].id;
+
+    // ==========================================
+    // 2. Obtener productos de esa lista
+    // ==========================================
+
+    const { data: items, error: itemsError } =
+      await this.supabase.client
+        .from('shopping_list_items')
+        .select(`
+          id,
+          desired_quantity,
+          unit,
+          is_purchased,
+          is_auto_generated,
+          product_id,
+          products (
+            id,
+            name,
+            category_id,
+            product_categories (
+              id,
+              name
+            )
+          )
+        `)
+        .eq('shopping_list_id', listaId)
+        .order('created_at', { ascending: true });
+
+    if (itemsError) {
+      console.error('Error obteniendo productos de la lista:', itemsError);
+      throw itemsError;
+    }
+
+    // ==========================================
+    // 3. Crear categorías para la pantalla
+    // ==========================================
+
+    const categoriasMap = new Map<string, CategoriaCompra>();
+
+    (items ?? []).forEach((item: any) => {
+
+      const producto = Array.isArray(item.products)
+        ? item.products[0]
+        : item.products;
+
+      if (!producto) {
+        return;
+      }
+
+      const categoriaBD =
+        Array.isArray(producto.product_categories)
+          ? producto.product_categories[0]
+          : producto.product_categories;
+
+      const nombreCategoria =
+        categoriaBD?.name ?? 'Otros';
+
+      const categoriaId =
+        this.normalizarCategoria(nombreCategoria);
+
+      if (!categoriasMap.has(categoriaId)) {
+
+        categoriasMap.set(categoriaId, {
+          id: categoriaId,
+          nombre: nombreCategoria,
+          icono: this.obtenerIcono(categoriaId),
+          color: this.obtenerColor(categoriaId),
+          items: []
+        });
+
+      }
+
+      // ========================================
+      // 4. Crear producto para la pantalla
+      // ========================================
+
+      const itemCompra: ItemCompra = {
+        id: item.id,
+        nombre: producto.name,
+        marcado: item.is_purchased,
+        cantidad: Number(item.desired_quantity ?? 1),
+        unidad: item.unit
+      };
+
+      categoriasMap.get(categoriaId)!.items.push(itemCompra);
+    });
+
+    return {
+      categorias: Array.from(categoriasMap.values()),
+      estadisticas: {
+        ahorro_proyectado: '20%',
+        plan_optimizado: 'Zero Waste'
+      }
+    };
   }
 
-  toggleItem(itemId: string): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/items/${itemId}/toggle`, {});
+  // ==========================================
+  // MARCAR / DESMARCAR PRODUCTO
+  // ==========================================
+
+  async toggleItem(itemId: string): Promise<void> {
+
+    // Primero obtenemos el estado actual
+
+    const { data: item, error: getError } =
+      await this.supabase.client
+        .from('shopping_list_items')
+        .select('is_purchased')
+        .eq('id', itemId)
+        .single();
+
+    if (getError) {
+      console.error('Error obteniendo producto:', getError);
+      throw getError;
+    }
+
+    const nuevoEstado = !item.is_purchased;
+
+    // Actualizar en Supabase
+
+    const { error: updateError } =
+      await this.supabase.client
+        .from('shopping_list_items')
+        .update({
+          is_purchased: nuevoEstado
+        })
+        .eq('id', itemId);
+
+    if (updateError) {
+      console.error('Error actualizando producto:', updateError);
+      throw updateError;
+    }
   }
 
-  generarListaAutomatica(): Observable<ShoppingListResponse> {
-    return this.http.post<ShoppingListResponse>(`${this.apiUrl}/generar-automatica`, {});
+  // ==========================================
+  // CATEGORÍA
+  // ==========================================
+
+  private normalizarCategoria(nombre: string): string {
+
+    const texto = nombre
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+
+    if (
+      texto.includes('lacteo') ||
+      texto.includes('huevo')
+    ) {
+      return 'lacteos';
+    }
+
+    if (
+      texto.includes('vegetal') ||
+      texto.includes('verdura')
+    ) {
+      return 'vegetales';
+    }
+
+    if (
+      texto.includes('carne') ||
+      texto.includes('proteina')
+    ) {
+      return 'carnes';
+    }
+
+    if (
+      texto.includes('bebida') ||
+      texto.includes('refresco') ||
+      texto.includes('jugo')
+    ) {
+      return 'bebidas';
+    }
+
+    return 'otros';
+  }
+
+  // ==========================================
+  // ICONO
+  // ==========================================
+
+  private obtenerIcono(categoria: string): string {
+
+    switch (categoria) {
+
+      case 'lacteos':
+        return 'nutritionOutline';
+
+      case 'vegetales':
+        return 'leafOutline';
+
+      case 'bebidas':
+        return 'waterOutline';
+
+      default:
+        return 'leafOutline';
+    }
+  }
+
+  // ==========================================
+  // COLOR
+  // ==========================================
+
+  private obtenerColor(
+    categoria: string
+  ): 'blue' | 'green' | 'teal' {
+
+    switch (categoria) {
+
+      case 'lacteos':
+        return 'blue';
+
+      case 'vegetales':
+        return 'green';
+
+      default:
+        return 'teal';
+    }
+  }
+
+  // ==========================================
+  // GENERAR LISTA AUTOMÁTICA
+  // ==========================================
+
+  async generarListaAutomatica(): Promise<void> {
+
+    console.log(
+      'La generación automática se realizará posteriormente.'
+    );
   }
 }

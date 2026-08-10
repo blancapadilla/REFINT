@@ -2,8 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
+
+import {
+  ComprasService,
+  ItemCompra,
+  CategoriaCompra
+} from 'src/app/services/compras.service';
+
 import { addIcons } from 'ionicons';
+
 import {
   settingsOutline,
   searchOutline,
@@ -20,50 +29,91 @@ import {
   notificationsOutline
 } from 'ionicons/icons';
 
-// Importamos el servicio e interfaces
-import { ComprasService, ItemCompra } from 'src/app/services/compras.service';
-
 @Component({
   selector: 'app-lista-compras',
   templateUrl: './lista-compras.page.html',
   styleUrls: ['./lista-compras.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, AppHeaderComponent]
+  imports: [
+    CommonModule,
+    IonicModule,
+    AppHeaderComponent
+  ]
 })
 export class ListaComprasPage implements OnInit {
 
-  // Iconos
+  // ==========================================
+  // ICONOS
+  // ==========================================
+
   settingsOutline = settingsOutline;
   searchOutline = searchOutline;
   sparklesOutline = sparklesOutline;
   trendingDownOutline = trendingDownOutline;
   leafOutline = leafOutline;
+  waterOutline = waterOutline;
+  nutritionOutline = nutritionOutline;
   addOutline = addOutline;
 
-  // Variables dinámicas cargadas desde FastAPI
-  categorias: any[] = [];
-  ahorroProyectado: string = '20%';
+  // ==========================================
+  // DATOS
+  // ==========================================
 
-  // Mapeo de strings de íconos recibidos del Backend a objetos IonIcons
-  private iconMap: { [key: string]: any } = {
-    waterOutline: waterOutline,
-    leafOutline: leafOutline,
-    nutritionOutline: nutritionOutline
-  };
+  categorias: CategoriaCompra[] = [];
 
-  // Menú inferior
+  ahorroProyectado = '20%';
+
+  cargando = true;
+
+  error = '';
+
+  // ==========================================
+  // MENÚ INFERIOR
+  // ==========================================
+
   bottomNavItems = [
-    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
-    { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: true },
-    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
-    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
-    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
+    {
+      id: 'inventory',
+      label: 'Inventario',
+      icon: cubeOutline,
+      path: '/inventario',
+      active: false
+    },
+    {
+      id: 'shopping',
+      label: 'Lista de Compras',
+      icon: cartOutline,
+      path: '/lista-compras',
+      active: true
+    },
+    {
+      id: 'sync',
+      label: 'Sincronizar',
+      icon: syncOutline,
+      path: '/comparacion',
+      active: false
+    },
+    {
+      id: 'history',
+      label: 'Historial',
+      icon: timeOutline,
+      path: '/historial',
+      active: false
+    },
+    {
+      id: 'alerts',
+      label: 'Alertas',
+      icon: notificationsOutline,
+      path: '/alertas',
+      active: false
+    }
   ];
 
   constructor(
     private router: Router,
-    private comprasService: ComprasService // Inyección de servicio
+    private comprasService: ComprasService
   ) {
+
     addIcons({
       settingsOutline,
       sparklesOutline,
@@ -78,67 +128,189 @@ export class ListaComprasPage implements OnInit {
       timeOutline,
       notificationsOutline
     });
+
   }
+
+  // ==========================================
+  // INICIO
+  // ==========================================
 
   ngOnInit() {
+
     this.cargarLista();
+
   }
 
-  // Cargar datos desde FastAPI
-  cargarLista() {
-    this.comprasService.getListaCompras().subscribe({
-      next: (res) => {
-        this.ahorroProyectado = res.estadisticas.ahorro_proyectado;
-        this.categorias = res.categorias.map(cat => ({
-          ...cat,
-          icono: this.iconMap[cat.icono] || leafOutline
-        }));
-      },
-      error: (err) => console.error('Error al obtener lista de compras:', err)
-    });
-  }
+  // ==========================================
+  // CARGAR LISTA DESDE SUPABASE
+  // ==========================================
 
-  // Marcar / desmarcar producto (Persiste en Backend)
-  toggleItem(item: ItemCompra) {
-    item.marcado = !item.marcado; // Feedback visual inmediato
+  async cargarLista() {
 
-    this.comprasService.toggleItem(item.id).subscribe({
-      error: (err) => {
-        console.error('Error al actualizar ítem:', err);
-        item.marcado = !item.marcado; // Revertir en caso de error
-      }
-    });
-  }
+    this.cargando = true;
+    this.error = '';
 
-  // Generación predictiva con FreshIQ
-  generarListaAutomatica() {
-    this.router.navigate(['/escaneo-inteligente']);
-  }
+    try {
 
-  irADashboard() {
-    this.router.navigate(['/inventario']);
-  }
+      const res =
+        await this.comprasService.getListaCompras();
 
-  buscar() {
-    console.log('Buscar en lista de compras');
-  }
+      this.categorias =
+        res.categorias;
 
-  irAConfiguracion() {
-    this.router.navigate(['/configuracion']);
-  }
+      this.ahorroProyectado =
+        res.estadisticas.ahorro_proyectado;
 
-  agregarItem() {
-    this.router.navigate(['/agregar-producto']);
-  }
+      console.log(
+        'Lista de compras desde Supabase:',
+        res
+      );
 
-  navegar(item: any) {
-    this.bottomNavItems = this.bottomNavItems.map(nav => ({
-      ...nav,
-      active: nav.id === item.id
-    }));
+    } catch (error) {
 
-    if (item.path) {
-      this.router.navigate([item.path]);
+      console.error(
+        'Error cargando lista de compras:',
+        error
+      );
+
+      this.error =
+        'No se pudo cargar la lista de compras.';
+
+      this.categorias = [];
+
+    } finally {
+
+      this.cargando = false;
+
     }
   }
+
+  // ==========================================
+  // MARCAR / DESMARCAR
+  // ==========================================
+
+  async toggleItem(item: ItemCompra) {
+
+    const estadoAnterior =
+      item.marcado;
+
+    // Cambio visual inmediato
+
+    item.marcado =
+      !item.marcado;
+
+    try {
+
+      await this.comprasService.toggleItem(
+        item.id
+      );
+
+      console.log(
+        'Producto actualizado correctamente:',
+        item.nombre
+      );
+
+    } catch (error) {
+
+      console.error(
+        'Error actualizando producto:',
+        error
+      );
+
+      // Regresar al estado anterior
+
+      item.marcado =
+        estadoAnterior;
+
+      alert(
+        'No se pudo actualizar el producto.'
+      );
+    }
+  }
+
+  // ==========================================
+  // GENERAR LISTA AUTOMÁTICA
+  // ==========================================
+
+  generarListaAutomatica() {
+
+    this.router.navigate([
+      '/escaneo-inteligente'
+    ]);
+
+  }
+
+  // ==========================================
+  // DASHBOARD
+  // ==========================================
+
+  irADashboard() {
+
+    this.router.navigate([
+      '/inventario'
+    ]);
+
+  }
+
+  // ==========================================
+  // BÚSQUEDA
+  // ==========================================
+
+  buscar() {
+
+    console.log(
+      'Buscar en lista de compras'
+    );
+
+  }
+
+  // ==========================================
+  // CONFIGURACIÓN
+  // ==========================================
+
+  irAConfiguracion() {
+
+    this.router.navigate([
+      '/configuracion'
+    ]);
+
+  }
+
+  // ==========================================
+  // AGREGAR PRODUCTO
+  // ==========================================
+
+  agregarItem() {
+
+    this.router.navigate([
+      '/agregar-producto'
+    ]);
+
+  }
+
+  // ==========================================
+  // NAVEGACIÓN INFERIOR
+  // ==========================================
+
+  navegar(item: any) {
+
+    this.bottomNavItems =
+      this.bottomNavItems.map(
+        nav => ({
+          ...nav,
+          active:
+            nav.id === item.id
+        })
+      );
+
+    if (item.path) {
+
+      this.router.navigate([
+        item.path
+      ]);
+
+    }
+
+  }
+
 }
