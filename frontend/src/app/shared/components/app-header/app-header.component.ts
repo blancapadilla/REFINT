@@ -2,6 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { settingsOutline, searchOutline, arrowBackOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-header',
@@ -10,6 +12,7 @@ import { Router } from '@angular/router';
   templateUrl: './app-header.component.html',
   styleUrls: ['./app-header.component.scss']
 })
+
 export class AppHeaderComponent {
   @Input() title = '';
   @Input() icon = 'notifications';
@@ -21,7 +24,13 @@ export class AppHeaderComponent {
   @Output() search = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { 
+    addIcons({
+      settingsOutline,
+      searchOutline,
+      arrowBackOutline
+    });
+  }
 
   goHome() {
     this.router.navigate(['/dashboard']);
