@@ -1,597 +1,837 @@
 :host {
   display: block;
+  height: 100%;
+  overflow: hidden;
 }
 
-.sync-content {
-  --background: #f7f9fb;
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================= */
+
+ion-content.comparison-content {
+  --background: #f4f6f9;
+  --overflow: auto;
+  height: 100%;
 }
 
-.sync-container {
-  padding-bottom: 90px;
+ion-content.comparison-content::part(scroll) {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  padding-bottom: 120px;
 }
 
-.dashboard-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.comparison-page {
   width: 100%;
-  height: 60px;
-  padding: 0 20px;
-  background-color: #f7f9fb;
-  border-bottom: 1px solid #e0e3e5;
+  min-height: 100%;
+  padding-bottom: 90px;
   box-sizing: border-box;
-
-  .brand-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-
-    .refint-logo-svg {
-      width: 24px;
-      height: 28px;
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: #0053db;
-      line-height: 1;
-      letter-spacing: -0.5px;
-    }
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    .icon-header-button {
-      background: transparent;
-      border: none;
-      padding: 4px;
-      margin: 0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-
-      ion-icon {
-        font-size: 22px;
-        color: #2d3133;
-      }
-
-      &:active {
-        opacity: 0.6;
-      }
-    }
-  }
-
-  @media (max-width: 420px) {
-    .dashboard-header {
-      height: auto;
-      padding: 10px 14px;
-      align-items: flex-start;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .dashboard-header .brand-title {
-      font-size: 20px;
-    }
-
-    .dashboard-header .header-actions {
-      width: 100%;
-      justify-content: flex-end;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-
-    .dashboard-header .header-actions .icon-header-button {
-      min-width: 34px;
-      min-height: 34px;
-      padding: 6px;
-    }
-
-    .dashboard-header .brand-group {
-      gap: 8px;
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 360px) {
-    .dashboard-header {
-      padding: 10px 10px;
-    }
-
-    .dashboard-header .brand-title {
-      font-size: 18px;
-    }
-
-    .dashboard-header .header-actions .icon-header-button {
-      min-width: 32px;
-      min-height: 32px;
-      padding: 5px;
-    }
-  }
 }
 
-.main-sync-body {
-  padding: 20px;
-  max-width: 800px;
+.comparison-container {
+  width: 100%;
+  max-width: 520px;
   margin: 0 auto;
+  padding: 20px 16px 120px;
+  box-sizing: border-box;
 }
 
-.page-title-block {
-  margin-bottom: 18px;
+/* =========================================================
+   INTRODUCCIÓN
+   ========================================================= */
 
-  h1 {
-    margin: 0 0 4px 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #191c1e;
-  }
-
-  p {
-    margin: 0;
-    font-size: 13px;
-    color: #0053db;
-    font-weight: 600;
-  }
+.intro-section {
+  margin-bottom: 20px;
 }
 
-/* Tarjetas resumen */
-.summary-cards {
+.intro-section h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #202124;
+}
+
+.intro-section p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+  color: #5f6673;
+  font-weight: 500;
+}
+
+/* =========================================================
+   RESUMEN
+   ========================================================= */
+
+.summary-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 24px;
-
-  .summary-card {
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border-left: 4px solid transparent;
-
-    .summary-icon-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      ion-icon {
-        font-size: 20px;
-      }
-    }
-
-    .summary-text {
-      display: flex;
-      flex-direction: column;
-
-      .summary-label {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-      }
-
-      .summary-value {
-        font-size: 18px;
-        font-weight: 700;
-        color: #191c1e;
-      }
-    }
-
-    &.summary-green {
-      border-left-color: #1f8a4c;
-
-      .summary-icon-circle {
-        background: rgba(31, 138, 76, 0.12);
-        color: #1f8a4c;
-      }
-
-      .summary-label {
-        color: #1f8a4c;
-      }
-    }
-
-    &.summary-amber {
-      border-left-color: #c66a00;
-
-      .summary-icon-circle {
-        background: rgba(198, 106, 0, 0.12);
-        color: #c66a00;
-      }
-
-      .summary-label {
-        color: #c66a00;
-      }
-    }
-
-    &.summary-red {
-      border-left-color: #ba1a1a;
-
-      .summary-icon-circle {
-        background: rgba(186, 26, 26, 0.1);
-        color: #ba1a1a;
-      }
-
-      .summary-label {
-        color: #ba1a1a;
-      }
-    }
-  }
+  margin-bottom: 20px;
 }
 
-/* Estado de Inventario Crítico */
-.critical-card {
-  background: #ffffff;
+.summary-card {
+  min-height: 88px;
+  border-radius: 18px;
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.summary-green {
+  border-left: 4px solid #00a651;
+}
+
+.summary-yellow {
+  border-left: 4px solid #f2ad00;
+}
+
+.summary-red {
+  border-left: 4px solid #e60000;
+}
+
+.summary-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-green .summary-icon {
+  background: #dcf9e7;
+  color: #00a651;
+}
+
+.summary-yellow .summary-icon {
+  background: #fff2d1;
+  color: #f2ad00;
+}
+
+.summary-red .summary-icon {
+  background: #ffe0e0;
+  color: #e60000;
+}
+
+.summary-icon ion-icon {
+  font-size: 28px;
+}
+
+.summary-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.summary-green .summary-label {
+  color: #00843d;
+}
+
+.summary-yellow .summary-label {
+  color: #d99800;
+}
+
+.summary-red .summary-label {
+  color: #d00000;
+}
+
+.summary-card strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 18px;
+  color: #202124;
+}
+
+/* =========================================================
+   TARJETAS GENERALES
+   ========================================================= */
+
+.critical-card,
+.no-critical-card,
+.shopping-sync-card,
+.inventory-usage-card,
+.analysis-card,
+.changes-card,
+.confirm-card,
+.state-card {
+  background: white;
+  border-radius: 22px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================================
+   INVENTARIO CRÍTICO
+   ========================================================= */
+
+.critical-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.critical-header h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.15;
+  color: #202124;
+}
+
+.category-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.category-pills span {
+  background: #f1f3f6;
+  border-radius: 20px;
+  padding: 7px 11px;
+  font-size: 11px;
+  color: #657080;
+}
+
+/* Lista de productos críticos */
+
+.critical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.critical-product {
+  min-height: 96px;
+  border: 1px solid #ffd36b;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: white;
+}
+
+.critical-product.critical-yellow {
+  border-color: #ffd36b;
+}
+
+.critical-product.critical-red {
+  border-color: #ffbcbc;
+}
+
+.product-image {
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  background: #f2f5f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-image ion-icon {
+  font-size: 30px;
+  color: #9aa9bd;
+}
+
+.product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-info strong {
+  display: block;
+  font-size: 16px;
+  color: #202124;
+  margin-bottom: 6px;
+}
+
+.product-status {
+  display: block;
+  color: #657080;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.product-info small {
+  color: #7c8797;
+  font-size: 12px;
+}
+
+.product-alert {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.product-alert ion-icon {
+  font-size: 23px;
+}
+
+.critical-yellow .product-alert ion-icon {
+  color: #f2ad00;
+}
+
+.critical-red .product-alert ion-icon {
+  color: #e60000;
+}
+
+/* =========================================================
+   CUANDO NO HAY PRODUCTOS CRÍTICOS
+   ========================================================= */
+
+.no-critical-card {
+  text-align: center;
+  padding: 35px 20px;
+}
+
+.no-critical-card ion-icon {
+  font-size: 40px;
+  color: #00a651;
+}
+
+.no-critical-card p {
+  color: #697587;
+  margin: 14px 0 0;
+}
+
+/* =========================================================
+   SINCRONIZACIÓN DE LISTA
+   ========================================================= */
+
+.shopping-sync-card {
+  background: #0757d9;
+  color: white;
+}
+
+.shopping-sync-card h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.shopping-sync-card p {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.shopping-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.shopping-item {
+  min-height: 40px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.shopping-item span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.shopping-item ion-icon {
+  font-size: 18px;
+}
+
+.shopping-update-btn {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 11px;
+  background: white;
+  color: #0757d9;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.shopping-update-btn:disabled {
+  opacity: 0.6;
+}
+
+/* =========================================================
+   USO DEL INVENTARIO
+   ========================================================= */
+
+.inventory-usage-card h2 {
+  margin: 0 0 18px;
+  font-size: 20px;
+  color: #202124;
+}
+
+.usage-info {
+  display: flex;
+  justify-content: space-between;
+  color: #657080;
+  font-size: 13px;
+}
+
+.percentage-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 25px 0;
+}
+
+.percentage-circle {
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #008c45 var(--percentage),
+    #e8edf1 var(--percentage)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.percentage-circle::before {
+  content: "";
+  position: absolute;
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: white;
+}
+
+.percentage-center {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.percentage-center strong {
+  font-size: 26px;
+  color: #202124;
+}
+
+.percentage-center small {
+  color: #788391;
+}
+
+.usage-bottom {
+  display: flex;
+  justify-content: space-between;
+  color: #657080;
+  font-size: 13px;
+}
+
+.usage-bottom strong {
+  margin-left: 6px;
+}
+
+/* =========================================================
+   ESTADO / MENSAJES
+   ========================================================= */
+
+.state-card {
+  text-align: center;
+  padding: 35px 20px;
+}
+
+.state-card ion-icon {
+  font-size: 40px;
+  color: #0757d9;
+}
+
+.state-card p {
+  color: #697587;
+  margin: 12px 0 0;
+}
+
+.state-error ion-icon {
+  color: #e60000;
+}
+
+/* =========================================================
+   ANÁLISIS
+   ========================================================= */
+
+.analysis-card h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.analysis-card > strong {
+  color: #0757d9;
+}
+
+.analysis-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 14px;
+  color: #697587;
+  font-size: 13px;
+}
+
+/* =========================================================
+   RESUMEN DEL ESCANEO
+   ========================================================= */
+
+.scan-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.scan-summary-card {
+  background: white;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  margin-bottom: 20px;
-
-  .critical-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 14px;
-
-    h2 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 700;
-      color: #191c1e;
-    }
-
-    .critical-pills {
-      display: flex;
-      gap: 6px;
-
-      .critical-pill {
-        background: rgba(100, 168, 254, 0.15);
-        color: #003c70;
-        border: none;
-        padding: 6px 14px;
-        border-radius: 16px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-
-        &.active {
-          background: #004ac6;
-          color: #ffffff;
-        }
-      }
-    }
-  }
-
-  .critical-items-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    .critical-item-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .critical-thumb {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        flex-shrink: 0;
-        background: #eef1f4;
-
-        &.thumb-1 { background: #e4ecf5; }
-        &.thumb-2 { background: #f3ecd9; }
-        &.thumb-3 { background: #e6f2e8; }
-      }
-
-      .critical-info {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-
-        .critical-name {
-          font-size: 14px;
-          font-weight: 700;
-          color: #0053db;
-        }
-
-        .critical-sub {
-          font-size: 12px;
-          color: #737686;
-          margin-top: 2px;
-        }
-      }
-
-      .critical-status-icon {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-
-        ion-icon {
-          font-size: 17px;
-        }
-
-        &.status-agotado {
-          background: #ba1a1a;
-          color: #ffffff;
-        }
-
-        &.status-faltante {
-          background: #f2a900;
-          color: #ffffff;
-        }
-
-        &.status-disponible {
-          background: #ffffff;
-          color: #1f8a4c;
-          border: 2px solid #1f8a4c;
-        }
-      }
-    }
-  }
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-/* Sincronización de Lista */
-.sync-cta-card {
-  background: linear-gradient(135deg, #0060f0 0%, #0041ab 100%);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 14px rgba(0, 74, 198, 0.3);
-
-  h2 {
-    margin: 0 0 6px 0;
-    font-size: 17px;
-    font-weight: 700;
-    color: #ffffff;
-  }
-
-  p {
-    margin: 0 0 16px 0;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.85);
-    line-height: 1.4;
-  }
-
-  .sync-items {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 18px;
-
-    .sync-item-row {
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 10px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      span {
-        font-size: 14px;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      ion-icon {
-        font-size: 17px;
-        color: rgba(255, 255, 255, 0.8);
-      }
-    }
-  }
-
-  .sync-update-btn {
-    width: 100%;
-    height: 46px;
-    border: none;
-    border-radius: 12px;
-    background: #ffffff;
-    color: #0041ab;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-
-    &:active {
-      transform: scale(0.98);
-    }
-  }
+.scan-summary-card ion-icon {
+  font-size: 30px;
 }
 
-/* Uso de Inventario */
-.usage-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-
-  h2 {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #191c1e;
-  }
-
-  .usage-chart-block {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    justify-items: center;
-    padding: 10px 0;
-
-    .usage-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #434655;
-      align-self: center;
-
-      &.top-left, &.bottom-left { justify-self: start; }
-      &.top-right, &.bottom-right { justify-self: end; }
-      &.top-left, &.top-right { grid-row: 1; }
-      &.bottom-left, &.bottom-right { grid-row: 3; }
-    }
-
-    .usage-donut {
-      grid-row: 1 / span 3;
-      grid-column: 2;
-      width: 140px;
-      height: 140px;
-      transform: rotate(-90deg);
-
-      .donut-track {
-        fill: none;
-        stroke: #eef1f4;
-        stroke-width: 12;
-      }
-
-      .donut-progress {
-        fill: none;
-        stroke: #1f8a4c;
-        stroke-width: 12;
-        stroke-linecap: round;
-      }
-    }
-
-    .donut-center-text {
-      grid-row: 2;
-      grid-column: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      .donut-percent {
-        font-size: 24px;
-        font-weight: 700;
-        color: #191c1e;
-      }
-
-      .donut-caption {
-        font-size: 12px;
-        font-weight: 600;
-        color: #1f8a4c;
-      }
-    }
-  }
+.scan-summary-card.green ion-icon {
+  color: #00a651;
 }
 
-/* Menú inferior (Sync con fondo azul en el ícono) */
+.scan-summary-card.yellow ion-icon {
+  color: #f2ad00;
+}
+
+.scan-summary-card.red ion-icon {
+  color: #e60000;
+}
+
+.scan-summary-card span,
+.scan-summary-card strong {
+  display: block;
+}
+
+.scan-summary-card span {
+  font-size: 12px;
+  color: #697587;
+}
+
+.scan-summary-card strong {
+  margin-top: 4px;
+  font-size: 17px;
+}
+
+/* =========================================================
+   CAMBIOS DETECTADOS
+   ========================================================= */
+
+.changes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.change-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f7f8fa;
+}
+
+.change-image {
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.change-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.change-image ion-icon {
+  font-size: 28px;
+  color: #9aa9bd;
+}
+
+.change-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.change-info strong,
+.change-info span,
+.change-info small,
+.change-info em {
+  display: block;
+}
+
+.change-info strong {
+  color: #202124;
+  font-size: 15px;
+}
+
+.change-info span {
+  color: #697587;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.change-info small {
+  color: #697587;
+  margin-top: 5px;
+}
+
+.change-info em {
+  color: #0757d9;
+  font-size: 11px;
+  margin-top: 4px;
+  font-style: normal;
+}
+
+.change-difference {
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.change-difference.positive {
+  color: #008c45;
+}
+
+.change-difference.negative {
+  color: #e60000;
+}
+
+/* =========================================================
+   CONFIRMAR CAMBIOS
+   ========================================================= */
+
+.confirm-card h2 {
+  margin: 0 0 8px;
+}
+
+.confirm-card p {
+  color: #697587;
+  line-height: 1.4;
+}
+
+.confirm-btn,
+.retry-btn {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background: #0757d9;
+  color: white;
+  font-weight: 600;
+}
+
+.confirm-btn:disabled {
+  opacity: 0.6;
+}
+
+/* =========================================================
+   ESPACIO FINAL
+   ========================================================= */
+
+.bottom-space {
+  height: 30px;
+}
+
+/* =========================================================
+   BARRA DE NAVEGACIÓN INFERIOR
+   ========================================================= */
+
 .bottom-nav {
   position: fixed;
-  bottom: 0;
   left: 0;
-  width: 100%;
-  height: 64px;
-  background-color: #ffffff;
-  border-top: 1px solid #e0e3e5;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+
+  height: 76px;
+
+  background: white;
+
+  border-top: 1px solid #e1e5ea;
+
   display: flex;
   justify-content: space-around;
   align-items: center;
-  z-index: 1000;
+
   padding-bottom: env(safe-area-inset-bottom);
-
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    flex: 1;
-    padding: 6px 0;
-    color: #737686;
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-
-    .nav-icon-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 2px;
-
-      ion-icon {
-        font-size: 22px;
-        color: currentColor;
-      }
-
-      .custom-nav-svg {
-        width: 22px;
-        height: 22px;
-        stroke: currentColor;
-        flex-shrink: 0;
-        display: block;
-      }
-
-      .nav-badge-dot {
-        position: absolute;
-        top: -2px;
-        right: -2px;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #ba1a1a;
-        border: 1.5px solid #ffffff;
-      }
-
-      &.pill-active {
-        background: #0053db;
-        border-radius: 10px;
-        width: 34px;
-        height: 30px;
-
-        ion-icon {
-          color: #ffffff;
-        }
-      }
-    }
-
-    &.active {
-      color: #0053db;
-      font-weight: 700;
-    }
-  }
 }
 
-/* Estados y datos reales del último scan; reutilizan la paleta y las tarjetas existentes. */
-.state-card, .analysis-card { background:#fff; border-radius:16px; padding:20px; margin-bottom:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.04); }
-.state-card ion-icon { color:#0053db; font-size:28px; }
-.state-card p { margin:8px 0 0; color:#434655; font-size:14px; }
-.state-error ion-icon { color:#ba1a1a; }
-.retry-btn { margin-top:14px; padding:9px 18px; border:0; border-radius:10px; background:#0053db; color:#fff; font-weight:700; }
-.analysis-card { text-align:left; }
-.analysis-card h2 { margin:0 0 6px; font-size:16px; color:#191c1e; }
-.analysis-card strong { font-size:15px; color:#0053db; }
-.analysis-details { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:8px; color:#737686; font-size:12px; }
-.critical-thumb { overflow:hidden; display:flex; align-items:center; justify-content:center; }
-.critical-thumb img { width:100%; height:100%; object-fit:cover; }
-.critical-thumb ion-icon { color:#737686; font-size:20px; }
-.critical-brand { font-size:12px; color:#434655; }
-.change-type { font-size:11px; color:#0053db; font-weight:700; margin-top:3px; }
-.difference { flex-shrink:0; max-width:110px; text-align:right; font-size:13px; font-weight:700; color:#1f8a4c; }
-.difference.positive { color:#0053db; }
-.difference.negative { color:#ba1a1a; }
-.sync-update-btn:disabled { opacity:.65; cursor:default; }
+.nav-item {
+  flex: 1;
+  height: 100%;
+  border: 0;
+  background: transparent;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  color: #707b8d;
+}
+
+.nav-item ion-icon {
+  font-size: 22px;
+}
+
+.nav-item span {
+  font-size: 11px;
+  text-align: center;
+}
+
+.nav-item.active {
+  color: #0757d9;
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+button {
+  font-family: inherit;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width: 600px) {
+
+  .comparison-container {
+    max-width: 520px;
+  }
+
+  .bottom-nav {
+    max-width: 520px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    border-radius: 15px 15px 0 0;
+  }
+
+}
+
+/* =========================================================
+   SOLUCIÓN DE SCROLL PARA IONIC
+   ========================================================= */
+
+ion-content {
+  --overflow: auto;
+}
+
+ion-content::part(scroll) {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Evita que la barra inferior tape los últimos productos */
+.comparison-container {
+  padding-bottom: 130px;
+}
+
+/* Permite que listas largas crezcan normalmente */
+.critical-list,
+.shopping-items,
+.changes-list {
+  width: 100%;
+}
+
+/* =========================================================
+   SEGURIDAD PARA PANTALLAS PEQUEÑAS
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .comparison-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .intro-section h1 {
+    font-size: 25px;
+  }
+
+  .intro-section p {
+    font-size: 15px;
+  }
+
+  .summary-card {
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .critical-product {
+    padding: 10px;
+  }
+
+  .product-image {
+    width: 52px;
+    height: 52px;
+  }
+
+  .product-info strong {
+    font-size: 15px;
+  }
+
+}
