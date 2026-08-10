@@ -1,12 +1,12 @@
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================= */
+
 :host {
   display: block;
   height: 100%;
   overflow: hidden;
 }
-
-/* =========================================================
-   CONTENEDOR PRINCIPAL
-   ========================================================= */
 
 ion-content.comparison-content {
   --background: #f4f6f9;
@@ -17,50 +17,52 @@ ion-content.comparison-content {
 ion-content.comparison-content::part(scroll) {
   overflow-y: auto !important;
   overflow-x: hidden;
-  padding-bottom: 120px;
+  padding-bottom: 100px;
 }
 
+
 /* =========================================================
-   PÁGINA
+   CONTENEDOR
    ========================================================= */
 
-.comparison-page {
+.sync-container {
   width: 100%;
+  max-width: 520px;
   min-height: 100%;
-  padding-bottom: 90px;
+  margin: 0 auto;
+  padding-bottom: 100px;
   box-sizing: border-box;
 }
 
-.comparison-container {
+.main-sync-body {
   width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
   padding: 20px 16px 120px;
   box-sizing: border-box;
 }
 
+
 /* =========================================================
-   INTRODUCCIÓN
+   TÍTULO
    ========================================================= */
 
-.intro-section {
+.page-title-block {
   margin-bottom: 20px;
 }
 
-.intro-section h1 {
+.page-title-block h1 {
   margin: 0 0 8px;
   font-size: 28px;
   font-weight: 700;
   color: #202124;
 }
 
-.intro-section p {
+.page-title-block p {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.4;
   color: #5f6673;
-  font-weight: 500;
 }
+
 
 /* =========================================================
    RESUMEN
@@ -77,19 +79,24 @@ ion-content.comparison-content::part(scroll) {
   min-height: 88px;
   border-radius: 18px;
   background: white;
+
   display: flex;
   align-items: center;
+
   gap: 18px;
   padding: 18px 20px;
+
   box-sizing: border-box;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .summary-green {
   border-left: 4px solid #00a651;
 }
 
-.summary-yellow {
+.summary-amber {
   border-left: 4px solid #f2ad00;
 }
 
@@ -97,39 +104,48 @@ ion-content.comparison-content::part(scroll) {
   border-left: 4px solid #e60000;
 }
 
-.summary-icon {
+.summary-icon-circle {
   width: 58px;
   height: 58px;
+
   border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   flex-shrink: 0;
 }
 
-.summary-green .summary-icon {
+.summary-green .summary-icon-circle {
   background: #dcf9e7;
   color: #00a651;
 }
 
-.summary-yellow .summary-icon {
+.summary-amber .summary-icon-circle {
   background: #fff2d1;
   color: #f2ad00;
 }
 
-.summary-red .summary-icon {
+.summary-red .summary-icon-circle {
   background: #ffe0e0;
   color: #e60000;
 }
 
-.summary-icon ion-icon {
+.summary-icon-circle ion-icon {
   font-size: 28px;
+}
+
+.summary-text {
+  min-width: 0;
 }
 
 .summary-label {
   display: block;
+
   font-size: 12px;
   font-weight: 700;
+
   letter-spacing: 0.5px;
 }
 
@@ -137,7 +153,7 @@ ion-content.comparison-content::part(scroll) {
   color: #00843d;
 }
 
-.summary-yellow .summary-label {
+.summary-amber .summary-label {
   color: #d99800;
 }
 
@@ -145,322 +161,46 @@ ion-content.comparison-content::part(scroll) {
   color: #d00000;
 }
 
-.summary-card strong {
+.summary-value {
   display: block;
+
   margin-top: 3px;
+
   font-size: 18px;
+  font-weight: 700;
+
   color: #202124;
 }
+
 
 /* =========================================================
    TARJETAS GENERALES
    ========================================================= */
 
 .critical-card,
-.no-critical-card,
-.shopping-sync-card,
+.sync-list-card,
 .inventory-usage-card,
 .analysis-card,
 .changes-card,
 .confirm-card,
 .state-card {
   background: white;
+
   border-radius: 22px;
+
   padding: 20px;
+
   margin-bottom: 18px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
-}
 
-/* =========================================================
-   INVENTARIO CRÍTICO
-   ========================================================= */
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.05);
 
-.critical-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.critical-header h2 {
-  margin: 0;
-  font-size: 20px;
-  line-height: 1.15;
-  color: #202124;
-}
-
-.category-pills {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.category-pills span {
-  background: #f1f3f6;
-  border-radius: 20px;
-  padding: 7px 11px;
-  font-size: 11px;
-  color: #657080;
-}
-
-/* Lista de productos críticos */
-
-.critical-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.critical-product {
-  min-height: 96px;
-  border: 1px solid #ffd36b;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  box-sizing: border-box;
-  background: white;
-}
-
-.critical-product.critical-yellow {
-  border-color: #ffd36b;
-}
-
-.critical-product.critical-red {
-  border-color: #ffbcbc;
-}
-
-.product-image {
-  width: 58px;
-  height: 58px;
-  border-radius: 12px;
-  background: #f2f5f8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.product-image ion-icon {
-  font-size: 30px;
-  color: #9aa9bd;
-}
-
-.product-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.product-info strong {
-  display: block;
-  font-size: 16px;
-  color: #202124;
-  margin-bottom: 6px;
-}
-
-.product-status {
-  display: block;
-  color: #657080;
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
-.product-info small {
-  color: #7c8797;
-  font-size: 12px;
-}
-
-.product-alert {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.product-alert ion-icon {
-  font-size: 23px;
-}
-
-.critical-yellow .product-alert ion-icon {
-  color: #f2ad00;
-}
-
-.critical-red .product-alert ion-icon {
-  color: #e60000;
-}
-
-/* =========================================================
-   CUANDO NO HAY PRODUCTOS CRÍTICOS
-   ========================================================= */
-
-.no-critical-card {
-  text-align: center;
-  padding: 35px 20px;
-}
-
-.no-critical-card ion-icon {
-  font-size: 40px;
-  color: #00a651;
-}
-
-.no-critical-card p {
-  color: #697587;
-  margin: 14px 0 0;
-}
-
-/* =========================================================
-   SINCRONIZACIÓN DE LISTA
-   ========================================================= */
-
-.shopping-sync-card {
-  background: #0757d9;
-  color: white;
-}
-
-.shopping-sync-card h2 {
-  margin: 0 0 10px;
-  font-size: 20px;
-}
-
-.shopping-sync-card p {
-  margin: 0 0 18px;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.shopping-items {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-
-.shopping-item {
-  min-height: 40px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.15);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 12px;
   box-sizing: border-box;
 }
 
-.shopping-item span {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.shopping-item ion-icon {
-  font-size: 18px;
-}
-
-.shopping-update-btn {
-  width: 100%;
-  min-height: 48px;
-  border: 0;
-  border-radius: 11px;
-  background: white;
-  color: #0757d9;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.shopping-update-btn:disabled {
-  opacity: 0.6;
-}
 
 /* =========================================================
-   USO DEL INVENTARIO
-   ========================================================= */
-
-.inventory-usage-card h2 {
-  margin: 0 0 18px;
-  font-size: 20px;
-  color: #202124;
-}
-
-.usage-info {
-  display: flex;
-  justify-content: space-between;
-  color: #657080;
-  font-size: 13px;
-}
-
-.percentage-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 25px 0;
-}
-
-.percentage-circle {
-  width: 145px;
-  height: 145px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #008c45 var(--percentage),
-    #e8edf1 var(--percentage)
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.percentage-circle::before {
-  content: "";
-  position: absolute;
-  width: 105px;
-  height: 105px;
-  border-radius: 50%;
-  background: white;
-}
-
-.percentage-center {
-  width: 105px;
-  height: 105px;
-  border-radius: 50%;
-  background: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 2;
-}
-
-.percentage-center strong {
-  font-size: 26px;
-  color: #202124;
-}
-
-.percentage-center small {
-  color: #788391;
-}
-
-.usage-bottom {
-  display: flex;
-  justify-content: space-between;
-  color: #657080;
-  font-size: 13px;
-}
-
-.usage-bottom strong {
-  margin-left: 6px;
-}
-
-/* =========================================================
-   ESTADO / MENSAJES
+   ESTADOS
    ========================================================= */
 
 .state-card {
@@ -473,21 +213,432 @@ ion-content.comparison-content::part(scroll) {
   color: #0757d9;
 }
 
+.state-card ion-spinner {
+  width: 40px;
+  height: 40px;
+}
+
 .state-card p {
   color: #697587;
   margin: 12px 0 0;
+  line-height: 1.4;
 }
 
 .state-error ion-icon {
   color: #e60000;
 }
 
+.retry-btn {
+  width: 100%;
+
+  min-height: 48px;
+
+  margin-top: 18px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: #0757d9;
+  color: white;
+
+  font-weight: 600;
+}
+
+
 /* =========================================================
-   ANÁLISIS
+   INVENTARIO CRÍTICO
+   ========================================================= */
+
+.critical-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+}
+
+.critical-header h2 {
+  margin: 0;
+
+  font-size: 20px;
+  line-height: 1.2;
+
+  color: #202124;
+}
+
+
+/* =========================================================
+   LISTA DE PRODUCTOS CRÍTICOS
+   ========================================================= */
+
+.critical-items-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  width: 100%;
+}
+
+.critical-item-row {
+  min-height: 96px;
+
+  border: 1px solid #ffd36b;
+
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  box-sizing: border-box;
+
+  background: white;
+}
+
+.critical-item-row:has(.critical-alert ion-icon[name="close-circle-outline"]) {
+  border-color: #ffbcbc;
+}
+
+
+/* =========================================================
+   IMAGEN DEL PRODUCTO
+   ========================================================= */
+
+.critical-thumb {
+  width: 58px;
+  height: 58px;
+
+  border-radius: 12px;
+
+  background: #f2f5f8;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  flex-shrink: 0;
+}
+
+.critical-thumb img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}
+
+.critical-thumb ion-icon {
+  font-size: 30px;
+
+  color: #9aa9bd;
+}
+
+
+/* =========================================================
+   INFORMACIÓN DEL PRODUCTO
+   ========================================================= */
+
+.critical-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.critical-name {
+  display: block;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  color: #202124;
+
+  margin-bottom: 5px;
+}
+
+.critical-status {
+  display: block;
+
+  color: #657080;
+
+  font-size: 14px;
+
+  margin-bottom: 5px;
+}
+
+.critical-sub {
+  display: block;
+
+  color: #7c8797;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   ICONO DE ALERTA
+   ========================================================= */
+
+.critical-alert {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.critical-alert ion-icon {
+  font-size: 23px;
+  color: #f2ad00;
+}
+
+
+/* =========================================================
+   SIN PRODUCTOS CRÍTICOS
+   ========================================================= */
+
+.no-critical-card {
+  text-align: center;
+
+  padding: 35px 20px;
+
+  background: white;
+
+  border-radius: 22px;
+
+  margin-bottom: 18px;
+
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
+.no-critical-card ion-icon {
+  font-size: 40px;
+  color: #00a651;
+}
+
+.no-critical-card p {
+  color: #697587;
+
+  margin: 14px 0 0;
+}
+
+
+/* =========================================================
+   SINCRONIZACIÓN DE LISTA
+   ========================================================= */
+
+.sync-list-card {
+  background: #0757d9;
+
+  color: white;
+}
+
+.sync-list-card h2 {
+  margin: 0 0 10px;
+
+  font-size: 20px;
+}
+
+.sync-list-card p {
+  margin: 0 0 18px;
+
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.sync-list-card p strong {
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   PRODUCTOS DE SHOPPING LIST
+   ========================================================= */
+
+.sync-products {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.sync-product {
+  min-height: 40px;
+
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.15);
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0 12px;
+
+  box-sizing: border-box;
+}
+
+.sync-product span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sync-product ion-icon {
+  font-size: 18px;
+}
+
+
+/* =========================================================
+   BOTÓN SHOPPING LIST
+   ========================================================= */
+
+.update-shopping-btn {
+  width: 100%;
+
+  min-height: 48px;
+
+  border: 0;
+  border-radius: 11px;
+
+  background: white;
+
+  color: #0757d9;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.update-shopping-btn:disabled {
+  opacity: 0.6;
+}
+
+
+/* =========================================================
+   USO DEL INVENTARIO
+   ========================================================= */
+
+.inventory-usage-card h2 {
+  margin: 0 0 18px;
+
+  font-size: 20px;
+
+  color: #202124;
+}
+
+.usage-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  color: #657080;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   CÍRCULO DE PORCENTAJE
+   ========================================================= */
+
+.usage-chart {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  padding: 25px 0;
+}
+
+.usage-circle {
+  width: 145px;
+  height: 145px;
+
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      #008c45 var(--percentage),
+      #e8edf1 var(--percentage)
+    );
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+}
+
+.usage-circle::before {
+  content: "";
+
+  position: absolute;
+
+  width: 105px;
+  height: 105px;
+
+  border-radius: 50%;
+
+  background: white;
+}
+
+.usage-circle strong,
+.usage-circle small {
+  position: relative;
+
+  z-index: 2;
+}
+
+.usage-circle strong {
+  font-size: 26px;
+
+  color: #202124;
+}
+
+.usage-circle small {
+  color: #788391;
+}
+
+
+/* =========================================================
+   DATOS DEL USO
+   ========================================================= */
+
+.usage-footer {
+  display: flex;
+
+  justify-content: space-between;
+
+  color: #657080;
+
+  font-size: 13px;
+}
+
+.usage-footer strong {
+  margin-left: 6px;
+}
+
+
+/* =========================================================
+   ÚLTIMO ANÁLISIS
    ========================================================= */
 
 .analysis-card h2 {
   margin: 0 0 6px;
+
   font-size: 20px;
 }
 
@@ -497,12 +648,18 @@ ion-content.comparison-content::part(scroll) {
 
 .analysis-details {
   display: flex;
+
   flex-direction: column;
+
   gap: 5px;
+
   margin-top: 14px;
+
   color: #697587;
+
   font-size: 13px;
 }
+
 
 /* =========================================================
    RESUMEN DEL ESCANEO
@@ -510,17 +667,25 @@ ion-content.comparison-content::part(scroll) {
 
 .scan-summary {
   display: flex;
+
   flex-direction: column;
+
   gap: 10px;
+
   margin-bottom: 18px;
 }
 
 .scan-summary-card {
   background: white;
+
   border-radius: 16px;
+
   padding: 16px;
+
   display: flex;
+
   align-items: center;
+
   gap: 14px;
 }
 
@@ -552,8 +717,10 @@ ion-content.comparison-content::part(scroll) {
 
 .scan-summary-card strong {
   margin-top: 4px;
+
   font-size: 17px;
 }
+
 
 /* =========================================================
    CAMBIOS DETECTADOS
@@ -561,44 +728,60 @@ ion-content.comparison-content::part(scroll) {
 
 .changes-list {
   display: flex;
+
   flex-direction: column;
+
   gap: 12px;
 }
 
 .change-row {
   display: flex;
+
   align-items: center;
+
   gap: 12px;
+
   padding: 12px;
+
   border-radius: 14px;
+
   background: #f7f8fa;
 }
 
 .change-image {
   width: 55px;
   height: 55px;
+
   border-radius: 10px;
+
   background: white;
+
   display: flex;
+
   justify-content: center;
   align-items: center;
+
   overflow: hidden;
+
   flex-shrink: 0;
 }
 
 .change-image img {
   width: 100%;
   height: 100%;
+
   object-fit: contain;
 }
 
 .change-image ion-icon {
   font-size: 28px;
+
   color: #9aa9bd;
 }
 
 .change-info {
   flex: 1;
+
   min-width: 0;
 }
 
@@ -611,30 +794,39 @@ ion-content.comparison-content::part(scroll) {
 
 .change-info strong {
   color: #202124;
+
   font-size: 15px;
 }
 
 .change-info span {
   color: #697587;
+
   font-size: 12px;
+
   margin-top: 3px;
 }
 
 .change-info small {
   color: #697587;
+
   margin-top: 5px;
 }
 
 .change-info em {
   color: #0757d9;
+
   font-size: 11px;
+
   margin-top: 4px;
+
   font-style: normal;
 }
 
 .change-difference {
   font-size: 12px;
+
   font-weight: 700;
+
   flex-shrink: 0;
 }
 
@@ -646,6 +838,7 @@ ion-content.comparison-content::part(scroll) {
   color: #e60000;
 }
 
+
 /* =========================================================
    CONFIRMAR CAMBIOS
    ========================================================= */
@@ -656,23 +849,30 @@ ion-content.comparison-content::part(scroll) {
 
 .confirm-card p {
   color: #697587;
+
   line-height: 1.4;
 }
 
-.confirm-btn,
-.retry-btn {
+.confirm-btn {
   width: 100%;
+
   min-height: 48px;
+
   border: 0;
+
   border-radius: 10px;
+
   background: #0757d9;
+
   color: white;
+
   font-weight: 600;
 }
 
 .confirm-btn:disabled {
   opacity: 0.6;
 }
+
 
 /* =========================================================
    ESPACIO FINAL
@@ -682,15 +882,18 @@ ion-content.comparison-content::part(scroll) {
   height: 30px;
 }
 
+
 /* =========================================================
-   BARRA DE NAVEGACIÓN INFERIOR
+   BARRA INFERIOR
    ========================================================= */
 
 .bottom-nav {
   position: fixed;
+
   left: 0;
   right: 0;
   bottom: 0;
+
   z-index: 1000;
 
   height: 76px;
@@ -700,20 +903,27 @@ ion-content.comparison-content::part(scroll) {
   border-top: 1px solid #e1e5ea;
 
   display: flex;
+
   justify-content: space-around;
   align-items: center;
 
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom:
+    env(safe-area-inset-bottom);
 }
 
 .nav-item {
   flex: 1;
+
   height: 100%;
+
   border: 0;
+
   background: transparent;
 
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
   justify-content: center;
 
@@ -728,12 +938,14 @@ ion-content.comparison-content::part(scroll) {
 
 .nav-item span {
   font-size: 11px;
+
   text-align: center;
 }
 
 .nav-item.active {
   color: #0757d9;
 }
+
 
 /* =========================================================
    BOTONES
@@ -747,28 +959,9 @@ button:active {
   transform: scale(0.98);
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (min-width: 600px) {
-
-  .comparison-container {
-    max-width: 520px;
-  }
-
-  .bottom-nav {
-    max-width: 520px;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    border-radius: 15px 15px 0 0;
-  }
-
-}
 
 /* =========================================================
-   SOLUCIÓN DE SCROLL PARA IONIC
+   SCROLL
    ========================================================= */
 
 ion-content {
@@ -777,60 +970,75 @@ ion-content {
 
 ion-content::part(scroll) {
   overflow-y: auto !important;
+
   -webkit-overflow-scrolling: touch;
 }
 
-/* Evita que la barra inferior tape los últimos productos */
-.comparison-container {
-  padding-bottom: 130px;
-}
-
-/* Permite que listas largas crezcan normalmente */
-.critical-list,
-.shopping-items,
-.changes-list {
-  width: 100%;
-}
 
 /* =========================================================
-   SEGURIDAD PARA PANTALLAS PEQUEÑAS
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width: 600px) {
+
+  .sync-container {
+    max-width: 520px;
+  }
+
+  .bottom-nav {
+    max-width: 520px;
+
+    left: 50%;
+    right: auto;
+
+    transform: translateX(-50%);
+
+    border-radius: 15px 15px 0 0;
+  }
+
+}
+
+
+/* =========================================================
+   PANTALLAS PEQUEÑAS
    ========================================================= */
 
 @media (max-width: 380px) {
 
-  .comparison-container {
+  .main-sync-body {
     padding-left: 12px;
     padding-right: 12px;
   }
 
-  .intro-section h1 {
+  .page-title-block h1 {
     font-size: 25px;
   }
 
-  .intro-section p {
+  .page-title-block p {
     font-size: 15px;
   }
 
   .summary-card {
     gap: 12px;
+
     padding: 15px;
   }
 
-  .summary-icon {
+  .summary-icon-circle {
     width: 52px;
     height: 52px;
   }
 
-  .critical-product {
+  .critical-item-row {
     padding: 10px;
   }
 
-  .product-image {
+  .critical-thumb {
     width: 52px;
     height: 52px;
   }
 
-  .product-info strong {
+  .critical-name {
     font-size: 15px;
   }
 
