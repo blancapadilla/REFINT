@@ -1,6 +1,4 @@
-import {
-  CommonModule
-} from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import {
   Component,
@@ -10,24 +8,15 @@ import {
 
 import {
   IonicModule,
-  ToastController
-} from '@ionic/angular';
-
-import {
+  ToastController,
   AlertController
 } from '@ionic/angular';
 
-import {
-  Router
-} from '@angular/router';
+import { Router } from '@angular/router';
 
-import {
-  RealtimeChannel
-} from '@supabase/supabase-js';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
-import {
-  addIcons
-} from 'ionicons';
+import { addIcons } from 'ionicons';
 
 import {
   cartOutline,
@@ -59,6 +48,10 @@ import {
 } from '../../shared/components/app-header/app-header.component';
 
 
+/* ==========================================================
+   ESTADOS DE LA PANTALLA
+   ========================================================== */
+
 type ViewState =
   | 'loading'
   | 'empty'
@@ -84,12 +77,15 @@ type ViewState =
     AppHeaderComponent
   ]
 })
+
+
 export class ComparacionPage
   implements OnInit, OnDestroy {
 
-  // ========================================================
-  // ICONOS
-  // ========================================================
+
+  /* ==========================================================
+     ICONOS
+     ========================================================== */
 
   readonly checkmarkCircleOutline =
     checkmarkCircleOutline;
@@ -107,57 +103,61 @@ export class ComparacionPage
     timeOutline;
 
 
-  // ========================================================
-  // ESTADO
-  // ========================================================
+  /* ==========================================================
+     ESTADO DE LA PANTALLA
+     ========================================================== */
 
   state: ViewState = 'loading';
 
 
-  // ========================================================
-  // ESCANEO
-  // ========================================================
+  /* ==========================================================
+     INFORMACIÓN DEL ESCANEO
+     ========================================================== */
 
   scan: Scan | null = null;
 
   changes: ScanChange[] = [];
 
 
-  // ========================================================
-  // INVENTARIO
-  // ========================================================
+  /* ==========================================================
+     INVENTARIO
+     ========================================================== */
 
   productosCriticos:
     InventarioSyncItem[] = [];
 
   resumenInventario:
-    ResumenInventario = {
-      disponible: 0,
-      faltantes: 0,
-      agotados: 0,
-      total: 0,
-      porcentaje: 0
-    };
+    ResumenInventario | null = null;
 
 
-  // ========================================================
-  // CONTROL
-  // ========================================================
+  /* ==========================================================
+     CONTROL
+     ========================================================== */
 
   confirming = false;
 
   actualizandoShopping = false;
 
+
+  /* ==========================================================
+     REFRIGERADOR
+     ========================================================== */
+
   private refrigeratorId:
     string | null = null;
+
+
+  /* ==========================================================
+     REALTIME
+     ========================================================== */
 
   private scansChannel:
     RealtimeChannel | null = null;
 
 
-  // ========================================================
-  // NAVEGACIÓN
-  // ========================================================
+  /* ==========================================================
+     NAVEGACIÓN INFERIOR
+     ========================================================== */
 
   readonly bottomNavItems = [
 
@@ -200,12 +200,13 @@ export class ComparacionPage
       path: '/alertas',
       active: false
     }
+
   ];
 
 
-  // ========================================================
-  // CONSTRUCTOR
-  // ========================================================
+  /* ==========================================================
+     CONSTRUCTOR
+     ========================================================== */
 
   constructor(
 
@@ -246,12 +247,13 @@ export class ComparacionPage
       warningOutline
 
     });
+
   }
 
 
-  // ========================================================
-  // INIT
-  // ========================================================
+  /* ==========================================================
+     INICIALIZAR
+     ========================================================== */
 
   ngOnInit(): void {
 
@@ -260,32 +262,40 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // DESTROY
-  // ========================================================
+  /* ==========================================================
+     DESTRUIR
+     ========================================================== */
 
   ngOnDestroy(): void {
 
     if (this.scansChannel) {
 
-      void this.syncService
-        .unsubscribe(
-          this.scansChannel
-        );
+      void this.syncService.unsubscribe(
+        this.scansChannel
+      );
+
+      this.scansChannel = null;
 
     }
 
   }
 
 
-  // ========================================================
-  // INICIALIZAR
-  // ========================================================
+  /* ==========================================================
+     INICIALIZAR PANTALLA
+     ========================================================== */
 
   private async initialize():
     Promise<void> {
 
     try {
+
+      this.state = 'loading';
+
+
+      /* ------------------------------------------------------
+         OBTENER REFRIGERADOR DEL USUARIO
+         ------------------------------------------------------ */
 
       const refrigerator =
         await this.refrigeradorService
@@ -294,6 +304,14 @@ export class ComparacionPage
 
       if (!refrigerator) {
 
+        this.resumenInventario = null;
+
+        this.productosCriticos = [];
+
+        this.scan = null;
+
+        this.changes = [];
+
         this.state = 'empty';
 
         return;
@@ -301,15 +319,31 @@ export class ComparacionPage
       }
 
 
+      /* ------------------------------------------------------
+         GUARDAR ID
+         ------------------------------------------------------ */
+
       this.refrigeratorId =
         refrigerator.id;
 
 
-      await this.loadResults();
-
+      /* ------------------------------------------------------
+         PRIMERO CARGAMOS INVENTARIO
+         ------------------------------------------------------ */
 
       await this.loadInventario();
 
+
+      /* ------------------------------------------------------
+         DESPUÉS CARGAMOS EL ÚLTIMO ESCANEO
+         ------------------------------------------------------ */
+
+      await this.loadResults(false);
+
+
+      /* ------------------------------------------------------
+         REALTIME
+         ------------------------------------------------------ */
 
       this.scansChannel =
         this.syncService
@@ -327,9 +361,8 @@ export class ComparacionPage
 
           );
 
-    }
 
-    catch (error) {
+    } catch (error) {
 
       console.error(
         'Error inicializando sincronización:',
@@ -343,9 +376,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // CARGAR RESULTADOS
-  // ========================================================
+  /* ==========================================================
+     CARGAR ÚLTIMO ESCANEO
+     ========================================================== */
 
   async loadResults(
     showLoading = true
@@ -367,6 +400,10 @@ export class ComparacionPage
 
     try {
 
+      /* ------------------------------------------------------
+         BUSCAR ÚLTIMO SCAN COMPLETADO
+         ------------------------------------------------------ */
+
       this.scan =
         await this.syncService
           .getLatestCompletedScan(
@@ -374,16 +411,42 @@ export class ComparacionPage
           );
 
 
+      /* ------------------------------------------------------
+         SI NO EXISTE SCAN
+         ------------------------------------------------------ */
+
       if (!this.scan) {
 
         this.changes = [];
 
-        this.state = 'empty';
+        /*
+         * IMPORTANTE:
+         * No ponemos error.
+         * El inventario puede seguir mostrándose
+         * aunque todavía no exista un scan.
+         */
+
+        if (
+          this.resumenInventario &&
+          this.resumenInventario.total > 0
+        ) {
+
+          this.state = 'no-changes';
+
+        } else {
+
+          this.state = 'empty';
+
+        }
 
         return;
 
       }
 
+
+      /* ------------------------------------------------------
+         OBTENER CAMBIOS
+         ------------------------------------------------------ */
 
       this.changes =
         await this.syncService
@@ -392,30 +455,49 @@ export class ComparacionPage
           );
 
 
+      /* ------------------------------------------------------
+         DETERMINAR ESTADO
+         ------------------------------------------------------ */
+
       this.state =
         this.changes.length > 0
           ? 'success'
           : 'no-changes';
 
-    }
 
-    catch (error) {
+    } catch (error) {
 
       console.error(
         'Error cargando resultados:',
         error
       );
 
-      this.state = 'error';
+      /*
+       * Si el inventario sí cargó,
+       * no escondemos la pantalla completa.
+       */
+
+      if (
+        this.resumenInventario &&
+        this.resumenInventario.total > 0
+      ) {
+
+        this.state = 'no-changes';
+
+      } else {
+
+        this.state = 'error';
+
+      }
 
     }
 
   }
 
 
-  // ========================================================
-  // CARGAR INVENTARIO
-  // ========================================================
+  /* ==========================================================
+     CARGAR INVENTARIO
+     ========================================================== */
 
   async loadInventario():
     Promise<void> {
@@ -429,12 +511,20 @@ export class ComparacionPage
 
     try {
 
+      /* ------------------------------------------------------
+         PRODUCTOS CRÍTICOS
+         ------------------------------------------------------ */
+
       this.productosCriticos =
         await this.syncService
           .getInventarioCritico(
             this.refrigeratorId
           );
 
+
+      /* ------------------------------------------------------
+         RESUMEN
+         ------------------------------------------------------ */
 
       this.resumenInventario =
         await this.syncService
@@ -443,25 +533,31 @@ export class ComparacionPage
           );
 
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
       console.error(
         'Error cargando inventario:',
         error
       );
 
+      this.productosCriticos = [];
+
+      this.resumenInventario = null;
+
     }
 
   }
 
 
-  // ========================================================
-  // RESUMEN DE CAMBIOS DEL ESCANEO
-  // ========================================================
+  /* ==========================================================
+     RESUMEN DE CAMBIOS DEL ESCANEO
+     ========================================================== */
 
-  get summary() {
+  get summary(): {
+    unchanged: number;
+    added: number;
+    removed: number;
+  } {
 
     return {
 
@@ -488,9 +584,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // CAMBIOS YA CONFIRMADOS
-  // ========================================================
+  /* ==========================================================
+     CAMBIOS YA CONFIRMADOS
+     ========================================================== */
 
   get alreadyConfirmed(): boolean {
 
@@ -513,9 +609,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // DIFERENCIA
-  // ========================================================
+  /* ==========================================================
+     DIFERENCIA
+     ========================================================== */
 
   formatDifference(
     change: ScanChange
@@ -543,9 +639,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // TIPO DE CAMBIO
-  // ========================================================
+  /* ==========================================================
+     TIPO DE CAMBIO
+     ========================================================== */
 
   changeTypeLabel(
     type: ScanChangeType
@@ -557,9 +653,11 @@ export class ComparacionPage
         string
       > = {
 
-        added: 'Agregado',
+        added:
+          'Agregado',
 
-        removed: 'Retirado',
+        removed:
+          'Retirado',
 
         quantity_changed:
           'Cantidad modificada',
@@ -575,9 +673,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // IMAGEN
-  // ========================================================
+  /* ==========================================================
+     OBTENER IMAGEN
+     ========================================================== */
 
   imageUrl(
     value:
@@ -595,7 +693,13 @@ export class ComparacionPage
     }
 
 
-    if (typeof value === 'string') {
+    /* ------------------------------------------------------
+       SI ES STRING
+       ------------------------------------------------------ */
+
+    if (
+      typeof value === 'string'
+    ) {
 
       return /^https?:\/\//i.test(
         value
@@ -606,12 +710,17 @@ export class ComparacionPage
     }
 
 
+    /* ------------------------------------------------------
+       SCAN CHANGE
+       ------------------------------------------------------ */
+
     if (
       'products' in value
     ) {
 
       const path =
         value.products?.image_path;
+
 
       if (
         path &&
@@ -622,13 +731,19 @@ export class ComparacionPage
 
       }
 
+
       return null;
 
     }
 
 
+    /* ------------------------------------------------------
+       INVENTARIO
+       ------------------------------------------------------ */
+
     const path =
       value.imagen;
+
 
     if (
       path &&
@@ -645,9 +760,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // FECHA
-  // ========================================================
+  /* ==========================================================
+     FECHA
+     ========================================================== */
 
   formatDate(
     value: string
@@ -669,9 +784,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // TIEMPO DE PROCESAMIENTO
-  // ========================================================
+  /* ==========================================================
+     TIEMPO DE PROCESAMIENTO
+     ========================================================== */
 
   formatProcessing(
     ms: number | null
@@ -688,7 +803,9 @@ export class ComparacionPage
 
       `Procesado en ` +
 
-      `${(ms / 1000).toLocaleString(
+      `${(
+        ms / 1000
+      ).toLocaleString(
         'es-MX',
         {
           maximumFractionDigits: 2
@@ -700,9 +817,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // CONFIRMAR CAMBIOS
-  // ========================================================
+  /* ==========================================================
+     CONFIRMAR CAMBIOS
+     ========================================================== */
 
   async confirmChanges():
     Promise<void> {
@@ -730,14 +847,20 @@ export class ComparacionPage
         buttons: [
 
           {
-            text: 'Cancelar',
-            role: 'cancel'
+            text:
+              'Cancelar',
+
+            role:
+              'cancel'
           },
 
           {
-            text: 'Confirmar',
 
-            role: 'confirm',
+            text:
+              'Confirmar',
+
+            role:
+              'confirm',
 
             handler: () =>
               void this.applyChanges()
@@ -754,9 +877,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // APLICAR CAMBIOS
-  // ========================================================
+  /* ==========================================================
+     APLICAR CAMBIOS DEL ESCANEO
+     ========================================================== */
 
   private async applyChanges():
     Promise<void> {
@@ -781,7 +904,6 @@ export class ComparacionPage
 
       await this.loadResults(false);
 
-
       await this.loadInventario();
 
 
@@ -790,9 +912,8 @@ export class ComparacionPage
         'success'
       );
 
-    }
 
-    catch (error) {
+    } catch (error) {
 
       console.error(
         'Error confirmando cambios:',
@@ -805,9 +926,8 @@ export class ComparacionPage
         'danger'
       );
 
-    }
 
-    finally {
+    } finally {
 
       this.confirming = false;
 
@@ -816,9 +936,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // ACTUALIZAR SHOPPING LIST
-  // ========================================================
+  /* ==========================================================
+     ACTUALIZAR SHOPPING LIST
+     ========================================================== */
 
   async actualizarShoppingList():
     Promise<void> {
@@ -831,6 +951,10 @@ export class ComparacionPage
 
     }
 
+
+    /* ------------------------------------------------------
+       COMPROBAR PRODUCTOS
+       ------------------------------------------------------ */
 
     if (
       this.productosCriticos.length === 0
@@ -867,9 +991,8 @@ export class ComparacionPage
         '/lista-compras'
       ]);
 
-    }
 
-    catch (error) {
+    } catch (error) {
 
       console.error(
         'Error actualizando Shopping List:',
@@ -882,9 +1005,8 @@ export class ComparacionPage
         'danger'
       );
 
-    }
 
-    finally {
+    } finally {
 
       this.actualizandoShopping =
         false;
@@ -894,9 +1016,9 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // TOAST
-  // ========================================================
+  /* ==========================================================
+     TOAST
+     ========================================================== */
 
   private async showToast(
 
@@ -928,23 +1050,28 @@ export class ComparacionPage
   }
 
 
-  // ========================================================
-  // BUSCAR
-  // ========================================================
+  /* ==========================================================
+     BUSCAR
+     ========================================================== */
 
   buscar(): void {
 
-    // Acción del encabezado.
+    /*
+     * Acción del encabezado.
+     * Se conserva para no romper AppHeader.
+     */
 
   }
 
 
-  // ========================================================
-  // NAVEGAR
-  // ========================================================
+  /* ==========================================================
+     NAVEGAR
+     ========================================================== */
 
   navegar(
-    item: { path: string }
+    item: {
+      path: string
+    }
   ): void {
 
     void this.router.navigate([

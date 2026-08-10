@@ -1,31 +1,42 @@
-<ion-content [scrollY]="true" class="comparison-content">
+<ion-content
+  [scrollY]="true"
+  class="comparison-content"
+>
 
   <div class="sync-container">
 
     <!-- ================================================= -->
-    <!-- ENCABEZADO -->
+    <!-- HEADER -->
     <!-- ================================================= -->
 
     <app-header
       title="Sincronizar"
       [showSearch]="true"
       [showSettings]="true"
-      (search)="buscar()">
+      (search)="buscar()"
+    >
     </app-header>
 
 
-    <!-- ================================================= -->
-    <!-- CONTENIDO PRINCIPAL -->
-    <!-- ================================================= -->
+    <main class="main-sync-body">
 
-    <div class="main-sync-body">
 
-      <div class="page-title-block">
-        <h1>Comparación Inteligente</h1>
+      <!-- ================================================= -->
+      <!-- TÍTULO -->
+      <!-- ================================================= -->
+
+      <section class="page-title-block">
+
+        <h1>
+          Comparación Inteligente
+        </h1>
+
         <p>
-          Resultados del último análisis de tu refrigerador.
+          Analizando las discrepancias entre tu
+          refrigerador y tus planes de compra.
         </p>
-      </div>
+
+      </section>
 
 
       <!-- ================================================= -->
@@ -35,31 +46,16 @@
       <section
         *ngIf="state === 'loading'"
         class="state-card"
-        aria-live="polite">
+        aria-live="polite"
+      >
 
-        <ion-spinner name="crescent"></ion-spinner>
+        <ion-spinner
+          name="crescent"
+        >
+        </ion-spinner>
 
         <p>
           Analizando resultados...
-        </p>
-
-      </section>
-
-
-      <!-- ================================================= -->
-      <!-- SIN ANÁLISIS -->
-      <!-- ================================================= -->
-
-      <section
-        *ngIf="state === 'empty'"
-        class="state-card">
-
-        <ion-icon
-          [icon]="timeOutline">
-        </ion-icon>
-
-        <p>
-          No hay análisis disponibles todavía.
         </p>
 
       </section>
@@ -71,22 +67,382 @@
 
       <section
         *ngIf="state === 'error'"
-        class="state-card state-error">
+        class="state-card state-error"
+      >
 
         <ion-icon
-          [icon]="warningOutline">
+          [icon]="warningOutline"
+        >
         </ion-icon>
 
         <p>
-          No fue posible cargar los resultados del análisis.
+          No fue posible cargar los resultados
+          del análisis.
         </p>
 
         <button
           type="button"
           class="retry-btn"
-          (click)="loadResults()">
-
+          (click)="loadResults()"
+        >
           Reintentar
+        </button>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- RESUMEN DEL INVENTARIO -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          resumenInventario &&
+          resumenInventario.total > 0
+        "
+        class="summary-section"
+      >
+
+        <!-- DISPONIBLE -->
+
+        <div
+          class="summary-card summary-green"
+        >
+
+          <span class="summary-icon-circle">
+
+            <ion-icon
+              [icon]="checkmarkCircleOutline"
+            >
+            </ion-icon>
+
+          </span>
+
+          <div class="summary-text">
+
+            <span class="summary-label">
+              DISPONIBLE
+            </span>
+
+            <span class="summary-value">
+              {{ resumenInventario.disponible }}
+              Artículos
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- FALTANTE -->
+
+        <div
+          class="summary-card summary-amber"
+        >
+
+          <span class="summary-icon-circle">
+
+            <ion-icon
+              [icon]="warningOutline"
+            >
+            </ion-icon>
+
+          </span>
+
+          <div class="summary-text">
+
+            <span class="summary-label">
+              FALTANTE
+            </span>
+
+            <span class="summary-value">
+              {{ resumenInventario.faltantes }}
+              Artículos
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- AGOTADO -->
+
+        <div
+          class="summary-card summary-red"
+        >
+
+          <span class="summary-icon-circle">
+
+            <ion-icon
+              [icon]="closeCircleOutline"
+            >
+            </ion-icon>
+
+          </span>
+
+          <div class="summary-text">
+
+            <span class="summary-label">
+              AGOTADO
+            </span>
+
+            <span class="summary-value">
+              {{ resumenInventario.agotados }}
+              Artículos
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- SIN INVENTARIO -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          state === 'empty' &&
+          !resumenInventario
+        "
+        class="state-card"
+      >
+
+        <ion-icon
+          [icon]="timeOutline"
+        >
+        </ion-icon>
+
+        <p>
+          No hay información disponible todavía.
+        </p>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- ESTADO DE INVENTARIO CRÍTICO -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          resumenInventario &&
+          productosCriticos.length > 0
+        "
+        class="critical-card"
+      >
+
+        <div class="critical-header">
+
+          <h2>
+            Estado de Inventario Crítico
+          </h2>
+
+        </div>
+
+
+        <!-- LISTA DE PRODUCTOS -->
+
+        <div class="critical-items-list">
+
+          <article
+            *ngFor="
+              let item of productosCriticos
+            "
+            class="critical-item-row"
+          >
+
+            <!-- IMAGEN -->
+
+            <div class="critical-thumb">
+
+              <img
+                *ngIf="
+                  imageUrl(item) as image
+                "
+                [src]="image"
+                [alt]="item.nombre"
+              >
+
+              <ion-icon
+                *ngIf="
+                  !imageUrl(item)
+                "
+                [icon]="imageOutline"
+              >
+              </ion-icon>
+
+            </div>
+
+
+            <!-- INFORMACIÓN -->
+
+            <div class="critical-info">
+
+              <span class="critical-name">
+                {{ item.nombre }}
+              </span>
+
+
+              <span class="critical-status">
+
+                {{
+                  item.estado === 'agotado'
+                    ? 'Agotado'
+                    : 'Faltante'
+                }}
+
+              </span>
+
+
+              <span class="critical-sub">
+
+                Quedan:
+                {{ item.cantidad }}
+                {{ item.unidad }}
+
+              </span>
+
+            </div>
+
+
+            <!-- ICONO -->
+
+            <span class="critical-alert">
+
+              <ion-icon
+                *ngIf="
+                  item.estado === 'agotado'
+                "
+                [icon]="closeCircleOutline"
+              >
+              </ion-icon>
+
+              <ion-icon
+                *ngIf="
+                  item.estado !== 'agotado'
+                "
+                [icon]="warningOutline"
+              >
+              </ion-icon>
+
+            </span>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- NO HAY PRODUCTOS CRÍTICOS -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          resumenInventario &&
+          resumenInventario.total > 0 &&
+          productosCriticos.length === 0
+        "
+        class="state-card"
+      >
+
+        <ion-icon
+          [icon]="checkmarkCircleOutline"
+        >
+        </ion-icon>
+
+        <p>
+          No hay productos en estado crítico.
+        </p>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- SINCRONIZACIÓN DE LISTA -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          resumenInventario &&
+          productosCriticos.length > 0
+        "
+        class="sync-list-card"
+      >
+
+        <h2>
+          Sincronización de Lista
+        </h2>
+
+
+        <p>
+
+          Se han identificado
+
+          <strong>
+            {{ productosCriticos.length }}
+          </strong>
+
+          artículos que requieren reposición
+          inmediata basada en tu inventario.
+
+        </p>
+
+
+        <!-- PRODUCTOS -->
+
+        <div class="sync-products">
+
+          <div
+            *ngFor="
+              let item of productosCriticos
+            "
+            class="sync-product"
+          >
+
+            <span>
+              {{ item.nombre }}
+            </span>
+
+            <ion-icon
+              *ngIf="
+                item.estado === 'agotado'
+              "
+              [icon]="closeCircleOutline"
+            >
+            </ion-icon>
+
+            <ion-icon
+              *ngIf="
+                item.estado !== 'agotado'
+              "
+              [icon]="warningOutline"
+            >
+            </ion-icon>
+
+          </div>
+
+        </div>
+
+
+        <!-- BOTÓN -->
+
+        <button
+          type="button"
+          class="update-shopping-btn"
+          [disabled]="actualizandoShopping"
+          (click)="actualizarShoppingList()"
+        >
+
+          {{
+            actualizandoShopping
+              ? 'Actualizando...'
+              : 'Actualizar Shopping List'
+          }}
 
         </button>
 
@@ -94,391 +450,492 @@
 
 
       <!-- ================================================= -->
-      <!-- RESULTADOS -->
+      <!-- USO DE INVENTARIO -->
       <!-- ================================================= -->
 
-      <ng-container
+      <section
         *ngIf="
-          scan &&
-          (
-            state === 'success' ||
-            state === 'no-changes'
-          )
-        ">
+          resumenInventario &&
+          resumenInventario.total > 0
+        "
+        class="inventory-usage-card"
+      >
+
+        <h2>
+          Uso de Inventario
+        </h2>
 
 
-        <!-- ================================================= -->
-        <!-- ÚLTIMO ANÁLISIS -->
-        <!-- ================================================= -->
+        <!-- INFORMACIÓN -->
 
-        <section class="analysis-card">
+        <div class="usage-header">
 
-          <h2>
-            Último análisis
-          </h2>
+          <span>
+            Disponible
+          </span>
 
-          <strong>
-            {{
-              formatDate(
-                scan.finished_at || scan.created_at
-              )
-            }}
-          </strong>
+          <span>
+            {{ resumenInventario.disponible }}
+            de
+            {{ resumenInventario.total }}
+          </span>
 
-          <div class="analysis-details">
-
-            <span>
-              {{ scan.detected_product_count }}
-              productos detectados
-            </span>
-
-            <span>
-              {{ formatProcessing(scan.processing_ms) }}
-            </span>
-
-            <span *ngIf="scan.scan_type">
-              {{ scan.scan_type }}
-            </span>
-
-          </div>
-
-        </section>
+        </div>
 
 
-        <!-- ================================================= -->
-        <!-- TARJETAS DE RESUMEN -->
-        <!-- ================================================= -->
+        <!-- CÍRCULO -->
 
-        <div class="summary-cards">
-
-
-          <!-- DISPONIBLES / SIN CAMBIOS -->
+        <div class="usage-chart">
 
           <div
-            class="summary-card summary-green">
+            class="usage-circle"
+            [style.--percentage]="
+              resumenInventario.porcentaje + '%'
+            "
+          >
 
-            <span class="summary-icon-circle">
+            <strong>
+              {{ resumenInventario.porcentaje }}%
+            </strong>
 
-              <ion-icon
-                [icon]="checkmarkCircleOutline">
-              </ion-icon>
-
-            </span>
-
-            <div class="summary-text">
-
-              <span class="summary-label">
-                Sin cambios
-              </span>
-
-              <span class="summary-value">
-                {{ summary.unchanged }} Artículos
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <!-- FALTANTES / AGREGADOS -->
-
-          <div
-            class="summary-card summary-amber">
-
-            <span class="summary-icon-circle">
-
-              <ion-icon
-                [icon]="warningOutline">
-              </ion-icon>
-
-            </span>
-
-            <div class="summary-text">
-
-              <span class="summary-label">
-                Agregados
-              </span>
-
-              <span class="summary-value">
-                {{ summary.added }} Artículos
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <!-- AGOTADOS / RETIRADOS -->
-
-          <div
-            class="summary-card summary-red">
-
-            <span class="summary-icon-circle">
-
-              <ion-icon
-                [icon]="closeCircleOutline">
-              </ion-icon>
-
-            </span>
-
-            <div class="summary-text">
-
-              <span class="summary-label">
-                Retirados
-              </span>
-
-              <span class="summary-value">
-                {{ summary.removed }} Artículos
-              </span>
-
-            </div>
+            <small>
+              Disponible
+            </small>
 
           </div>
 
         </div>
 
 
-        <!-- ================================================= -->
-        <!-- SIN CAMBIOS -->
-        <!-- ================================================= -->
+        <!-- DATOS -->
 
-        <section
-          *ngIf="state === 'no-changes'"
-          class="state-card">
+        <div class="usage-footer">
+
+          <span>
+            Faltantes
+
+            <strong>
+              {{ resumenInventario.faltantes }}
+            </strong>
+
+          </span>
+
+
+          <span>
+            Agotados
+
+            <strong>
+              {{ resumenInventario.agotados }}
+            </strong>
+
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- ÚLTIMO ANÁLISIS -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          scan &&
+          (
+            state === 'success' ||
+            state === 'no-changes'
+          )
+        "
+        class="analysis-card"
+      >
+
+        <h2>
+          Último análisis
+        </h2>
+
+
+        <strong>
+          {{
+            formatDate(
+              scan.finished_at ||
+              scan.created_at
+            )
+          }}
+        </strong>
+
+
+        <div class="analysis-details">
+
+          <span>
+            {{ scan.detected_product_count }}
+            productos detectados
+          </span>
+
+          <span>
+            {{ formatProcessing(scan.processing_ms) }}
+          </span>
+
+          <span
+            *ngIf="scan.scan_type"
+          >
+            {{ scan.scan_type }}
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- RESUMEN DEL ESCANEO -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          scan &&
+          (
+            state === 'success' ||
+            state === 'no-changes'
+          )
+        "
+        class="scan-summary"
+      >
+
+        <!-- SIN CAMBIOS -->
+
+        <div
+          class="scan-summary-card green"
+        >
 
           <ion-icon
-            [icon]="checkmarkCircleOutline">
+            [icon]="checkmarkCircleOutline"
+          >
           </ion-icon>
 
-          <p>
-            No se detectaron cambios
-            en el inventario.
-          </p>
+          <div>
 
-        </section>
+            <span>
+              Sin cambios
+            </span>
 
-
-        <!-- ================================================= -->
-        <!-- CAMBIOS DETECTADOS -->
-        <!-- ================================================= -->
-
-        <section
-          *ngIf="
-            state === 'success' &&
-            changes.length > 0
-          "
-          class="critical-card">
-
-          <div class="critical-header-row">
-
-            <h2>
-              Cambios detectados
-            </h2>
+            <strong>
+              {{ summary.unchanged }}
+              Artículos
+            </strong>
 
           </div>
 
-
-          <div class="critical-items-list">
-
-
-            <!-- PRODUCTO -->
-            <article
-              *ngFor="let change of changes"
-              class="critical-item-row">
+        </div>
 
 
-              <!-- IMAGEN -->
+        <!-- AGREGADOS -->
 
-              <span class="critical-thumb">
+        <div
+          class="scan-summary-card yellow"
+        >
 
-                <img
-                  *ngIf="imageUrl(change) as image"
-                  [src]="image"
-                  [alt]="
-                    change.products?.name ||
-                    'Producto'
-                  "
-                >
+          <ion-icon
+            [icon]="warningOutline"
+          >
+          </ion-icon>
 
-                <ion-icon
-                  *ngIf="!imageUrl(change)"
-                  [icon]="imageOutline">
-                </ion-icon>
+          <div>
 
-              </span>
+            <span>
+              Agregados
+            </span>
 
-
-              <!-- INFORMACIÓN -->
-
-              <div class="critical-info">
-
-                <span class="critical-name">
-
-                  {{
-                    change.products?.name ||
-                    'Producto'
-                  }}
-
-                </span>
-
-
-                <span
-                  *ngIf="change.products?.brand"
-                  class="critical-brand">
-
-                  {{ change.products?.brand }}
-
-                </span>
-
-
-                <span class="critical-sub">
-
-                  Antes:
-                  {{ change.previous_quantity }}
-
-                  ·
-
-                  Ahora:
-                  {{ change.new_quantity }}
-
-                </span>
-
-
-                <span class="change-type">
-
-                  {{
-                    changeTypeLabel(
-                      change.change_type
-                    )
-                  }}
-
-                </span>
-
-              </div>
-
-
-              <!-- DIFERENCIA -->
-
-              <span
-                class="difference"
-                [class.positive]="
-                  change.difference > 0
-                "
-                [class.negative]="
-                  change.difference < 0
-                ">
-
-                {{
-                  formatDifference(change)
-                }}
-
-              </span>
-
-
-            </article>
+            <strong>
+              {{ summary.added }}
+              Artículos
+            </strong>
 
           </div>
 
-        </section>
+        </div>
 
 
-        <!-- ================================================= -->
-        <!-- CONFIRMAR CAMBIOS -->
-        <!-- ================================================= -->
+        <!-- RETIRADOS -->
 
-        <section
-          *ngIf="
-            state === 'success' &&
-            changes.length > 0
-          "
-          class="sync-cta-card">
+        <div
+          class="scan-summary-card red"
+        >
 
+          <ion-icon
+            [icon]="closeCircleOutline"
+          >
+          </ion-icon>
+
+          <div>
+
+            <span>
+              Retirados
+            </span>
+
+            <strong>
+              {{ summary.removed }}
+              Artículos
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- SIN CAMBIOS DEL ESCANEO -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          scan &&
+          state === 'no-changes'
+        "
+        class="state-card"
+      >
+
+        <ion-icon
+          [icon]="checkmarkCircleOutline"
+        >
+        </ion-icon>
+
+        <p>
+          No se detectaron cambios
+          en el inventario.
+        </p>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- CAMBIOS DETECTADOS -->
+      <!-- ================================================= -->
+
+      <section
+        *ngIf="
+          scan &&
+          state === 'success' &&
+          changes.length > 0
+        "
+        class="changes-card"
+      >
+
+        <div class="critical-header">
 
           <h2>
-
-            {{
-              alreadyConfirmed
-                ? 'Cambios confirmados'
-                : 'Actualizar inventario'
-            }}
-
+            Cambios detectados
           </h2>
 
-
-          <p>
-
-            {{
-              alreadyConfirmed
-                ? 'Este análisis ya fue aplicado al inventario.'
-                : 'Confirma para aplicar de forma segura los resultados de este análisis.'
-            }}
-
-          </p>
+        </div>
 
 
-          <button
-            type="button"
-            class="sync-update-btn"
-            [disabled]="
-              confirming ||
-              alreadyConfirmed
+        <div class="changes-list">
+
+          <article
+            *ngFor="
+              let change of changes
             "
-            (click)="confirmChanges()">
+            class="change-row"
+          >
 
-            {{
-              confirming
-                ? 'Confirmando...'
-                : alreadyConfirmed
-                  ? 'Cambios confirmados'
-                  : 'Confirmar cambios'
-            }}
+            <!-- IMAGEN -->
 
-          </button>
+            <div class="change-image">
+
+              <img
+                *ngIf="
+                  imageUrl(change) as image
+                "
+                [src]="image"
+                [alt]="
+                  change.products?.name ||
+                  'Producto'
+                "
+              >
+
+              <ion-icon
+                *ngIf="
+                  !imageUrl(change)
+                "
+                [icon]="imageOutline"
+              >
+              </ion-icon>
+
+            </div>
 
 
-        </section>
+            <!-- INFORMACIÓN -->
+
+            <div class="change-info">
+
+              <strong>
+                {{
+                  change.products?.name ||
+                  'Producto'
+                }}
+              </strong>
 
 
-      </ng-container>
+              <span
+                *ngIf="
+                  change.products?.brand
+                "
+              >
+                {{ change.products?.brand }}
+              </span>
+
+
+              <small>
+
+                Antes:
+                {{ change.previous_quantity }}
+
+                ·
+
+                Ahora:
+                {{ change.new_quantity }}
+
+              </small>
+
+
+              <em>
+
+                {{
+                  changeTypeLabel(
+                    change.change_type
+                  )
+                }}
+
+              </em>
+
+            </div>
+
+
+            <!-- DIFERENCIA -->
+
+            <div
+              class="change-difference"
+              [class.positive]="
+                change.difference > 0
+              "
+              [class.negative]="
+                change.difference < 0
+              "
+            >
+
+              {{
+                formatDifference(change)
+              }}
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
 
 
       <!-- ================================================= -->
-      <!-- ESPACIO FINAL -->
+      <!-- CONFIRMAR CAMBIOS -->
       <!-- ================================================= -->
 
-      <div class="bottom-space"></div>
+      <section
+        *ngIf="
+          scan &&
+          state === 'success' &&
+          changes.length > 0
+        "
+        class="confirm-card"
+      >
 
-    </div>
+        <h2>
+
+          {{
+            alreadyConfirmed
+              ? 'Cambios confirmados'
+              : 'Actualizar inventario'
+          }}
+
+        </h2>
+
+
+        <p>
+
+          {{
+            alreadyConfirmed
+              ? 'Este análisis ya fue aplicado al inventario.'
+              : 'Confirma para aplicar de forma segura los resultados de este análisis.'
+          }}
+
+        </p>
+
+
+        <button
+          type="button"
+          class="confirm-btn"
+          [disabled]="
+            confirming ||
+            alreadyConfirmed
+          "
+          (click)="confirmChanges()"
+        >
+
+          {{
+            confirming
+              ? 'Confirmando...'
+              : alreadyConfirmed
+                ? 'Cambios confirmados'
+                : 'Confirmar cambios'
+          }}
+
+        </button>
+
+      </section>
+
+
+      <!-- ================================================= -->
+      <!-- ESPACIO PARA SCROLL -->
+      <!-- ================================================= -->
+
+      <div class="bottom-space">
+      </div>
+
+
+    </main>
 
 
     <!-- ================================================= -->
-    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+    <!-- BARRA INFERIOR -->
     <!-- ================================================= -->
 
     <nav class="bottom-nav">
 
       <button
-        *ngFor="let item of bottomNavItems"
+        *ngFor="
+          let item of bottomNavItems
+        "
         type="button"
         class="nav-item"
         [class.active]="item.active"
-        (click)="navegar(item)">
-
+        (click)="navegar(item)"
+      >
 
         <ion-icon
-          [icon]="item.icon">
+          [icon]="item.icon"
+        >
         </ion-icon>
-
 
         <span>
           {{ item.label }}
         </span>
 
-
       </button>
 
     </nav>
-
 
   </div>
 
