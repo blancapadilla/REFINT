@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { RefrigeradorService } from '../../services/refrigerador.service';
+import { IonicModule, NavController } from '@ionic/angular';
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { addIcons } from 'ionicons';
 import { cubeOutline, qrCodeOutline, checkmarkOutline } from 'ionicons/icons';
@@ -21,38 +19,37 @@ export class RegistroRefriPage {
   guardando = false;
   errorMsg = '';
 
-  cubeOutline    = cubeOutline;
-  qrCodeOutline  = qrCodeOutline;
+  cubeOutline = cubeOutline;
+  qrCodeOutline = qrCodeOutline;
   checkmarkOutline = checkmarkOutline;
 
-  constructor(
-    private router: Router,
-    private refrigeradorService: RefrigeradorService
-  ) {
-    addIcons({ cubeOutline, qrCodeOutline, checkmarkOutline });
+  constructor(private navCtrl: NavController) {
+    addIcons({
+      cubeOutline,
+      qrCodeOutline,
+      checkmarkOutline
+    });
   }
 
   valido(): boolean {
-    return this.nombre.trim().length > 0 && this.codigo.trim().length > 0;
-  }
-
-  regresarConfiguracion(): void {
-    void this.router.navigate(['/configuracion']);
+    return this.nombre.trim().length >= 3 && this.codigo.trim().length >= 4;
   }
 
   async registrar() {
-    if (!this.valido()) return;
-    this.errorMsg = '';
+    if (!this.valido() || this.guardando) return;
+
     this.guardando = true;
+    this.errorMsg = '';
 
     try {
-      await this.refrigeradorService.registrar(
-        this.nombre.trim(),
-        this.codigo.trim().toUpperCase()
-      );
-      await this.router.navigate(['/inventario']);
-    } catch (e: any) {
-      this.errorMsg = e?.message ?? 'Error al registrar el refrigerador.';
+      // AQUÍ IRÁ LA VINCULACIÓN CON SUPABASE
+      // Ejemplo: await this.supabase.from('refrigerators').insert({ name: this.nombre, device_code: this.codigo.toUpperCase() });
+
+      // Al vincular con éxito, redirige al Dashboard
+      this.navCtrl.navigateRoot('/dashboard');
+    } catch (error: any) {
+      console.error('Error al vincular refrigerador:', error);
+      this.errorMsg = error.message || 'No se pudo vincular el dispositivo. Verifica el código.';
     } finally {
       this.guardando = false;
     }

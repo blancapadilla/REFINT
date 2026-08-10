@@ -1,64 +1,66 @@
 <ion-content class="refri-content">
-  <app-header title="Vincular Refrigerador" [showBack]="true" backRoute="/configuracion"></app-header>
-  <main class="refri-main">
+  <div class="refri-container">
+    <app-header title="Refint" [showBack]="true" backRoute="/configuracion"></app-header>
 
-    <div class="refri-hero">
-      <div class="refri-icon-wrap">
-        <svg viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" class="refri-svg">
-          <rect x="2" y="2" width="20" height="24" rx="4" stroke="#0053db" stroke-width="2.5"/>
-          <line x1="2" y1="12" x2="22" y2="12" stroke="#0053db" stroke-width="2.5"/>
-          <line x1="6" y1="5.5" x2="6" y2="9.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="6" y1="15.5" x2="6" y2="20.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h1>Vincula tu refrigerador</h1>
-      <p>Ingresa el nombre y el código único de tu dispositivo para comenzar a gestionar tu inventario.</p>
-    </div>
+    <main class="refri-main">
 
-    <form (ngSubmit)="registrar()" class="refri-form">
-
-      <div class="form-group">
-        <label>Nombre del refrigerador</label>
-        <div class="input-wrapper">
-          <ion-icon [icon]="cubeOutline" class="field-icon"></ion-icon>
-          <input
-            type="text"
-            [(ngModel)]="nombre"
-            name="nombre"
-            placeholder="Ej. Cocina Principal"
-            autocomplete="off"
-          />
+      <!-- ENCABEZADO Y LOGO -->
+      <div class="refri-hero">
+        <div class="refri-icon-wrap">
+          <svg viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" class="refri-svg">
+            <rect x="2" y="2" width="20" height="24" rx="4" stroke="#0053db" stroke-width="2.5"/>
+            <line x1="2" y1="12" x2="22" y2="12" stroke="#0053db" stroke-width="2.5"/>
+            <line x1="6" y1="5.5" x2="6" y2="9.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="6" y1="15.5" x2="6" y2="20.5" stroke="#0053db" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
         </div>
+        <h1>Vincula tu refrigerador</h1>
+        <p>Ingresa el nombre y el código único de tu dispositivo para comenzar a gestionar tu inventario.</p>
       </div>
 
-      <div class="form-group">
-        <label>Código del dispositivo</label>
-        <div class="input-wrapper">
-          <ion-icon [icon]="qrCodeOutline" class="field-icon"></ion-icon>
-          <input
-            type="text"
-            [(ngModel)]="codigo"
-            name="codigo"
-            placeholder="Ej. FRIDGE-X1"
-            autocomplete="off"
-            style="text-transform: uppercase;"
-          />
+      <!-- FORMULARIO DE REGISTRO -->
+      <form (ngSubmit)="registrar()" class="refri-form">
+
+        <div class="form-group">
+          <label for="nombre-refri">Nombre del refrigerador</label>
+          <div class="input-wrapper">
+            <ion-icon [icon]="cubeOutline" class="field-icon"></ion-icon>
+            <input
+              id="nombre-refri"
+              type="text"
+              [(ngModel)]="nombre"
+              name="nombre"
+              placeholder="Ej. Cocina Principal"
+              autocomplete="off"
+            />
+          </div>
         </div>
-        <span class="hint">Encuéntralo en la etiqueta de tu dispositivo ESP32.</span>
-      </div>
 
-      <p *ngIf="errorMsg" class="error-msg">{{ errorMsg }}</p>
+        <div class="form-group">
+          <label for="codigo-dispositivo">Código del dispositivo</label>
+          <div class="input-wrapper">
+            <ion-icon [icon]="qrCodeOutline" class="field-icon"></ion-icon>
+            <input
+              id="codigo-dispositivo"
+              type="text"
+              [(ngModel)]="codigo"
+              name="codigo"
+              placeholder="Ej. FRIDGE-X1"
+              autocomplete="off"
+              style="text-transform: uppercase;"
+            />
+          </div>
+          <span class="hint">Encuéntralo en la etiqueta de tu dispositivo ESP32.</span>
+        </div>
 
-      <button type="submit" class="save-btn" [disabled]="!valido() || guardando">
-        <ion-icon [icon]="checkmarkOutline"></ion-icon>
-        <span>{{ guardando ? 'Registrando...' : 'Vincular refrigerador' }}</span>
-      </button>
+        <p *ngIf="errorMsg" class="error-msg">{{ errorMsg }}</p>
 
-      <button type="button" class="back-btn" (click)="regresarConfiguracion()">
-        Regresar a configuración
-      </button>
+        <button type="submit" class="save-btn" [disabled]="!valido() || guardando">
+          <ion-icon [icon]="checkmarkOutline"></ion-icon>
+          <span>{{ guardando ? 'Registrando...' : 'Vincular refrigerador' }}</span>
+        </button>
+      </form>
 
-    </form>
-
-  </main>
+    </main>
+  </div>
 </ion-content>

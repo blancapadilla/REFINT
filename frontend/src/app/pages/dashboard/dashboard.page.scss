@@ -555,7 +555,7 @@
     grid-template-columns: 1fr;
     gap: 8px !important;
   }
-  
+
   .dashboard-layout {
     grid-template-columns: 1fr;
   }
@@ -613,4 +613,13 @@
     transform: scale(0.98);
   }
 }
+}
+
+.inventory-chart {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.99);
+  }
 }
