@@ -1,292 +1,173 @@
 <ion-content [scrollY]="true" class="comparison-content">
   <div class="sync-container">
-  <app-header title="Sincronizar" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
-  <main class="main-sync-body">
-    <div class="page-title-block"><h1>Comparación Inteligente</h1><p>Resultados del último análisis de tu refrigerador.</p></div>
 
-    <section *ngIf="state === 'loading'" class="state-card" aria-live="polite"><ion-spinner name="crescent"></ion-spinner><p>Analizando resultados...</p></section>
-    <section *ngIf="state === 'empty'" class="state-card"><ion-icon [icon]="timeOutline"></ion-icon><p>No hay análisis disponibles todavía.</p></section>
-    <section *ngIf="state === 'error'" class="state-card state-error"><ion-icon [icon]="warningOutline"></ion-icon><p>No fue posible cargar los resultados del análisis.</p><button type="button" class="retry-btn" (click)="loadResults()">Reintentar</button></section>
+    <!-- CABECERA DE LA APP -->
+    <app-header title="Refint" [showSearch]="false" [showSettings]="true"></app-header>
 
-    <ng-container *ngIf="scan && (state === 'success' || state === 'no-changes')">
-      <section class="analysis-card"><h2>Último análisis</h2><strong>{{ formatDate(scan.finished_at || scan.created_at) }}</strong><div class="analysis-details"><span>{{ scan.detected_product_count }} productos detectados</span><span>{{ formatProcessing(scan.processing_ms) }}</span><span *ngIf="scan.scan_type">{{ scan.scan_type }}</span></div></section>
-      <div class="summary-cards">
-        <div class="summary-card summary-green"><span class="summary-icon-circle"><ion-icon [icon]="checkmarkCircleOutline"></ion-icon></span><div class="summary-text"><span class="summary-label">Sin cambios</span><span class="summary-value">{{ summary.unchanged }} Artículos</span></div></div>
-        <div class="summary-card summary-amber"><span class="summary-icon-circle"><ion-icon [icon]="warningOutline"></ion-icon></span><div class="summary-text"><span class="summary-label">Agregados</span><span class="summary-value">{{ summary.added }} Artículos</span></div></div>
-        <div class="summary-card summary-red"><span class="summary-icon-circle"><ion-icon [icon]="closeCircleOutline"></ion-icon></span><div class="summary-text"><span class="summary-label">Retirados</span><span class="summary-value">{{ summary.removed }} Artículos</span></div></div>
+    <main class="main-sync-body">
+
+      <!-- TÍTULO DE LA PÁGINA -->
+      <div class="page-title-block">
+        <h1>Comparación Inteligente</h1>
+        <p>Resultados del último análisis de tu refrigerador.</p>
       </div>
-      <section *ngIf="state === 'no-changes'" class="state-card"><ion-icon [icon]="checkmarkCircleOutline"></ion-icon><p>No se detectaron cambios en el inventario.</p></section>
-      <section *ngIf="state === 'success'" class="critical-card"><div class="critical-header-row"><h2>Cambios detectados</h2></div><div class="critical-items-list">
-        <article *ngFor="let change of changes" class="critical-item-row">
-          <span class="critical-thumb"><img *ngIf="imageUrl(change) as image" [src]="image" [alt]="change.products?.name || 'Producto'"><ion-icon *ngIf="!imageUrl(change)" [icon]="imageOutline"></ion-icon></span>
-          <div class="critical-info"><span class="critical-name">{{ change.products?.name || 'Producto' }}</span><span *ngIf="change.products?.brand" class="critical-brand">{{ change.products?.brand }}</span><span class="critical-sub">Antes: {{ change.previous_quantity }} · Ahora: {{ change.new_quantity }}</span><span class="change-type">{{ changeTypeLabel(change.change_type) }}</span></div>
-          <span class="difference" [class.positive]="change.difference > 0" [class.negative]="change.difference < 0">{{ formatDifference(change) }}</span>
-        </article>
 
+      <!-- ESTADOS INICIALES: CARGANDO / VACÍO / ERROR -->
+      <section *ngIf="state === 'loading'" class="state-card" aria-live="polite">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Analizando resultados...</p>
       </section>
 
-
-      <!-- =============================================== -->
-      <!-- SIN CAMBIOS -->
-      <!-- =============================================== -->
-
-      <section
-        *ngIf="state === 'no-changes'"
-        class="state-card"
-      >
-
-        <ion-icon
-          [icon]="checkmarkCircleOutline"
-        >
-        </ion-icon>
-
-        <p>
-          No se detectaron cambios
-          en el inventario.
-        </p>
-
+      <section *ngIf="state === 'empty'" class="state-card">
+        <ion-icon [icon]="timeOutline"></ion-icon>
+        <p>No hay análisis disponibles todavía.</p>
       </section>
 
+      <section *ngIf="state === 'error'" class="state-card state-error">
+        <ion-icon [icon]="warningOutline"></ion-icon>
+        <p>No fue posible cargar los resultados del análisis.</p>
+        <button type="button" class="retry-btn" (click)="loadResults()">Reintentar</button>
+      </section>
 
-      <!-- =============================================== -->
-      <!-- CAMBIOS DETECTADOS -->
-      <!-- =============================================== -->
+      <!-- RESULTADOS DEL ANÁLISIS -->
+      <ng-container *ngIf="scan && (state === 'success' || state === 'no-changes')">
 
-      <section
-        *ngIf="state === 'success'"
-        class="changes-card"
-      >
+        <!-- RESUMEN DEL ÚLTIMO ANÁLISIS -->
+        <section class="analysis-card">
+          <h2>Último análisis</h2>
+          <strong>{{ formatDate(scan.finished_at || scan.created_at) }}</strong>
+          <div class="analysis-details">
+            <span>{{ scan.detected_product_count }} productos detectados</span>
+            <span>{{ formatProcessing(scan.processing_ms) }}</span>
+            <span *ngIf="scan.scan_type">{{ scan.scan_type }}</span>
+          </div>
+        </section>
 
-        <div class="critical-header">
+        <!-- TARJETAS DE CONTEO RÁPIDO -->
+        <div class="summary-cards">
+          <div class="summary-card summary-green">
+            <span class="summary-icon-circle">
+              <ion-icon [icon]="checkmarkCircleOutline"></ion-icon>
+            </span>
+            <div class="summary-text">
+              <span class="summary-label">Sin cambios</span>
+              <span class="summary-value">{{ summary.unchanged }} Artículos</span>
+            </div>
+          </div>
 
+          <div class="summary-card summary-amber">
+            <span class="summary-icon-circle">
+              <ion-icon [icon]="warningOutline"></ion-icon>
+            </span>
+            <div class="summary-text">
+              <span class="summary-label">Agregados</span>
+              <span class="summary-value">{{ summary.added }} Artículos</span>
+            </div>
+          </div>
+
+          <div class="summary-card summary-red">
+            <span class="summary-icon-circle">
+              <ion-icon [icon]="closeCircleOutline"></ion-icon>
+            </span>
+            <div class="summary-text">
+              <span class="summary-label">Retirados</span>
+              <span class="summary-value">{{ summary.removed }} Artículos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MENSAJE: SIN CAMBIOS -->
+        <section *ngIf="state === 'no-changes'" class="state-card">
+          <ion-icon [icon]="checkmarkCircleOutline"></ion-icon>
+          <p>No se detectaron cambios en el inventario.</p>
+        </section>
+
+        <!-- LISTA DE CAMBIOS DETECTADOS -->
+        <section *ngIf="state === 'success'" class="changes-card">
+          <div class="critical-header">
+            <h2>Cambios detectados</h2>
+          </div>
+
+          <div class="changes-list">
+            <article *ngFor="let change of changes" class="change-row">
+              <div class="change-image">
+                <img
+                  *ngIf="imageUrl(change) as image"
+                  [src]="image"
+                  [alt]="change.products?.name || 'Producto'"
+                />
+                <ion-icon
+                  *ngIf="!imageUrl(change)"
+                  [icon]="imageOutline"
+                ></ion-icon>
+              </div>
+
+              <div class="change-info">
+                <strong>{{ change.products?.name || 'Producto' }}</strong>
+                <span *ngIf="change.products?.brand">{{ change.products?.brand }}</span>
+                <small>Antes: {{ change.previous_quantity }} · Ahora: {{ change.new_quantity }}</small>
+                <em>{{ changeTypeLabel(change.change_type) }}</em>
+              </div>
+
+              <div
+                class="change-difference"
+                [class.positive]="change.difference > 0"
+                [class.negative]="change.difference < 0"
+              >
+                {{ formatDifference(change) }}
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- CONFIRMAR Y APLICAR CAMBIOS EN INVENTARIO -->
+        <section *ngIf="state === 'success'" class="confirm-card">
           <h2>
-            Cambios detectados
+            {{ alreadyConfirmed ? 'Cambios confirmados' : 'Actualizar inventario' }}
           </h2>
-
-        </div>
-
-
-        <div class="changes-list">
-
-          <article
-            *ngFor="
-              let change of changes
-            "
-            class="change-row"
+          <p>
+            {{
+              alreadyConfirmed
+                ? 'Este análisis ya fue aplicado al inventario.'
+                : 'Confirma para aplicar de forma segura los resultados de este análisis.'
+            }}
+          </p>
+          <button
+            type="button"
+            class="confirm-btn"
+            [disabled]="confirming || alreadyConfirmed"
+            (click)="confirmChanges()"
           >
+            {{
+              confirming
+                ? 'Confirmando...'
+                : alreadyConfirmed
+                  ? 'Cambios confirmados'
+                  : 'Confirmar cambios'
+            }}
+          </button>
+        </section>
 
-            <div class="change-image">
+      </ng-container>
 
-              <img
-                *ngIf="
-                  imageUrl(change) as image
-                "
-                [src]="image"
-                [alt]="
-                  change.products?.name ||
-                  'Producto'
-                "
-              >
-
-              <ion-icon
-                *ngIf="
-                  !imageUrl(change)
-                "
-                [icon]="imageOutline"
-              >
-              </ion-icon>
-
-            </div>
-
-
-            <div class="change-info">
-
-              <strong>
-                {{
-                  change.products?.name ||
-                  'Producto'
-                }}
-              </strong>
-
-              <span
-                *ngIf="
-                  change.products?.brand
-                "
-              >
-                {{ change.products?.brand }}
-              </span>
-
-              <small>
-                Antes:
-                {{ change.previous_quantity }}
-
-                ·
-
-                Ahora:
-                {{ change.new_quantity }}
-              </small>
-
-              <em>
-                {{
-                  changeTypeLabel(
-                    change.change_type
-                  )
-                }}
-              </em>
-
-            </div>
-
-
-            <div
-              class="change-difference"
-              [class.positive]="
-                change.difference > 0
-              "
-              [class.negative]="
-                change.difference < 0
-              "
-            >
-
-              {{
-                formatDifference(
-                  change
-                )
-              }}
-
-            </div>
-
-          </article>
-
-        </div>
-
-      </section>
-
-
-      <!-- =============================================== -->
-      <!-- CONFIRMAR CAMBIOS -->
-      <!-- =============================================== -->
-
-      <section
-        *ngIf="
-          state === 'success'
-        "
-        class="confirm-card"
-      >
-
-        <h2>
-
-          {{
-            alreadyConfirmed
-              ? 'Cambios confirmados'
-              : 'Actualizar inventario'
-          }}
-
-        </h2>
-
-
-        <p>
-
-          {{
-            alreadyConfirmed
-
-              ? 'Este análisis ya fue aplicado al inventario.'
-
-              : 'Confirma para aplicar de forma segura los resultados de este análisis.'
-          }}
-
-        </p>
-
-
-        <button
-          type="button"
-          class="confirm-btn"
-          [disabled]="
-            confirming ||
-            alreadyConfirmed
-          "
-          (click)="confirmChanges()"
-        >
-
-          {{
-            confirming
-              ? 'Confirmando...'
-              : alreadyConfirmed
-                ? 'Cambios confirmados'
-                : 'Confirmar cambios'
-          }}
-
-        </button>
-
-      </section>
-
-
-      <!-- =============================================== -->
-      <!-- ERROR -->
-      <!-- =============================================== -->
-
-      <section
-        *ngIf="state === 'error'"
-        class="state-card state-error"
-      >
-
-        <ion-icon
-          [icon]="warningOutline"
-        >
-        </ion-icon>
-
-        <p>
-          No fue posible cargar
-          los resultados del análisis.
-        </p>
-
-        <button
-          type="button"
-          class="retry-btn"
-          (click)="loadResults()"
-        >
-          Reintentar
-        </button>
-
-      </section>
-
-
-      <!-- ESPACIO FINAL PARA SCROLL -->
-
-      <div class="bottom-space">
-      </div>
-
+      <div class="bottom-space"></div>
     </main>
 
-
-    <!-- ================================================= -->
-    <!-- BARRA INFERIOR -->
-    <!-- ================================================= -->
-
+    <!-- MENÚ INFERIOR DE NAVEGACIÓN -->
     <nav class="bottom-nav">
-
       <button
-        *ngFor="
-          let item of bottomNavItems
-        "
+        *ngFor="let item of bottomNavItems"
         type="button"
         class="nav-item"
         [class.active]="item.active"
         (click)="navegar(item)"
       >
-
-        <ion-icon
-          [icon]="item.icon"
-        >
-        </ion-icon>
-
-        <span>
-          {{ item.label }}
+        <span class="nav-icon-wrap" [class.pill-active]="item.active">
+          <ion-icon [icon]="item.icon"></ion-icon>
         </span>
-
+        <span>{{ item.label }}</span>
       </button>
-
     </nav>
 
   </div>
-
 </ion-content>

@@ -20,7 +20,7 @@
         </div>
       </section>
 
-      <!-- RECUADRO UNIFICADO: ESTADO DEL REFRIGERADOR (CLIC REDIRIGE A ESTADO-SISTEMA) -->
+      <!-- RECUADRO UNIFICADO: ESTADO DEL REFRIGERADOR -->
       <section class="fridge-status-card" (click)="irAEstadoSistema()" role="button" tabindex="0">
         <h3 class="card-title">Estado del Refrigerador</h3>
 
@@ -68,15 +68,16 @@
       </section>
 
       <section class="dashboard-layout">
+        <!-- COLUMNA IZQUIERDA: TARJETAS Y PRODUCTOS POR VENCER -->
         <div class="dashboard-left">
           <section class="stats-cards">
-          <!-- 1. TOTAL PRODUCTOS -> REDIRIGE A INVENTARIO -->
+            <!-- 1. TOTAL PRODUCTOS -> REDIRIGE A INVENTARIO -->
             <article 
               class="total-products-card clickable" 
               (click)="irA('/inventario')" 
               role="button" 
               tabindex="0"
-              >
+            >
               <div class="total-copy">  
                 <span>TOTAL PRODUCTOS</span>
                 <h1>{{ totalProductos }}</h1>
@@ -87,7 +88,7 @@
               </div>
             </article>
 
-  <!-- 2 Y 3. POR VENCER (ALERTAS) Y ESCASEANDO (LISTA DE COMPRAS) -->
+            <!-- 2 Y 3. POR VENCER (ALERTAS) Y ESCASEANDO (LISTA DE COMPRAS) -->
             <article 
               *ngFor="let summary of summaryCards" 
               class="summary-card summary-{{ summary.type }} clickable" 
@@ -105,7 +106,7 @@
                 </div>
               </div>
             </article>
-</section>
+          </section>
 
           <section class="expiring-products">
             <div class="section-header">
@@ -129,10 +130,17 @@
           </section>
         </div>
 
+        <!-- COLUMNA DERECHA: DISTRIBUCIÓN DE INVENTARIO (ÚNICA Y CLIQUEABLE) -->
         <aside class="dashboard-right">
-          <section class="inventory-chart">
+          <section 
+            class="inventory-chart clickable" 
+            (click)="irA('/estadisticas')" 
+            role="button" 
+            tabindex="0"
+          >
             <div class="section-header">
               <h2>Distribución de Inventario</h2>
+              <button class="see-all" type="button">Ver detalles</button>
             </div>
             <article class="chart-card">
               <div class="chart-preview">
