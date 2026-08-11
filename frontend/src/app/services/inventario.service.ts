@@ -212,24 +212,28 @@ export class InventarioService {
   /**
    * Elimina un producto de inventory_items.
    */
-  async eliminarProducto(id: string): Promise<boolean> {
+ async eliminarProducto(id: string): Promise<boolean> {
+    try {
+      // Como ya quitamos la restricción en la base de datos, 
+      // podemos eliminar el producto directamente y sin bloqueos.
+      const { error } = await this.supabase.client
+        .from('inventory_items')
+        .delete()
+        .eq('id', id);
 
-    const { error } = await this.supabase.client
-      .from('inventory_items')
-      .delete()
-      .eq('id', id);
+      if (error) {
+        console.error('Error al eliminar producto de Supabase:', error);
+        return false;
+      }
 
-    if (error) {
-      console.error(
-        'Error al eliminar producto de Supabase:',
-        error
-      );
+      // Actualizamos toda la app (Dashboard, Estadísticas, Inventario)
+      await this.refrescarProductos();
+      return true;
+
+    } catch (err) {
+      console.error('Error interno al eliminar:', err);
       return false;
     }
-
-    // Actualiza el estado reactivo inmediatamente
-    await this.refrescarProductos();
-    return true;
   }
 
 
@@ -445,5 +449,21 @@ export class InventarioService {
     await this.refrescarProductos();
 
     return data;
+  }
+
+  obtenerImagenProducto(item: any): string {
+    // Imagen vectorial de respaldo (No requiere archivo local)
+    const DEFAULT_SVG = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Crect x="3" y="3" width="18" height="18" rx="4" fill="%23f1f5f9" stroke="none"/%3E%3Cpath d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/%3E%3Cpolyline points="3.27 6.96 12 12.01 20.73 6.96"/%3E%3Cline x1="12" y1="22.08" x2="12" y2="12"/%3E%3C/svg%3E';
+
+    if (item.product_image_path && /^https?:\/\//i.test(item.product_image_path)) {
+      return item.product_image_path;
+    }
+
+    if (item.image_path && /^https?:\/\//i.test(item.image_path)) {
+      return item.image_path;
+    }
+
+    // Retorna el SVG nativo en lugar de una ruta inexistente
+    return DEFAULT_SVG;
   }
 }

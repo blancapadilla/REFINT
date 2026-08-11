@@ -187,12 +187,22 @@ export class InventarioPage {
     });
   }
 
-  async eliminarProducto(item: ProductoInventario) {
+async eliminarProducto(item: ProductoInventario) {
+    // 👇 Soluciona el warning de "aria-hidden" quitando el foco del botón presionado
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     try {
-      await this.inventoryService.deleteItem(item.id);
-      this.productos = this.productos.filter(producto => producto.id !== item.id);
-      this.totalProductos = this.productos.length;
-      this.aplicarFiltros();
+      // Llamamos al servicio para borrar
+      const exito = await this.inventoryService.eliminarProducto(item.id);
+      
+      if (exito) {
+        // Actualizamos las listas en pantalla de inmediato
+        this.productos = this.productos.filter(producto => producto.id !== item.id);
+        this.totalProductos = this.productos.length;
+        this.aplicarFiltros();
+      }
     } catch (error) {
       console.error('Error al eliminar:', error);
     }
