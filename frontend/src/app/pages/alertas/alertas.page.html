@@ -128,18 +128,19 @@
     </main>
 
     <!-- NAVEGACIÓN INFERIOR -->
+<!-- BARRA INFERIOR DE NAVEGACIÓN ESTÁNDAR -->
     <nav class="bottom-nav">
       <button
-        *ngFor="let nav of bottomNavItems"
+        *ngFor="let item of bottomNavItems"
         type="button"
         class="nav-item"
-        [class.active]="nav.active"
-        (click)="navegar(nav)"
+        [class.active]="item.active"
+        (click)="navegar(item)"
       >
-        <span class="nav-icon-wrap" [class.pill-active]="nav.active">
-          <ion-icon [icon]="nav.icon"></ion-icon>
+        <span class="nav-icon-wrap">
+          <ion-icon [icon]="item.icon"></ion-icon>
         </span>
-        <span>{{ nav.label }}</span>
+        <span>{{ item.label }}</span>
       </button>
     </nav>
 
