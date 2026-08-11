@@ -1,25 +1,6 @@
-from services.supabase_service import supabase
-
-
-def create_scan(refrigerator_id: str):
-    scan_data = {
-        "refrigerator_id": refrigerator_id,
-        "status": "processing",
-        "scan_type": "automatico"
-    }
-
-    response = (
-        supabase
-        .table("scans")
-        .insert(scan_data)
-        .execute()
-    )
-
-    return response.data[0]
-
 from datetime import datetime, timezone
 
-from services.supabase_service import supabase
+from iA.services.supabase_service import supabase
 
 
 def create_scan(refrigerator_id: str):

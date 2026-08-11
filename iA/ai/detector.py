@@ -29,7 +29,7 @@ client = InferenceHTTPClient(
 )
 
 WORKSPACE_NAME = "anayafregozo-gmail-com"
-WORKFLOW_ID = "find-egg_carton-greek_yogurt-and-more"
+WORKFLOW_ID = "datasetfinalesperando"
 
 
 # -----------------------------
@@ -69,7 +69,7 @@ def detect_products(
         images={
             "image": image_base64
         },
-        use_cache=False
+        use_cache=True
     )
 
     # La estructura real que devolvió tu Workflow es:

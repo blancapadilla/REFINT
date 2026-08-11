@@ -72,13 +72,13 @@
         <div class="dashboard-left">
           <section class="stats-cards">
             <!-- 1. TOTAL PRODUCTOS -> REDIRIGE A INVENTARIO -->
-            <article 
-              class="total-products-card clickable" 
-              (click)="irA('/inventario')" 
-              role="button" 
+            <article
+              class="total-products-card clickable"
+              (click)="irA('/inventario')"
+              role="button"
               tabindex="0"
             >
-              <div class="total-copy">  
+              <div class="total-copy">
                 <span>TOTAL PRODUCTOS</span>
                 <h1>{{ totalProductos }}</h1>
                 <p class="total-subtext">+4 agregados hoy</p>
@@ -89,11 +89,11 @@
             </article>
 
             <!-- 2 Y 3. POR VENCER (ALERTAS) Y ESCASEANDO (LISTA DE COMPRAS) -->
-            <article 
-              *ngFor="let summary of summaryCards" 
-              class="summary-card summary-{{ summary.type }} clickable" 
-              (click)="irA(summary.path)" 
-              role="button" 
+            <article
+              *ngFor="let summary of summaryCards"
+              class="summary-card summary-{{ summary.type }} clickable"
+              (click)="irA(summary.path)"
+              role="button"
               tabindex="0"
             >
               <div class="summary-copy">
@@ -132,10 +132,10 @@
 
         <!-- COLUMNA DERECHA: DISTRIBUCIÓN DE INVENTARIO (ÚNICA Y CLIQUEABLE) -->
         <aside class="dashboard-right">
-          <section 
-            class="inventory-chart clickable" 
-            (click)="irA('/estadisticas')" 
-            role="button" 
+          <section
+            class="inventory-chart clickable"
+            (click)="irA('/estadisticas')"
+            role="button"
             tabindex="0"
           >
             <div class="section-header">

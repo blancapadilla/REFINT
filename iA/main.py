@@ -1,12 +1,12 @@
 from time import perf_counter
 
-from ai.detector import detect_products
-from camera.capture import capture_image
+from iA.ai.detector import detect_products
+from iA.camera.capture import capture_image
 
-from services.supabase_service import supabase
-from services.scan_service import create_scan, complete_scan
-from services.detection_service import create_detection
-from services.comparison_service import compare_scan_with_inventory
+from iA.services.supabase_service import supabase
+from iA.services.scan_service import create_scan, complete_scan
+from iA.services.detection_service import create_detection
+from iA.services.comparison_service import compare_scan_with_inventory
 
 
 REFRIGERATOR_ID = "595494f8-76ea-418f-af92-d16ca17d2613"
@@ -29,7 +29,11 @@ def get_product_by_ai_label(label):
     return response.data[0]
 
 
-def main():
+def run_scan(
+    refrigerator_id: str = REFRIGERATOR_ID,
+    camera_index: int = 0,
+    existing_scan_id: str | None = None,
+):
     started = perf_counter()
 
     try:
@@ -39,11 +43,14 @@ def main():
 
         print("Creando scan...")
 
-        scan = create_scan(
-            REFRIGERATOR_ID
-        )
-
-        scan_id = scan["id"]
+        if existing_scan_id:
+            scan_id = existing_scan_id
+            supabase.table("scans").update({
+                "status": "processing"
+            }).eq("id", scan_id).execute()
+        else:
+            scan = create_scan(refrigerator_id)
+            scan_id = scan["id"]
 
         print(
             f"Scan creado: {scan_id}"
@@ -56,7 +63,7 @@ def main():
         print("\nTomando fotografía...")
 
         image_path = capture_image(
-            camera_index=0
+            camera_index=camera_index
         )
 
         print(
@@ -106,7 +113,7 @@ def main():
                 f'Estado: {completed_scan["status"]}'
             )
 
-            return
+            return completed_scan
 
         # ==========================================
         # MOSTRAR DETECCIONES
@@ -169,7 +176,7 @@ def main():
 
         changes = compare_scan_with_inventory(
             scan_id=scan_id,
-            refrigerator_id=REFRIGERATOR_ID
+            refrigerator_id=refrigerator_id
         )
 
         print("\nCambios detectados:")
@@ -222,10 +229,22 @@ def main():
             f'{completed_scan["processing_ms"]} ms'
         )
 
+        return completed_scan
+
     except Exception as error:
 
         print("\nError durante el scan:")
         print(error)
+        if 'scan_id' in locals():
+            supabase.table("scans").update({
+                "status": "failed",
+                "error_message": str(error)
+            }).eq("id", scan_id).execute()
+        raise
+
+
+def main():
+    run_scan()
 
 
 if __name__ == "__main__":

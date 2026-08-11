@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -7,6 +7,9 @@ import { Router } from '@angular/router';
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { DashboardService } from '../../services/dashboard.service';
 import { AuthService } from '../../services/auth';
+import { HardwareService } from '../../services/hardware.service';
+import { RefrigeradorService } from '../../services/refrigerador.service';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { addIcons } from 'ionicons';
 import {
   calendarOutline, addOutline, syncOutline, analyticsOutline, barChartOutline,
@@ -21,14 +24,24 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, AppHeaderComponent]
 })
-export class DashboardPage {
+export class DashboardPage implements OnInit, OnDestroy {
+
   usuario = 'Vanessa';
   totalProductos = 0;
   totalUnidades = 0;
   chartGradient = 'conic-gradient(#e2e8f0 0% 100%)';
-  temperatura = '3';
 
-  syncOutline = syncOutline; notificationsOutline = notificationsOutline; cubeOutline = cubeOutline; alertCircleOutline = alertCircleOutline; timeOutline = timeOutline; wifiOutline = wifiOutline;
+  // Íconos para la vista
+  syncOutline = syncOutline;
+  notificationsOutline = notificationsOutline;
+  cubeOutline = cubeOutline;
+  alertCircleOutline = alertCircleOutline;
+  timeOutline = timeOutline;
+  wifiOutline = wifiOutline;
+
+  // Variables de Hardware / Sensores (Arduino / ESP32)
+  temperatura = '--';
+  humedad = '45';
 
   deviceStatus = {
     esp: { label: 'ESP32 STATUS', value: 'Offline', state: 'offline' },
@@ -57,15 +70,25 @@ export class DashboardPage {
     { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
   ];
 
+  private temperatureChannel: RealtimeChannel | null = null;
+
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
-    private authService: AuthService
+    private authService: AuthService,
+    private hardwareService: HardwareService,
+    private refrigeradorService: RefrigeradorService
   ) {
-    addIcons({ calendarOutline, addOutline, syncOutline, analyticsOutline, barChartOutline, notificationsOutline, cubeOutline, cartOutline, timeOutline, alertCircleOutline, checkmarkCircleOutline, waterOutline, wifiOutline });
+    addIcons({
+      calendarOutline, addOutline, syncOutline, analyticsOutline, barChartOutline,
+      notificationsOutline, cubeOutline, cartOutline, timeOutline, alertCircleOutline,
+      checkmarkCircleOutline, waterOutline, wifiOutline
+    });
   }
 
-  // 1. REEMPLAZO DE ngOnInit: El Dashboard se actualizará siempre que regreses a él
+  ngOnInit() {}
+
+  // Se ejecuta cada vez que la pantalla pasa al frente
   async ionViewWillEnter() {
     const session = await this.authService.getSession();
     if (!session) {
@@ -73,12 +96,36 @@ export class DashboardPage {
       return;
     }
     await this.cargarDashboard();
+    await this.conectarTemperatura();
   }
 
-async cargarDashboard() {
+  // Conexión Realtime al sensor de temperatura del Arduino / ESP32
+  async conectarTemperatura() {
+    const refrigerator = await this.refrigeradorService.getMiRefrigerador();
+    if (!refrigerator) return;
+
+    const latest = await this.hardwareService.getLatestTemperature(refrigerator.id);
+    if (latest != null) {
+      this.temperatura = latest.toFixed(2);
+    }
+
+    this.temperatureChannel = this.hardwareService.subscribeToTemperature(
+      refrigerator.id,
+      value => this.temperatura = value.toFixed(2)
+    );
+  }
+
+  // Cancelamos la suscripción Realtime al salir de la pantalla
+  ngOnDestroy() {
+    if (this.temperatureChannel) {
+      void this.hardwareService.unsubscribe(this.temperatureChannel);
+    }
+  }
+
+  async cargarDashboard() {
     try {
       // 1. OBTENEMOS EL REFRIGERADOR ACTIVO
-      const fridge = await this.dashboardService['refrigeradorService'].getMiRefrigerador();
+      const fridge = await this.refrigeradorService.getMiRefrigerador();
       if (!fridge) return;
 
       // 2. CONSULTAMOS EL INVENTARIO VIVO
@@ -118,7 +165,7 @@ async cargarDashboard() {
         }
       });
 
-      // 4. ACTUALIZAMOS LAS TARJETAS DEL DASHBOARD
+      // 4. ACTUALIZAMOS LAS TARJETAS PRINCIPALES
       this.summaryCards = [
         { 
           type: 'warning', 
@@ -139,10 +186,25 @@ async cargarDashboard() {
       // 5. ESTADO DEL HARDWARE Y TEMPERATURA
       const summary = await this.dashboardService.getSummary();
       if (summary) {
-        this.temperatura = summary.current_temperature_c != null ? `${summary.current_temperature_c}` : '3';
+        if (summary.current_temperature_c != null && this.temperatura === '--') {
+          this.temperatura = Number(summary.current_temperature_c).toFixed(2);
+        }
+
+        if (summary.current_humidity != null) {
+          this.humedad = `${summary.current_humidity}`;
+        }
+
         this.deviceStatus = {
-          esp: { label: 'ESP32 STATUS', value: summary.esp32_status === 'online' ? 'Online' : 'Offline', state: summary.esp32_status ?? 'offline' },
-          camera: { label: 'CÁMARA', value: summary.camera_status === 'online' ? 'Activa' : 'Inactiva', state: summary.camera_status ?? 'offline' },
+          esp: { 
+            label: 'ESP32 STATUS', 
+            value: summary.esp32_status === 'online' ? 'Online' : 'Offline', 
+            state: summary.esp32_status ?? 'offline' 
+          },
+          camera: { 
+            label: 'CÁMARA', 
+            value: summary.camera_status === 'online' ? 'Activa' : 'Inactiva', 
+            state: summary.camera_status ?? 'offline' 
+          },
           lastSync: summary.last_sync_at ? 'Actualizado' : 'Pendiente'
         };
       }
