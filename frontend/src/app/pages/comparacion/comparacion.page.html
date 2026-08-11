@@ -1,7 +1,7 @@
 <ion-content [scrollY]="true" class="comparison-content">
   <div class="sync-container">
 
-    <!-- CABECERA DE LA APP (NUESTRA CONFIGURACIÓN) -->
+    <!-- CABECERA DE LA APP -->
     <app-header title="Refint" [showSearch]="false" [showSettings]="true"></app-header>
 
     <main class="main-sync-body">
@@ -25,56 +25,67 @@
         <button type="button" class="retry-btn" (click)="loadResults()">Reintentar</button>
       </section>
 
-      <!-- RESUMEN DEL INVENTARIO (DESDE MAIN) -->
-      <section *ngIf="resumenInventario && resumenInventario.total > 0" class="summary-section">
-        <!-- DISPONIBLE -->
+      <!-- RESUMEN DEL INVENTARIO (LOS 4 RECUADROS JUNTOS) -->
+      <section *ngIf="resumenInventario as resumen" class="summary-section">
+        <!-- 1. DISPONIBLE -->
         <div class="summary-card summary-green">
           <span class="summary-icon-circle">
             <ion-icon [icon]="checkmarkCircleOutline"></ion-icon>
           </span>
           <div class="summary-text">
             <span class="summary-label">DISPONIBLE</span>
-            <span class="summary-value">{{ resumenInventario.disponible }} Artículos</span>
+            <span class="summary-value">{{ resumen.disponible }} Artículos</span>
           </div>
         </div>
 
-        <!-- FALTANTE -->
+        <!-- 2. FALTANTE / POR VENCER -->
         <div class="summary-card summary-amber">
           <span class="summary-icon-circle">
             <ion-icon [icon]="warningOutline"></ion-icon>
           </span>
           <div class="summary-text">
-            <span class="summary-label">FALTANTE</span>
-            <span class="summary-value">{{ resumenInventario.faltantes }} Artículos</span>
+            <span class="summary-label">POR VENCER / FALTANTE</span>
+            <span class="summary-value">{{ resumen.faltantes }} Artículos</span>
           </div>
         </div>
 
-        <!-- AGOTADO -->
+        <!-- 3. AGOTADO -->
         <div class="summary-card summary-red">
           <span class="summary-icon-circle">
             <ion-icon [icon]="closeCircleOutline"></ion-icon>
           </span>
           <div class="summary-text">
             <span class="summary-label">AGOTADO</span>
-            <span class="summary-value">{{ resumenInventario.agotados }} Artículos</span>
+            <span class="summary-value">{{ resumen.agotados }} Artículos</span>
+          </div>
+        </div>
+
+        <!-- 4. CADUCADO -->
+        <div class="summary-card summary-purple">
+          <span class="summary-icon-circle">
+            <ion-icon [icon]="alertCircleOutline"></ion-icon>
+          </span>
+          <div class="summary-text">
+            <span class="summary-label">CADUCADO</span>
+            <span class="summary-value">{{ resumen.caducados }} Artículos</span>
           </div>
         </div>
       </section>
 
-      <!-- SIN INVENTARIO (DESDE MAIN) -->
+      <!-- SIN INVENTARIO (ESTADO VACÍO) -->
       <section *ngIf="state === 'empty' && !resumenInventario" class="state-card">
         <ion-icon [icon]="timeOutline"></ion-icon>
         <p>No hay información disponible todavía.</p>
       </section>
 
-      <!-- ESTADO DE INVENTARIO CRÍTICO (DESDE MAIN) -->
+      <!-- ESTADO DE INVENTARIO CRÍTICO -->
       <section *ngIf="resumenInventario && productosCriticos.length > 0" class="critical-card">
         <div class="critical-header">
           <h2>Estado de Inventario Crítico</h2>
         </div>
 
         <div class="critical-items-list">
-          <article *ngFor="let item of productosCriticos" class="critical-item-row">
+          <article *ngFor="let item of productosCriticos" class="critical-item-row" [ngClass]="'border-' + item.estado">
             <!-- IMAGEN -->
             <div class="critical-thumb">
               <img *ngIf="imageUrl(item) as image" [src]="image" [alt]="item.nombre" />
@@ -84,30 +95,31 @@
             <!-- INFORMACIÓN -->
             <div class="critical-info">
               <span class="critical-name">{{ item.nombre }}</span>
-              <span class="critical-status">
-                {{ item.estado === 'agotado' ? 'Agotado' : 'Faltante' }}
+              <span class="critical-status" [ngClass]="'text-' + item.estado">
+                {{ item.estado === 'caducado' ? 'Caducado' : (item.estado === 'agotado' ? 'Agotado' : 'Faltante / Por vencer') }}
               </span>
               <span class="critical-sub">
-                Quedan: {{ item.cantidad }} {{ item.unidad }}
+                {{ formatSubtext(item) }}
               </span>
             </div>
 
             <!-- ICONO -->
             <span class="critical-alert">
-              <ion-icon *ngIf="item.estado === 'agotado'" [icon]="closeCircleOutline"></ion-icon>
-              <ion-icon *ngIf="item.estado !== 'agotado'" [icon]="warningOutline"></ion-icon>
+              <ion-icon *ngIf="item.estado === 'caducado'" [icon]="alertCircleOutline" style="color: #7c3aed;"></ion-icon>
+              <ion-icon *ngIf="item.estado === 'agotado'" [icon]="closeCircleOutline" style="color: #e60000;"></ion-icon>
+              <ion-icon *ngIf="item.estado === 'faltante'" [icon]="warningOutline" style="color: #f2ad00;"></ion-icon>
             </span>
           </article>
         </div>
       </section>
 
-      <!-- NO HAY PRODUCTOS CRÍTICOS (DESDE MAIN) -->
+      <!-- NO HAY PRODUCTOS CRÍTICOS -->
       <section *ngIf="resumenInventario && resumenInventario.total > 0 && productosCriticos.length === 0" class="state-card">
         <ion-icon [icon]="checkmarkCircleOutline"></ion-icon>
         <p>No hay productos en estado crítico.</p>
       </section>
 
-      <!-- SINCRONIZACIÓN DE LISTA (DESDE MAIN) -->
+      <!-- SINCRONIZACIÓN DE LISTA -->
       <section *ngIf="resumenInventario && productosCriticos.length > 0" class="sync-list-card">
         <h2>Sincronización de Lista</h2>
         <p>
@@ -132,25 +144,26 @@
         </button>
       </section>
 
-      <!-- USO DE INVENTARIO (DESDE MAIN) -->
-      <section *ngIf="resumenInventario && resumenInventario.total > 0" class="inventory-usage-card">
+      <!-- USO DE INVENTARIO -->
+      <section *ngIf="resumenInventario as resumen" class="inventory-usage-card">
         <h2>Uso de Inventario</h2>
 
         <div class="usage-header">
           <span>Disponible</span>
-          <span>{{ resumenInventario.disponible }} de {{ resumenInventario.total }}</span>
+          <span>{{ resumen.disponible }} de {{ resumen.total }}</span>
         </div>
 
         <div class="usage-chart">
-          <div class="usage-circle" [style.--percentage]="resumenInventario.porcentaje + '%'">
-            <strong>{{ resumenInventario.porcentaje }}%</strong>
+          <div class="usage-circle" [style.--percentage]="resumen.porcentaje + '%'">
+            <strong>{{ resumen.porcentaje }}%</strong>
             <small>Disponible</small>
           </div>
         </div>
 
         <div class="usage-footer">
-          <span>Faltantes <strong>{{ resumenInventario.faltantes }}</strong></span>
-          <span>Agotados <strong>{{ resumenInventario.agotados }}</strong></span>
+          <span>Faltantes <strong>{{ resumen.faltantes }}</strong></span>
+          <span>Caducados <strong>{{ resumen.caducados }}</strong></span>
+          <span>Agotados <strong>{{ resumen.agotados }}</strong></span>
         </div>
       </section>
 
