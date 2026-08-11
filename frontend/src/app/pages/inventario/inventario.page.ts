@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -8,30 +8,13 @@ import { AppHeaderComponent } from '../../shared/components/app-header/app-heade
 import { InventarioService } from '../../services/inventario.service';
 import { AuthService } from '../../services/auth';
 import { RefrigeradorService } from '../../services/refrigerador.service';
-
 import { addIcons } from 'ionicons';
-
 import {
-  snowOutline,
-  settingsOutline,
-  searchOutline,
-  filterOutline,
-  calendarOutline,
-  createOutline,
-  trashOutline,
-  addOutline,
-  cubeOutline,
-  cartOutline,
-  syncOutline,
-  timeOutline,
-  notificationsOutline,
-  analyticsOutline,
-  alertCircleOutline,
-  barChartOutline,
-  wifiOutline,
-  cameraOutline
+  snowOutline, settingsOutline, searchOutline, filterOutline, calendarOutline,
+  createOutline, trashOutline, addOutline, cubeOutline, cartOutline, syncOutline,
+  timeOutline, notificationsOutline, analyticsOutline, alertCircleOutline,
+  barChartOutline, wifiOutline, cameraOutline
 } from 'ionicons/icons';
-
 
 interface ProductoInventario {
   id: string;
@@ -45,350 +28,46 @@ interface ProductoInventario {
   fuente?: 'ai' | 'manual';
 }
 
-
 @Component({
   selector: 'app-inventario',
   templateUrl: './inventario.page.html',
   styleUrls: ['./inventario.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    AppHeaderComponent
-  ]
+  imports: [CommonModule, FormsModule, IonicModule, AppHeaderComponent]
 })
-
-
-export class InventarioPage implements OnInit {
-
-  // =====================================================
-  // DATOS GENERALES
-  // =====================================================
-
-  textoBusqueda: string = '';
-
-  categoriaSeleccionada: string = 'todos';
-
-  usuario = 'Vanessa';
-
+export class InventarioPage {
+  textoBusqueda = '';
+  categoriaSeleccionada = 'todos';
   totalProductos = 0;
 
-  chartGradient =
-    'conic-gradient(#004ac6 0% 65%, #64a8fe 65% 85%, #006229 85% 100%)';
-
-
-  // =====================================================
-  // ICONOS
-  // =====================================================
-
-  snowOutline = snowOutline;
-  settingsOutline = settingsOutline;
-  searchOutline = searchOutline;
-  filterOutline = filterOutline;
-  calendarOutline = calendarOutline;
-  createOutline = createOutline;
-  trashOutline = trashOutline;
-  addOutline = addOutline;
-  cubeOutline = cubeOutline;
-  cartOutline = cartOutline;
-  syncOutline = syncOutline;
-  timeOutline = timeOutline;
-  notificationsOutline = notificationsOutline;
-  analyticsOutline = analyticsOutline;
-  alertCircleOutline = alertCircleOutline;
-  barChartOutline = barChartOutline;
-  wifiOutline = wifiOutline;
-  cameraOutline = cameraOutline;
-
-
-  // =====================================================
-  // CATEGORÍAS
-  // =====================================================
-
+    searchOutline = searchOutline;
+    filterOutline = filterOutline;
+    cameraOutline = cameraOutline;
+    createOutline = createOutline;
+    calendarOutline = calendarOutline;
+    trashOutline = trashOutline;
+    addOutline = addOutline;
+  
+  // Añadimos la categoría "Otros" para los productos sin categoría
   categorias = [
-    {
-      id: 'todos',
-      nombre: 'Todos'
-    },
-    {
-      id: 'lacteos',
-      nombre: 'Lácteos'
-    },
-    {
-      id: 'vegetales',
-      nombre: 'Vegetales'
-    },
-    {
-      id: 'carnes',
-      nombre: 'Carnes'
-    },
-    {
-      id: 'bebidas',
-      nombre: 'Bebidas'
-    }
+    { id: 'todos', nombre: 'Todos' },
+    { id: 'lacteos', nombre: 'Lácteos' },
+    { id: 'vegetales', nombre: 'Vegetales' },
+    { id: 'carnes', nombre: 'Carnes' },
+    { id: 'bebidas', nombre: 'Bebidas' },
+    { id: 'otros', nombre: 'Otros' } 
   ];
-
-
-  // =====================================================
-  // ACCIONES RÁPIDAS
-  // =====================================================
-
-  quickActions = [
-    {
-      type: 'sync',
-      label: 'Sincronizar',
-      icon: this.syncOutline
-    },
-    {
-      type: 'scan',
-      label: 'Escaneo Inteligente',
-      icon: this.analyticsOutline
-    },
-    {
-      type: 'stats',
-      label: 'Ver Estadísticas',
-      icon: this.barChartOutline
-    },
-    {
-      type: 'alerts',
-      label: 'Ver Alertas',
-      icon: this.notificationsOutline
-    }
-  ];
-
-
-  // =====================================================
-  // TARJETAS DE ESTADO
-  // Por ahora siguen siendo datos visuales.
-  // Después las conectaremos con Supabase.
-  // =====================================================
-
-  statusCards = [
-    {
-      color: 'primary',
-      icon: this.calendarOutline,
-      title: 'Temperatura',
-      value: '3 °C',
-      subtitle: 'Óptima'
-    },
-    {
-      color: 'secondary',
-      icon: this.addOutline,
-      title: 'Humedad',
-      value: '45 %',
-      subtitle: 'Nivel Estable'
-    }
-  ];
-
-
-  // =====================================================
-  // RESUMEN
-  // =====================================================
-
-  summaryCards = [
-    {
-      type: 'warning',
-      title: 'Por vencer',
-      value: '3',
-      subtitle: 'Alimentos próximos a caducar'
-    },
-    {
-      type: 'danger',
-      title: 'Escaseando',
-      value: '5',
-      subtitle: 'Productos por reabastecer'
-    }
-  ];
-
-
-  // =====================================================
-  // PRODUCTOS PRÓXIMOS A VENCER
-  // Por ahora siguen siendo visuales.
-  // =====================================================
-
-  expiringProducts = [
-    {
-      nombre: 'Leche Entera',
-      image: 'assets/images/products/lecheentera.webp',
-      vence: '1 día restante',
-      progreso: 10,
-      clase: 'danger'
-    },
-    {
-      nombre: 'Espinacas',
-      image: 'assets/images/products/espinacas.png',
-      vence: '3 días restantes',
-      progreso: 30,
-      clase: 'warning'
-    }
-  ];
-
-
-  // =====================================================
-  // DISTRIBUCIÓN
-  // =====================================================
-
-  distributionLegend = [
-    {
-      color: 'primary',
-      label: 'Lácteos & Huevos',
-      percent: 65
-    },
-    {
-      color: 'secondary',
-      label: 'Vegetales',
-      percent: 20
-    },
-    {
-      color: 'tertiary',
-      label: 'Proteínas',
-      percent: 15
-    }
-  ];
-
-
-  // =====================================================
-  // RECETAS
-  // =====================================================
-
-  recipeSuggestions = [
-    {
-      title: 'Omelette Cremoso de Espinacas',
-      description: 'Receta recomendada',
-      variant: 'green',
-      image: 'assets/images/recipes/omeleet.png'
-    },
-    {
-      title: 'Quiche de Tres Quesos',
-      description: 'Lácteos por vencer',
-      variant: 'orange',
-      image: 'assets/images/recipes/quiche.jpg'
-    }
-  ];
-
-
-  // =====================================================
-  // ESTADO DE DISPOSITIVOS
-  // Después lo conectaremos a la tabla devices.
-  // =====================================================
-
-  deviceStatus = {
-
-    esp: {
-      label: 'ESP32 STATUS',
-      value: 'Online',
-      state: 'online'
-    },
-
-    camera: {
-      label: 'CÁMARA',
-      value: 'Activa',
-      state: 'online'
-    },
-
-    wifi: {
-      label: 'WIFI',
-      value: 'Excelente',
-      state: 'online'
-    },
-
-    temperature: {
-      label: 'TEMPERATURA',
-      value: '3°C Óptima',
-      state: 'online'
-    },
-
-    lastSync: 'Hace 2 min'
-
-  };
-
-
-  // =====================================================
-  // ACTIVIDAD RECIENTE
-  // =====================================================
-
-  recentActivity = [
-    {
-      icon: this.syncOutline,
-      title: 'Inventario actualizado',
-      subtitle: 'Hoy, 10:45 AM',
-      time: 'Ahora',
-      variant: 'primary'
-    },
-    {
-      icon: this.cartOutline,
-      title: 'Producto agregado',
-      subtitle: 'Hoy, 09:12 AM',
-      time: 'Reciente',
-      variant: 'success'
-    },
-    {
-      icon: this.alertCircleOutline,
-      title: 'Alerta de vencimiento',
-      subtitle: 'Ayer, 06:30 PM',
-      time: 'Ayer',
-      variant: 'warning'
-    }
-  ];
-
-
-  // =====================================================
-  // INVENTARIO
-  // Ahora los productos vienen de Supabase.
-  // =====================================================
 
   productos: ProductoInventario[] = [];
-
   productosFiltrados: ProductoInventario[] = [];
 
-
-  // =====================================================
-  // MENÚ INFERIOR
-  // =====================================================
-
   bottomNavItems = [
-    {
-      id: 'inventory',
-      label: 'Inventario',
-      icon: cubeOutline,
-      path: '/inventario',
-      active: true
-    },
-    {
-      id: 'shopping',
-      label: 'Lista de Compras',
-      icon: cartOutline,
-      path: '/lista-compras',
-      active: false
-    },
-    {
-      id: 'sync',
-      label: 'Sincronizar',
-      icon: syncOutline,
-      path: '/comparacion',
-      active: false
-    },
-    {
-      id: 'history',
-      label: 'Historial',
-      icon: timeOutline,
-      path: '/historial',
-      active: false
-    },
-    {
-      id: 'alerts',
-      label: 'Alertas',
-      icon: notificationsOutline,
-      path: '/alertas',
-      active: false
-    }
+    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: true },
+    { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
+    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
+    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
+    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
   ];
-
-
-  // =====================================================
-  // CONSTRUCTOR
-  // =====================================================
 
   constructor(
     private router: Router,
@@ -396,701 +75,134 @@ export class InventarioPage implements OnInit {
     private authService: AuthService,
     private refrigeradorService: RefrigeradorService
   ) {
-
-    addIcons({
-      snowOutline,
-      settingsOutline,
-      searchOutline,
-      filterOutline,
-      calendarOutline,
-      createOutline,
-      trashOutline,
-      addOutline,
-      cubeOutline,
-      cartOutline,
-      syncOutline,
-      timeOutline,
-      notificationsOutline,
-      analyticsOutline,
-      alertCircleOutline,
-      barChartOutline,
-      wifiOutline,
-      cameraOutline
-    });
-
+    addIcons({ snowOutline, settingsOutline, searchOutline, filterOutline, calendarOutline, createOutline, trashOutline, addOutline, cubeOutline, cartOutline, syncOutline, timeOutline, notificationsOutline, analyticsOutline, alertCircleOutline, barChartOutline, wifiOutline, cameraOutline });
   }
 
-
-  // =====================================================
-  // INICIO DE LA PÁGINA
-  // =====================================================
-
-  async ngOnInit() {
-
+  // 1. REEMPLAZO DE ngOnInit por ionViewWillEnter (Se ejecuta siempre que entras a la pantalla)
+  async ionViewWillEnter() {
     const session = await this.authService.getSession();
-
     if (!session) {
       await this.router.navigate(['/login']);
       return;
     }
-
     const tieneRefri = await this.refrigeradorService.tieneRefrigerador();
     if (!tieneRefri) {
       await this.router.navigate(['/registro-refri']);
       return;
     }
-
     await this.cargarInventario();
-
   }
-
-
-  // =====================================================
-  // OBTENER INVENTARIO DESDE SUPABASE
-  // =====================================================
 
   async cargarInventario() {
-
     try {
-
       const data = await this.inventoryService.getInventory();
+      
+      this.productos = (data ?? []).map((item: any): ProductoInventario => {
+        const estadoVisual = this.obtenerEstadoVisual(item);
+        return {
+          id: item.id,
+          nombre: item.product_name ?? 'Producto',
+          cantidad: `${item.quantity ?? 0} ${item.unit ?? ''}`.trim(),
+          categoria: this.normalizarCategoria(item), // 2. Modificado para analizar todo el item
+          estado: estadoVisual,
+          etiquetaEstado: this.obtenerEtiquetaEstado(estadoVisual),
+          vencimiento: this.formatearVencimiento(item.days_to_expiry, item.expires_on),
+          imagen: this.obtenerImagenProducto(item),
+          fuente: item.source === 'ai' ? 'ai' : 'manual'
+        };
+      });
 
-      console.log(
-        'Datos recibidos de Supabase:',
-        data
-      );
-
-
-      this.productos = (data ?? []).map(
-        (item: any): ProductoInventario => {
-
-          const estadoVisual =
-            this.obtenerEstadoVisual(item);
-
-          return {
-
-            id: item.id,
-
-            nombre:
-              item.product_name ?? 'Producto',
-
-            cantidad:
-              `${item.quantity ?? 0} ${item.unit ?? ''}`.trim(),
-
-            categoria:
-              this.normalizarCategoria(
-                item.category_name
-              ),
-
-            estado:
-              estadoVisual,
-
-            etiquetaEstado:
-              this.obtenerEtiquetaEstado(
-                estadoVisual
-              ),
-
-            vencimiento:
-              this.formatearVencimiento(
-                item.days_to_expiry,
-                item.expires_on
-              ),
-
-            imagen:
-              this.obtenerImagenProducto(item),
-
-            fuente:
-              item.source === 'ai' ? 'ai' : 'manual'
-
-          };
-
-        }
-      );
-
-
-      this.totalProductos =
-        this.productos.length;
-
-
-      this.productosFiltrados = [
-        ...this.productos
-      ];
-
-
-      console.log(
-        'Inventario preparado:',
-        this.productos
-      );
-
+      this.totalProductos = this.productos.length;
+      this.aplicarFiltros();
     } catch (error) {
-
-      console.error(
-        'Error cargando inventario desde Supabase:',
-        error
-      );
-
-      this.productos = [];
-
-      this.productosFiltrados = [];
-
-      this.totalProductos = 0;
-
+      console.error('Error cargando inventario:', error);
     }
-
   }
 
+  // 3. NUEVA LÓGICA DE ETIQUETAS: Busca en la categoría y en el nombre del producto
+  normalizarCategoria(item: any): string {
+    const catName = (item.category_name || '').toLowerCase();
+    const prodName = (item.product_name || '').toLowerCase();
 
-  // =====================================================
-  // NORMALIZAR CATEGORÍAS DE SUPABASE
-  // =====================================================
-
-  normalizarCategoria(
-    categoria: string | null | undefined
-  ): string {
-
-    if (!categoria) {
-      return 'otros';
-    }
-
-
-    const nombre = categoria
-
-      .normalize('NFD')
-
-      .replace(
-        /[\u0300-\u036f]/g,
-        ''
-      )
-
-      .toLowerCase();
-
-
-    if (
-      nombre.includes('lacteo') ||
-      nombre.includes('huevo')
-    ) {
-
-      return 'lacteos';
-
-    }
-
-
-    if (
-      nombre.includes('fruta') ||
-      nombre.includes('verdura') ||
-      nombre.includes('vegetal')
-    ) {
-
-      return 'vegetales';
-
-    }
-
-
-    if (
-      nombre.includes('carne') ||
-      nombre.includes('proteina')
-    ) {
-
-      return 'carnes';
-
-    }
-
-
-    if (
-      nombre.includes('bebida') ||
-      nombre.includes('refresco') ||
-      nombre.includes('jugo')
-    ) {
-
-      return 'bebidas';
-
-    }
-
+    if (catName.includes('lácteo') || catName.includes('lacteo') || prodName.includes('leche') || prodName.includes('queso') || prodName.includes('yogurt') || prodName.includes('huevo')) return 'lacteos';
+    if (catName.includes('fruta') || catName.includes('verdura') || prodName.includes('tomate') || prodName.includes('espinaca') || prodName.includes('apio') || prodName.includes('platano')) return 'vegetales';
+    if (catName.includes('carne') || catName.includes('proteína') || prodName.includes('pollo')) return 'carnes';
+    if (catName.includes('bebida') || prodName.includes('agua') || prodName.includes('refresco')) return 'bebidas';
 
     return 'otros';
-
   }
 
-
-  // =====================================================
-  // CONVERTIR ESTADO DE SUPABASE AL DISEÑO
-  // =====================================================
-
-  obtenerEstadoVisual(
-    item: any
-  ): 'critical' | 'soon' | 'fresh' {
-
-    if (
-      item.status === 'caducado'
-    ) {
-
-      return 'critical';
-
-    }
-
-
-    if (
-      item.status === 'agotado'
-    ) {
-
-      return 'critical';
-
-    }
-
-
-    const dias =
-      item.days_to_expiry;
-
-
-    if (
-      dias === null ||
-      dias === undefined
-    ) {
-
-      return 'fresh';
-
-    }
-
-
-    if (
-      Number(dias) <= 1
-    ) {
-
-      return 'critical';
-
-    }
-
-
-    if (
-      Number(dias) <= 3
-    ) {
-
-      return 'soon';
-
-    }
-
-
+  obtenerEstadoVisual(item: any): 'critical' | 'soon' | 'fresh' {
+    if (item.status === 'caducado' || item.status === 'agotado') return 'critical';
+    const dias = item.days_to_expiry;
+    if (dias == null) return 'fresh';
+    if (Number(dias) <= 1) return 'critical';
+    if (Number(dias) <= 3) return 'soon';
     return 'fresh';
-
   }
 
-
-  // =====================================================
-  // ETIQUETA VISUAL
-  // =====================================================
-
-  obtenerEtiquetaEstado(
-    estado: 'critical' | 'soon' | 'fresh'
-  ): string {
-
+  obtenerEtiquetaEstado(estado: 'critical' | 'soon' | 'fresh'): string {
     switch (estado) {
-
-      case 'critical':
-
-        return 'CRITICAL';
-
-
-      case 'soon':
-
-        return 'SOON';
-
-
-      default:
-
-        return 'FRESH';
-
+      case 'critical': return 'CRITICAL';
+      case 'soon': return 'SOON';
+      default: return 'FRESH';
     }
-
   }
 
-
-  // =====================================================
-  // FORMATEAR FECHA DE VENCIMIENTO
-  // =====================================================
-
-  formatearVencimiento(
-    dias: number | null | undefined,
-    fecha: string | null | undefined
-  ): string {
-
-    if (!fecha) {
-
-      return 'Sin fecha de vencimiento';
-
-    }
-
-
-    if (
-      dias === null ||
-      dias === undefined
-    ) {
-
-      return `Vence: ${fecha}`;
-
-    }
-
-
-    const diasNumero =
-      Number(dias);
-
-
-    if (
-      diasNumero < 0
-    ) {
-
-      return 'Caducado';
-
-    }
-
-
-    if (
-      diasNumero === 0
-    ) {
-
-      return 'Vence: Hoy';
-
-    }
-
-
-    if (
-      diasNumero === 1
-    ) {
-
-      return 'Expires: Tomorrow';
-
-    }
-
-
-    if (
-      diasNumero <= 7
-    ) {
-
-      return `Exp: ${diasNumero} days left`;
-
-    }
-
-
-    const fechaFormateada =
-      new Date(
-        `${fecha}T00:00:00`
-      ).toLocaleDateString(
-        'es-MX',
-        {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
-        }
-      );
-
-
-    return `Exp: ${fechaFormateada}`;
-
+  formatearVencimiento(dias: number | null | undefined, fecha: string | null | undefined): string {
+    if (!fecha) return 'Sin fecha de vencimiento';
+    if (dias == null) return `Vence: ${fecha}`;
+    const diasNumero = Number(dias);
+    if (diasNumero < 0) return 'Caducado';
+    if (diasNumero === 0) return 'Vence: Hoy';
+    if (diasNumero <= 7) return `Exp: en ${diasNumero} día(s)`;
+    return `Exp: ${new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}`;
   }
 
-
-  // =====================================================
-  // IMÁGENES DE PRODUCTOS
-  // =====================================================
-
-  obtenerImagenProducto(
-    item: any
-  ): string {
-
-    if (
-      item.product_image_path &&
-      (
-        item.product_image_path.startsWith('http://') ||
-        item.product_image_path.startsWith('https://')
-      )
-    ) {
-
-      return item.product_image_path;
-
-    }
-
-
-    if (
-      item.image_path &&
-      (
-        item.image_path.startsWith('http://') ||
-        item.image_path.startsWith('https://')
-      )
-    ) {
-
-      return item.image_path;
-
-    }
-
-
-    const nombre =
-      (item.product_name ?? '')
-        .toLowerCase();
-
-
-    if (
-      nombre.includes('leche')
-    ) {
-
-      return 'assets/images/products/lecheentera.webp';
-
-    }
-
-
-    if (
-      nombre.includes('espinaca')
-    ) {
-
-      return 'assets/images/products/espinacas.png';
-
-    }
-
-
+  obtenerImagenProducto(item: any): string {
+    if (item.product_image_path && /^https?:\/\//i.test(item.product_image_path)) return item.product_image_path;
+    if (item.image_path && /^https?:\/\//i.test(item.image_path)) return item.image_path;
+    const nombre = (item.product_name ?? '').toLowerCase();
+    if (nombre.includes('leche')) return 'assets/images/products/lecheentera.webp';
+    if (nombre.includes('espinaca')) return 'assets/images/products/espinacas.png';
     return 'assets/images/products/default-product.png';
-
   }
 
-
-  onImageError(
-    event: any
-  ) {
-
-    event.target.src =
-      'assets/images/products/default-product.png';
-
-    const imgElement = event.target as HTMLImageElement;
-
-    // 1. Desactivamos el handler de error para DETENER el bucle infinito inmediatamente
-    imgElement.onerror = null;
-
-    // 2. Asignamos un icono vectorial SVG integrado (no genera peticiones HTTP ni 404)
-    imgElement.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Crect x="3" y="3" width="18" height="18" rx="4" fill="%23f1f5f9" stroke="none"/%3E%3Cpath d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/%3E%3Cpolyline points="3.27 6.96 12 12.01 20.73 6.96"/%3E%3Cline x1="12" y1="22.08" x2="12" y2="12"/%3E%3C/svg%3E';
+  onImageError(event: any) {
+    event.target.onerror = null;
+    event.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Crect x="3" y="3" width="18" height="18" rx="4" fill="%23f1f5f9" stroke="none"/%3E%3Cpath d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/%3E%3Cpolyline points="3.27 6.96 12 12.01 20.73 6.96"/%3E%3Cline x1="12" y1="22.08" x2="12" y2="12"/%3E%3C/svg%3E';
   }
 
-
-  // =====================================================
-  // ACCIONES RÁPIDAS
-  // =====================================================
-
-  ejecutarAccion(
-    action: string
-  ) {
-
-    switch (action) {
-
-      case 'sync':
-
-        this.router.navigate([
-          '/comparacion'
-        ]);
-
-        break;
-
-
-      case 'scan':
-
-        this.router.navigate([
-          '/escaneo-inteligente'
-        ]);
-
-        break;
-
-
-      case 'stats':
-
-        this.router.navigate([
-          '/estadisticas'
-        ]);
-
-        break;
-
-
-      case 'alerts':
-
-        this.router.navigate([
-          '/alertas'
-        ]);
-
-        break;
-
-    }
-
-  }
-
-
-  // =====================================================
-  // NAVEGACIÓN
-  // =====================================================
-
-  irADashboard() {
-
-    // Redirige al Dashboard de inicio
-    this.router.navigate([
-      '/dashboard'
-    ]);
-
-  }
-
-
-  irAConfiguracion() {
-
-    this.router.navigate([
-      '/configuracion'
-    ]);
-
-  }
-
-
-  buscar() {
-
-    console.log(
-      'Abrir búsqueda de inventario'
-    );
-
-  }
-
-
-  irA(
-    ruta: string
-  ) {
-
-    this.router.navigate([
-      ruta
-    ]);
-
-  }
-
-
-  navegar(
-    item: any
-  ) {
-
-    if (
-      item.path
-    ) {
-
-      this.router.navigate([
-        item.path
-      ]);
-
-    }
-
-  }
-
-
-  // =====================================================
-  // FILTROS
-  // =====================================================
-
-  seleccionarCategoria(
-    catId: string
-  ) {
-
-    this.categoriaSeleccionada =
-      catId;
-
+  seleccionarCategoria(catId: string) {
+    this.categoriaSeleccionada = catId;
     this.aplicarFiltros();
-
   }
-
 
   aplicarFiltros() {
-
-    const busqueda =
-      (this.textoBusqueda || '')
-        .trim()
-        .toLowerCase();
-
-
-    this.productosFiltrados =
-      this.productos.filter(
-        item => {
-
-          const coincideBusqueda =
-            item.nombre
-              .toLowerCase()
-              .includes(
-                busqueda
-              );
-
-
-          const coincideCategoria =
-            this.categoriaSeleccionada ===
-              'todos' ||
-
-            item.categoria ===
-              this.categoriaSeleccionada;
-
-
-          return (
-            coincideBusqueda &&
-            coincideCategoria
-          );
-
-        }
-      );
-
+    const busqueda = (this.textoBusqueda || '').trim().toLowerCase();
+    this.productosFiltrados = this.productos.filter(item => {
+      const coincideBusqueda = item.nombre.toLowerCase().includes(busqueda);
+      const coincideCategoria = this.categoriaSeleccionada === 'todos' || item.categoria === this.categoriaSeleccionada;
+      return coincideBusqueda && coincideCategoria;
+    });
   }
 
-
-  // =====================================================
-  // PRODUCTOS
-  // =====================================================
-
-  agregarProducto() {
-
-    this.router.navigate([
-      '/agregar-producto'
-    ]);
-
-  }
-
-
-  editarProducto(
-    item: ProductoInventario
-  ) {
-
-    console.log(
-      'Editar producto:',
-      item.nombre
-    );
-
-  }
-
-
-  async eliminarProducto(
-    item: ProductoInventario
-  ) {
-
+  async eliminarProducto(item: ProductoInventario) {
     try {
-
-      // Llama a Supabase para eliminar el ítem real
-      await this.inventoryService.deleteItem(
-        item.id
-      );
-
-
-      this.productos =
-        this.productos.filter(
-          producto =>
-            producto.id !== item.id
-        );
-
-
-      this.totalProductos =
-        this.productos.length;
-
-
+      await this.inventoryService.deleteItem(item.id);
+      this.productos = this.productos.filter(producto => producto.id !== item.id);
+      this.totalProductos = this.productos.length;
       this.aplicarFiltros();
-
     } catch (error) {
-
-      console.error(
-        'Error al eliminar el producto:',
-        error
-      );
-
+      console.error('Error al eliminar:', error);
     }
-
   }
 
+  agregarProducto() { this.router.navigate(['/agregar-producto']); }
+  editarProducto(item: ProductoInventario) { console.log('Editar:', item.nombre); }
+  irADashboard() { this.router.navigate(['/dashboard']); }
+  irAConfiguracion() { this.router.navigate(['/configuracion']); }
+  buscar() {}
+  irA(ruta: string) { this.router.navigate([ruta]); }
+  navegar(item: any) { if (item.path) this.router.navigate([item.path]); }
 }
