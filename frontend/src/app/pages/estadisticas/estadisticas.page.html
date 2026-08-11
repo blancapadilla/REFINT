@@ -1,433 +1,168 @@
-<ion-content
-  [scrollY]="true"
-  class="stats-content"
->
-
+<ion-content [scrollY]="true" class="stats-content">
   <div class="stats-container">
 
-    <!-- HEADER -->
-
-    <app-header
-      title="Estadísticas"
-      [showSearch]="false"
-      [showSettings]="true"
-      (settings)="irAConfig()"
-    >
-    </app-header>
-
-
-    <!-- ENCABEZADO -->
+    <!-- CABECERA -->
+    <app-header title="Estadísticas" [showBack]="true" [showSettings]="true"></app-header>
 
     <main class="stats-main">
 
+      <!-- ENCABEZADO Y PERÍODO -->
       <div class="stats-title-row">
-
         <div>
-
-          <h1>
-            Estadísticas
-          </h1>
-
+          <h1>Estadísticas</h1>
           <p>
-            Resumen de consumo y
-            <br>
+            Resumen de consumo y<br>
             estado de la nevera
           </p>
-
         </div>
 
         <div class="period-card">
-
-          <ion-icon
-            name="calendar-outline"
-          >
-          </ion-icon>
-
+          <ion-icon name="calendar-outline"></ion-icon>
           <span>
-            Últimos
-            <br>
+            Últimos<br>
             30 días
           </span>
-
         </div>
-
       </div>
 
-
-      <!-- TARJETAS -->
-
+      <!-- TARJETAS DE MÉTRICAS -->
       <section class="stats-grid">
-
-        <article
-          class="metric-card"
-        >
-
-          <span class="metric-label">
-            {{ metrics[0].label }}
-          </span>
-
-          <strong>
-            {{ metrics[0].value }}
-          </strong>
-
-          <span class="metric-note success">
-            ↗ {{ metrics[0].note }}
-          </span>
-
+        <article class="metric-card" *ngIf="metrics[0]">
+          <span class="metric-label">{{ metrics[0].label }}</span>
+          <strong>{{ metrics[0].value }}</strong>
+          <span class="metric-note success">↗ {{ metrics[0].note }}</span>
         </article>
 
-
-        <article
-          class="metric-card"
-        >
-
-          <span class="metric-label">
-            {{ metrics[1].label }}
-          </span>
-
-          <strong>
-            {{ metrics[1].value }}
-          </strong>
-
-          <span class="metric-note success">
-            ⊙ {{ metrics[1].note }}
-          </span>
-
+        <article class="metric-card" *ngIf="metrics[1]">
+          <span class="metric-label">{{ metrics[1].label }}</span>
+          <strong>{{ metrics[1].value }}</strong>
+          <span class="metric-note success">⊙ {{ metrics[1].note }}</span>
         </article>
 
-
-        <article
-          class="metric-card"
-        >
-
-          <span class="metric-label">
-            {{ metrics[2].label }}
-          </span>
-
-          <strong>
-            {{ metrics[2].value }}
-          </strong>
-
-          <span class="metric-note success">
-            ↗ {{ metrics[2].note }}
-          </span>
-
+        <article class="metric-card" *ngIf="metrics[2]">
+          <span class="metric-label">{{ metrics[2].label }}</span>
+          <strong>{{ metrics[2].value }}</strong>
+          <span class="metric-note success">↗ {{ metrics[2].note }}</span>
         </article>
 
-
-        <article
-          class="metric-card"
-        >
-
-          <span class="metric-label">
-            {{ metrics[3].label }}
-          </span>
-
-          <strong>
-            {{ metrics[3].value }}
-          </strong>
-
-          <span class="metric-note danger">
-            △ Revisar
-          </span>
-
+        <article class="metric-card" *ngIf="metrics[3]">
+          <span class="metric-label">{{ metrics[3].label }}</span>
+          <strong>{{ metrics[3].value }}</strong>
+          <span class="metric-note danger">△ Revisar</span>
         </article>
-
       </section>
 
-
-      <!-- ================================= -->
-      <!-- TENDENCIA -->
-      <!-- ================================= -->
-
+      <!-- TENDENCIA DE CONSUMO SEMANAL (SVG) -->
       <section class="chart-card">
-
         <div class="chart-header">
-
-          <h2>
-            Tendencia de Consumo Semanal
-          </h2>
-
+          <h2>Tendencia de Consumo Semanal</h2>
         </div>
 
-
         <div class="line-chart">
-
           <div class="line-grid">
-
             <span></span>
             <span></span>
             <span></span>
             <span></span>
             <span></span>
-
           </div>
 
-
-          <svg
-            class="trend-svg"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
-
+          <svg class="trend-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
             <polyline
               class="trend-area"
-              [attr.points]="
-                '5,90 ' +
-                getTrendSvgPoints() +
-                ' 95,90'
-              "
-            >
-            </polyline>
-
+              [attr.points]="'5,90 ' + getTrendSvgPoints() + ' 95,90'"
+            ></polyline>
 
             <polyline
               class="trend-line"
-              [attr.points]="
-                getTrendSvgPoints()
-              "
-            >
-            </polyline>
-
+              [attr.points]="getTrendSvgPoints()"
+            ></polyline>
 
             <circle
-              *ngFor="
-                let point of trendPoints
-              "
+              *ngFor="let point of trendPoints"
               class="trend-point"
               [attr.cx]="point.x"
               [attr.cy]="point.y"
               r="1.5"
-            >
-            </circle>
-
+            ></circle>
           </svg>
 
-
           <div class="trend-labels">
-
-            <div
-              *ngFor="
-                let point of trendPoints
-              "
-              class="trend-label"
-            >
-
-              <strong>
-                {{ point.count }}
-              </strong>
-
-              <span>
-                {{ point.day }}
-              </span>
-
+            <div *ngFor="let point of trendPoints" class="trend-label">
+              <strong>{{ point.count }}</strong>
+              <span>{{ point.day }}</span>
             </div>
-
           </div>
-
         </div>
-
       </section>
 
-
-      <!-- ================================= -->
-      <!-- PRODUCTOS -->
-      <!-- ================================= -->
-
-      <section
-        class="chart-card small-card"
-      >
-
-        <h2>
-          Productos Más Consumidos
-        </h2>
-
+      <!-- PRODUCTOS MÁS CONSUMIDOS -->
+      <section class="chart-card small-card">
+        <h2>Productos Más Consumidos</h2>
 
         <div class="product-chart">
-
-          <div
-            *ngFor="
-              let product of topProducts
-            "
-            class="product-column"
-          >
-
-            <div class="product-value">
-              {{ product.quantity }}
-            </div>
-
+          <div *ngFor="let product of topProducts" class="product-column">
+            <div class="product-value">{{ product.quantity }}</div>
 
             <div class="product-bar-area">
-
               <div
                 class="product-bar"
-                [style.height.%]="
-                  (product.quantity /
-                  maxProductQuantity) * 100
-                "
-              >
-              </div>
-
+                [style.height.%]="(product.quantity / maxProductQuantity) * 100"
+              ></div>
             </div>
 
-
-            <span
-              class="product-name"
-            >
-              {{
-                shortProductName(
-                  product.name
-                )
-              }}
+            <span class="product-name">
+              {{ shortProductName(product.name) }}
             </span>
-
           </div>
-
         </div>
-
       </section>
 
-
-      <!-- ================================= -->
-      <!-- CADUCIDAD -->
-      <!-- ================================= -->
-
-      <section
-        class="chart-card small-card"
-      >
-
-        <h2>
-          Estado de Caducidad
-        </h2>
-
+      <!-- ESTADO DE CADUCIDAD (DONUT CHART) -->
+      <section class="chart-card small-card">
+        <h2>Estado de Caducidad</h2>
 
         <div class="donut-legend">
-
-
-          <div
-            class="donut-chart"
-            [style.background]="
-              getDonutBackground()
-            "
-          >
-
-            <div
-              class="donut-center"
-            >
-
+          <div class="donut-chart" [style.background]="getDonutBackground()">
+            <div class="donut-center">
               <strong>
-                {{
-                  expiryCounts.fresh +
-                  expiryCounts.soon +
-                  expiryCounts.critical
-                }}
+                {{ expiryCounts.fresh + expiryCounts.soon + expiryCounts.critical }}
               </strong>
-
-              <span>
-                Productos
-              </span>
-
+              <span>Productos</span>
             </div>
-
           </div>
-
 
           <div class="legend-list">
-
-
-            <div
-              class="legend-item"
-            >
-
-              <span
-                class="legend-swatch green"
-              >
-              </span>
-
+            <div class="legend-item">
+              <span class="legend-swatch green"></span>
               <div>
-
-                <strong>
-                  Seguro
-                </strong>
-
-                <span>
-                  (>7 días)
-                </span>
-
+                <strong>Seguro</strong>
+                <span>(>7 días)</span>
               </div>
-
-              <b>
-                {{ expiryCounts.fresh }}
-              </b>
-
+              <b>{{ expiryCounts.fresh }}</b>
             </div>
 
-
-            <div
-              class="legend-item"
-            >
-
-              <span
-                class="legend-swatch blue"
-              >
-              </span>
-
+            <div class="legend-item">
+              <span class="legend-swatch blue"></span>
               <div>
-
-                <strong>
-                  Atención
-                </strong>
-
-                <span>
-                  (3-7 días)
-                </span>
-
+                <strong>Atención</strong>
+                <span>(3-7 días)</span>
               </div>
-
-              <b>
-                {{ expiryCounts.soon }}
-              </b>
-
+              <b>{{ expiryCounts.soon }}</b>
             </div>
 
-
-            <div
-              class="legend-item"
-            >
-
-              <span
-                class="legend-swatch red"
-              >
-              </span>
-
+            <div class="legend-item">
+              <span class="legend-swatch red"></span>
               <div>
-
-                <strong>
-                  Crítico
-                </strong>
-
-                <span>
-                  (&lt;3 días)
-                </span>
-
+                <strong>Crítico</strong>
+                <span>(&lt;3 días)</span>
               </div>
-
-              <b>
-                {{ expiryCounts.critical }}
-              </b>
-
+              <b>{{ expiryCounts.critical }}</b>
             </div>
-
-
           </div>
-
         </div>
-
       </section>
 
-
     </main>
-
   </div>
-
 </ion-content>
