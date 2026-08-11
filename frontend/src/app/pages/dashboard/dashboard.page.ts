@@ -24,6 +24,7 @@ import {
 export class DashboardPage {
   usuario = 'Vanessa';
   totalProductos = 0;
+  totalUnidades = 0;
   chartGradient = 'conic-gradient(#e2e8f0 0% 100%)';
   temperatura = '3';
 
@@ -123,13 +124,16 @@ export class DashboardPage {
       });
 
       // 3. GRÁFICA DE DISTRIBUCIÓN DINÁMICA
+      // 3. GRÁFICA DE DISTRIBUCIÓN DINÁMICA
       const distData = await this.dashboardService.getInventoryDistribution();
       let lacteos = 0, vegetales = 0, proteinas = 0, otros = 0, totalChart = 0;
 
       distData.forEach((item: any) => {
         const catName = (item.category_name || '').toLowerCase();
         const prodName = (item.product_name || '').toLowerCase();
-        const qty = Number(item.quantity || 1);
+        
+        // Sumamos la CANTIDAD real del producto (ej. 12 papas + 6 tomates)
+        const qty = Number(item.quantity ?? 0); 
         totalChart += qty;
 
         if (catName.includes('lácteo') || catName.includes('lacteo') || prodName.includes('leche') || prodName.includes('queso') || prodName.includes('yogurt')) lacteos += qty;
@@ -137,6 +141,9 @@ export class DashboardPage {
         else if (catName.includes('carne') || catName.includes('proteína') || prodName.includes('pollo')) proteinas += qty;
         else otros += qty;
       });
+
+      // Guardamos el total físico para mostrarlo en el centro de la dona
+      this.totalUnidades = totalChart;
 
       if (totalChart > 0) {
         const pLacteos = Math.round((lacteos / totalChart) * 100);
@@ -163,16 +170,18 @@ export class DashboardPage {
           stops.push(`#006229 ${currentPct}% ${currentPct + pProteinas}%`);
           currentPct += pProteinas;
         }
+        // Agregamos la categoría "Otros" visualmente a la leyenda
         if (pOtros > 0) {
+          this.distributionLegend.push({ color: 'gray', label: 'Otros (Snacks, Bebidas)', percent: pOtros });
           stops.push(`#94a3b8 ${currentPct}% 100%`);
         }
+        
         this.chartGradient = stops.length > 0 ? `conic-gradient(${stops.join(', ')})` : 'conic-gradient(#e2e8f0 0% 100%)';
       } else {
         this.distributionLegend = [];
         this.chartGradient = 'conic-gradient(#e2e8f0 0% 100%)';
       }
-
-    } catch (error) {
+     } catch (error) {
       console.error('Error al cargar datos del Dashboard:', error);
     }
   }

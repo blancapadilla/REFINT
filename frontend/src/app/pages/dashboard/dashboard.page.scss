@@ -623,3 +623,14 @@
     transform: scale(0.99);
   }
 }
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  &.legend-primary { background: #004ac6; }
+  &.legend-secondary { background: #64a8fe; }
+  &.legend-tertiary { background: #007e37; }
+  &.legend-gray { background: #94a3b8; } /* <-- Nueva línea para "Otros" */
+}
