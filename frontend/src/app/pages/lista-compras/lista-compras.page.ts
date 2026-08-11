@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular'; // 👈 IMPORTANTE AÑADIR
+import { trashOutline, checkmarkOutline /* ... tus otros iconos ... */ } from 'ionicons/icons';
 
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 
@@ -111,10 +113,13 @@ export class ListaComprasPage implements OnInit {
 
   constructor(
     private router: Router,
-    private comprasService: ComprasService
+    private comprasService: ComprasService,
+    private alertController: AlertController
   ) {
 
     addIcons({
+      trashOutline, 
+      checkmarkOutline,
       settingsOutline,
       sparklesOutline,
       trendingDownOutline,
@@ -279,13 +284,56 @@ export class ListaComprasPage implements OnInit {
   // ==========================================
   // AGREGAR PRODUCTO
   // ==========================================
+async agregarItem() {
+    const alert = await this.alertController.create({
+      header: 'Añadir a la lista',
+      message: '¿Qué necesitas comprar?',
+      inputs: [
+        {
+          name: 'producto',
+          type: 'text',
+          placeholder: 'Ej. Manzanas, Jabón, Leche...'
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Agregar',
+          handler: async (data) => {
+            if (data.producto && data.producto.trim() !== '') {
+              try {
+                await this.comprasService.agregarItemManual(data.producto);
+                await this.cargarLista(); // Refresca la lista para mostrar el nuevo
+              } catch (e) {
+                console.error(e);
+              }
+            }
+          }
+        }
+      ]
+    });
 
-  agregarItem() {
+    await alert.present();
+  }
 
-    this.router.navigate([
-      '/agregar-producto'
-    ]);
 
+  // ==========================================
+  // ELIMINAR DE LA LISTA
+  // ==========================================
+  async eliminarDeLista(item: ItemCompra, event: Event) {
+    event.stopPropagation(); // Evita que se marque el checkbox por accidente
+    
+    // Quita el foco para evitar el warning 'Blocked aria-hidden'
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
+    try {
+      await this.comprasService.eliminarItem(item.id);
+      await this.cargarLista(); // Refresca la lista para quitarlo visualmente
+    } catch (error) {
+      console.error('Error al eliminar', error);
+    }
   }
 
   // ==========================================

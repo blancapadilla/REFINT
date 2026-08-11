@@ -300,4 +300,70 @@ export class ComprasService {
       'La generación automática se realizará posteriormente.'
     );
   }
+
+  // ==========================================
+  // ELIMINAR PRODUCTO DE LA LISTA
+  // ==========================================
+  async eliminarItem(itemId: string): Promise<void> {
+    const { error } = await this.supabase.client
+      .from('shopping_list_items')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) {
+      console.error('Error eliminando item:', error);
+      throw error;
+    }
+  }
+
+  // ==========================================
+  // AGREGAR PRODUCTO MANUAL A LA LISTA
+  // ==========================================
+  async agregarItemManual(nombreProducto: string): Promise<void> {
+    // 1. Obtener la lista activa
+    let { data: listas } = await this.supabase.client
+      .from('shopping_lists')
+      .select('id')
+      .eq('status', 'active')
+      .limit(1);
+
+    // Si no hay lista activa, la protección de la BD requerirá crear una (asumiendo que ya hay una, tomamos el ID)
+    if (!listas || listas.length === 0) throw new Error("No hay lista activa");
+    const listaId = listas[0].id;
+
+    // 2. Buscar si el producto ya existe en el catálogo global
+    let productId: string;
+    const { data: prodExistente } = await this.supabase.client
+      .from('products')
+      .select('id')
+      .ilike('name', nombreProducto.trim())
+      .limit(1)
+      .maybeSingle();
+
+    if (prodExistente) {
+      productId = prodExistente.id;
+    } else {
+      // 3. Si no existe, lo creamos rápido en el catálogo de productos
+      const { data: nuevoProd, error: prodErr } = await this.supabase.client
+        .from('products')
+        .insert({ name: nombreProducto.trim(), default_unit: 'unidad' })
+        .select('id')
+        .single();
+      
+      if (prodErr) throw prodErr;
+      productId = nuevoProd.id;
+    }
+
+    // 4. Agregarlo a la lista de compras
+    const { error: insertErr } = await this.supabase.client
+      .from('shopping_list_items')
+      .insert({
+        shopping_list_id: listaId,
+        product_id: productId,
+        desired_quantity: 1,
+        is_auto_generated: false
+      });
+
+    if (insertErr) throw insertErr;
+  }
 }
