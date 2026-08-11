@@ -274,7 +274,7 @@
       <div class="bottom-space"></div>
     </main>
 
-    <!-- BARRA INFERIOR DE NAVEGACIÓN -->
+    <!-- BARRA INFERIOR DE NAVEGACIÓN ESTÁNDAR -->
     <nav class="bottom-nav">
       <button
         *ngFor="let item of bottomNavItems"
@@ -283,7 +283,7 @@
         [class.active]="item.active"
         (click)="navegar(item)"
       >
-        <span class="nav-icon-wrap" [class.pill-active]="item.active">
+        <span class="nav-icon-wrap">
           <ion-icon [icon]="item.icon"></ion-icon>
         </span>
         <span>{{ item.label }}</span>

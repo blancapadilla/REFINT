@@ -50,13 +50,13 @@ export class AlertasPage implements OnInit {
   alertCircleOutline = alertCircleOutline;
   timeOutline = timeOutline;
   checkmarkCircleOutline = checkmarkCircleOutline;
-
-  bottomNavItems = [
-    { id: 'inventory', label: 'Inventario', icon: cubeOutline, active: false, path: '/inventario' },
-    { id: 'shopping', label: 'Lista de compras', icon: cartOutline, active: false, path: '/lista-compras' },
-    { id: 'sync', label: 'Sincronizar', icon: syncOutline, active: false, path: '/comparacion' },
-    { id: 'history', label: 'Historial', icon: timeOutline, active: false, path: '/historial' },
-    { id: 'alerts', label: 'Alertas', icon: notifications, active: true, path: '/alertas' }
+  
+bottomNavItems = [
+    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
+    { id: 'shopping', label: 'Compras', icon: cartOutline, path: '/lista-compras', active: false },
+    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
+    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
+    { id: 'alerts', label: 'Alertas', icon: notifications, path: '/alertas', active: true }
   ];
 
   constructor(

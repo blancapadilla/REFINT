@@ -67,41 +67,11 @@ export class ListaComprasPage implements OnInit {
   guardandoItem = false;
 
   bottomNavItems = [
-    {
-      id: 'inventory',
-      label: 'Inventario',
-      icon: cubeOutline,
-      path: '/inventario',
-      active: false
-    },
-    {
-      id: 'shopping',
-      label: 'Lista de Compras',
-      icon: cartOutline,
-      path: '/lista-compras',
-      active: true
-    },
-    {
-      id: 'sync',
-      label: 'Sincronizar',
-      icon: syncOutline,
-      path: '/comparacion',
-      active: false
-    },
-    {
-      id: 'history',
-      label: 'Historial',
-      icon: timeOutline,
-      path: '/historial',
-      active: false
-    },
-    {
-      id: 'alerts',
-      label: 'Alertas',
-      icon: notificationsOutline,
-      path: '/alertas',
-      active: false
-    }
+    { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: false },
+    { id: 'shopping', label: 'Compras', icon: cartOutline, path: '/lista-compras', active: true },
+    { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
+    { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
+    { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
   ];
 
   constructor(

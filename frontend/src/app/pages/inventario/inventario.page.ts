@@ -63,7 +63,7 @@ export class InventarioPage {
 
   bottomNavItems = [
     { id: 'inventory', label: 'Inventario', icon: cubeOutline, path: '/inventario', active: true },
-    { id: 'shopping', label: 'Lista de Compras', icon: cartOutline, path: '/lista-compras', active: false },
+    { id: 'shopping', label: 'Compras', icon: cartOutline, path: '/lista-compras', active: false },
     { id: 'sync', label: 'Sincronizar', icon: syncOutline, path: '/comparacion', active: false },
     { id: 'history', label: 'Historial', icon: timeOutline, path: '/historial', active: false },
     { id: 'alerts', label: 'Alertas', icon: notificationsOutline, path: '/alertas', active: false }
