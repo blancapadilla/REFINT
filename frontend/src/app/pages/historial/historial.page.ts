@@ -29,7 +29,7 @@ export class HistorialPage implements OnInit {
 
   bottomNavItems = [
     { id: 'inventory',  label: 'Inventario',      icon: cubeOutline,          path: '/inventario',   active: false },
-    { id: 'shopping',   label: 'Lista',            icon: cartOutline,          path: '/lista-compras',active: false },
+    { id: 'shopping',   label: 'Lista de compras', icon: cartOutline,          path: '/lista-compras',active: false },
     { id: 'sync',       label: 'Sincronizar',      icon: syncOutline,          path: '/comparacion',  active: false },
     { id: 'history',    label: 'Historial',        icon: timeOutline,          path: '/historial',    active: true  },
     { id: 'alerts',     label: 'Alertas',          icon: notificationsOutline, path: '/alertas',      active: false }
