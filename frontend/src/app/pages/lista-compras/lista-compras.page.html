@@ -33,12 +33,22 @@
           </div>
 
           <div class="items-list">
-            <div *ngFor="let item of cat.items" class="shopping-item-card" (click)="toggleItem(item)">
-              <span class="checkbox-box" [class.checked]="item.marcado"></span>
-              <span class="item-name" [class.strike]="item.marcado">{{ item.nombre }}</span>
-              <span *ngIf="item.badge" class="item-badge" [ngClass]="'badge-' + item.badge.tipo">
-                {{ item.badge.texto }}
-              </span>
+            <div *ngFor="let item of cat.items" class="shopping-item-card">
+              <!-- Hacemos que solo el clic en la cajita o el texto marque el producto -->
+              <div class="item-content-wrapper" (click)="toggleItem(item)" style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                <span class="checkbox-box" [class.checked]="item.marcado">
+                  <ion-icon *ngIf="item.marcado" name="checkmark-outline" style="color: white; font-size: 16px; margin: 0 auto; display: block;"></ion-icon>
+                </span>
+                <span class="item-name" [class.strike]="item.marcado">{{ item.nombre }}</span>
+                <span *ngIf="item.badge" class="item-badge" [ngClass]="'badge-' + item.badge.tipo">
+                  {{ item.badge.texto }}
+                </span>
+              </div>
+              
+              <!-- NUEVO: BOTÓN DE ELIMINAR -->
+              <button class="delete-btn" (click)="eliminarDeLista(item, $event)" aria-label="Eliminar" style="background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 4px;">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
             </div>
           </div>
 
@@ -92,5 +102,51 @@
       </button>
     </nav>
 
+    
+
   </div>
 </ion-content>
+
+<!-- CÓDIGO EXISTENTE DE LA PANTALLA... -->
+
+<!-- MODAL PERSONALIZADO PARA AGREGAR PRODUCTO -->
+<ion-modal [isOpen]="modalAgregarAbierto" (didDismiss)="cerrarModal()" class="custom-add-modal">
+  <ng-template>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon-circle">
+          <ion-icon name="cart-outline"></ion-icon>
+        </div>
+        <h2>Añadir a la lista</h2>
+        <p>Escribe el nombre del producto que necesitas comprar.</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="input-field-wrap">
+          <ion-icon name="pricetag-outline" class="input-icon"></ion-icon>
+          <input 
+            type="text" 
+            [(ngModel)]="nuevoProductoNombre" 
+            placeholder="Ej. Manzanas, Jabón, Leche..." 
+            (keyup.enter)="confirmarAgregarManual()"
+            autofocus
+          />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-secondary" (click)="cerrarModal()">
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          class="btn-modal-primary" 
+          [disabled]="!nuevoProductoNombre.trim() || guardandoItem"
+          (click)="confirmarAgregarManual()"
+        >
+          {{ guardandoItem ? 'Guardando...' : 'Agregar' }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

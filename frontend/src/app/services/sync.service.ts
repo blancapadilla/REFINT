@@ -63,18 +63,20 @@ export interface InventarioSyncItem {
   nombre: string;
   cantidad: number;
   unidad: string;
-  estado: 'faltante' | 'agotado';
+  estado: 'faltante' | 'agotado' | 'caducado';
   imagen: string | null;
 
   // Se agrega para poder considerar productos próximos
   // a caducar o ya caducados.
   expires_on?: string | null;
+  days_to_expiry?: number | null;
 }
 
 export interface ResumenInventario {
   disponible: number;
   faltantes: number;
   agotados: number;
+  caducados: number;
   total: number;
   porcentaje: number;
 }
@@ -84,9 +86,7 @@ export interface ResumenInventario {
 })
 export class SyncService {
 
-  constructor(
-    private readonly supabaseService: SupabaseService
-  ) {}
+  constructor( private readonly supabaseService: SupabaseService ) {}
 
   // ==========================================================
   // OBTENER ÚLTIMO ESCANEO
@@ -179,199 +179,52 @@ export class SyncService {
   // OBTENER INVENTARIO CRÍTICO
   // ==========================================================
 
-  async getInventarioCritico(
-    refrigeratorId: string
-  ): Promise<InventarioSyncItem[]> {
-
-    const { data, error } =
-      await this.supabaseService.client
-        .from('inventory_items')
-        .select(`
-          id,
-          refrigerator_id,
-          product_id,
-          quantity,
-          unit,
-          min_stock,
-          status,
-          expires_on,
-          image_path,
-          products (
-            id,
-            name,
-            brand,
-            image_path,
-            default_unit
-          )
-        `)
-        .eq('refrigerator_id', refrigeratorId)
-        .order('created_at', {
-          ascending: true
-        });
+ async getInventarioCritico(refrigeratorId: string): Promise<InventarioSyncItem[]> {
+    const { data, error } = await this.supabaseService.client
+      .from('v_inventory_current')
+      .select('*')
+      .eq('refrigerator_id', refrigeratorId);
 
     if (error) {
-      console.error(
-        'Error obteniendo inventario crítico:',
-        error
-      );
-
+      console.error('Error obteniendo inventario crítico:', error);
       throw error;
     }
 
     const productos: InventarioSyncItem[] = [];
 
-    // ----------------------------------------------------------
-    // FECHA ACTUAL
-    // ----------------------------------------------------------
-
-    const hoy = new Date();
-
-    hoy.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    // Consideraremos crítico:
-    // - Caducado
-    // - Caduca hoy
-    // - Caduca mañana
-
-    const manana = new Date(hoy);
-
-    manana.setDate(
-      manana.getDate() + 1
-    );
-
-
-    // ----------------------------------------------------------
-    // RECORRER TODO EL INVENTARIO
-    // ----------------------------------------------------------
-
     (data ?? []).forEach((item: any) => {
+      const cantidad = Number(item.quantity ?? 0);
+      const dias = item.days_to_expiry != null ? Number(item.days_to_expiry) : null;
+      const status = String(item.status ?? '').toLowerCase();
 
-      const producto = Array.isArray(item.products)
-        ? item.products[0]
-        : item.products;
+      let estado: 'faltante' | 'agotado' | 'caducado' | null = null;
 
-
-      const cantidad = Number(
-        item.quantity ?? 0
-      );
-
-
-      const minimo = Number(
-        item.min_stock ?? 1
-      );
-
-
-      const status =
-        String(
-          item.status ?? ''
-        ).toLowerCase();
-
-
-      // --------------------------------------------------------
-      // COMPROBAR FECHA DE CADUCIDAD
-      // --------------------------------------------------------
-
-      let estaPorCaducar = false;
-
-      if (item.expires_on) {
-
-        const fechaCaducidad =
-          new Date(
-            `${item.expires_on}T00:00:00`
-          );
-
-        fechaCaducidad.setHours(
-          0,
-          0,
-          0,
-          0
-        );
-
-        if (
-          fechaCaducidad <= manana
-        ) {
-
-          estaPorCaducar = true;
-        }
+      // 1. CADUCADO (Fecha pasada)
+      if (status === 'caducado' || (dias !== null && dias < 0)) {
+        estado = 'caducado';
       }
-
-
-      // --------------------------------------------------------
-      // DETERMINAR ESTADO
-      // --------------------------------------------------------
-
-      let estado:
-        | 'faltante'
-        | 'agotado'
-        | null = null;
-
-
-      // AGOTADO
-      if (
-        cantidad <= 0 ||
-        status.includes('agot')
-      ) {
-
+      // 2. AGOTADO (Cantidad 0)
+      else if (status === 'agotado' || cantidad <= 0) {
         estado = 'agotado';
       }
-
-
-      // FALTANTE
-      else if (
-        cantidad <= minimo ||
-        status.includes('crit') ||
-        estaPorCaducar
-      ) {
-
+      // 3. FALTANTE / POR VENCER (Stock bajo o vence en 0-3 días)
+      else if (status === 'bajo' || status === 'proximo_a_caducar' || (dias !== null && dias <= 3)) {
         estado = 'faltante';
       }
 
-
-      // SI NO ES CRÍTICO, NO SE MUESTRA
-      if (!estado) {
-        return;
-      }
-
-
-      // --------------------------------------------------------
-      // AGREGAR PRODUCTO
-      // --------------------------------------------------------
+      if (!estado) return;
 
       productos.push({
-
-        product_id:
-          item.product_id,
-
-        nombre:
-          producto?.name ??
-          'Producto',
-
+        product_id: item.product_id,
+        nombre: item.product_name ?? 'Producto',
         cantidad,
-
-        unidad:
-          item.unit ??
-          producto?.default_unit ??
-          'unidad',
-
+        unidad: item.unit ?? 'unidad',
         estado,
-
-        imagen:
-          item.image_path ??
-          producto?.image_path ??
-          null,
-
-        expires_on:
-          item.expires_on ??
-          null
+        imagen: item.product_image_path || item.image_path || null,
+        expires_on: item.expires_on ?? null,
+        days_to_expiry: dias
       });
-
     });
-
 
     return productos;
   }
@@ -381,159 +234,45 @@ export class SyncService {
   // RESUMEN DEL INVENTARIO
   // ==========================================================
 
-  async getResumenInventario(
-    refrigeratorId: string
-  ): Promise<ResumenInventario> {
+async getResumenInventario(refrigeratorId: string): Promise<ResumenInventario> {
+    const { data, error } = await this.supabaseService.client
+      .from('v_inventory_current')
+      .select('*')
+      .eq('refrigerator_id', refrigeratorId);
 
-    const { data, error } =
-      await this.supabaseService.client
-        .from('inventory_items')
-        .select(`
-          quantity,
-          min_stock,
-          status,
-          expires_on
-        `)
-        .eq('refrigerator_id', refrigeratorId);
-
-    if (error) {
-      throw error;
-    }
-
+    if (error) throw error;
 
     let disponible = 0;
     let faltantes = 0;
     let agotados = 0;
-
-
-    // --------------------------------------------------------
-    // FECHAS
-    // --------------------------------------------------------
-
-    const hoy = new Date();
-
-    hoy.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    const manana = new Date(hoy);
-
-    manana.setDate(
-      manana.getDate() + 1
-    );
-
-
-    // --------------------------------------------------------
-    // CONTAR INVENTARIO
-    // --------------------------------------------------------
+    let caducados = 0;
 
     (data ?? []).forEach((item: any) => {
+      const cantidad = Number(item.quantity ?? 0);
+      const dias = item.days_to_expiry != null ? Number(item.days_to_expiry) : null;
+      const status = String(item.status ?? '').toLowerCase();
 
-      const cantidad =
-        Number(
-          item.quantity ?? 0
-        );
-
-
-      const minimo =
-        Number(
-          item.min_stock ?? 1
-        );
-
-
-      const status =
-        String(
-          item.status ?? ''
-        ).toLowerCase();
-
-
-      // ------------------------------------------------------
-      // CADUCIDAD
-      // ------------------------------------------------------
-
-      let estaPorCaducar = false;
-
-      if (item.expires_on) {
-
-        const fechaCaducidad =
-          new Date(
-            `${item.expires_on}T00:00:00`
-          );
-
-        fechaCaducidad.setHours(
-          0,
-          0,
-          0,
-          0
-        );
-
-        if (
-          fechaCaducidad <= manana
-        ) {
-
-          estaPorCaducar = true;
-        }
-      }
-
-
-      // ------------------------------------------------------
-      // CLASIFICACIÓN
-      // ------------------------------------------------------
-
-      if (
-        cantidad <= 0 ||
-        status.includes('agot')
-      ) {
-
+      if (status === 'caducado' || (dias !== null && dias < 0)) {
+        caducados++;
+      } else if (status === 'agotado' || cantidad <= 0) {
         agotados++;
-      }
-
-      else if (
-        cantidad <= minimo ||
-        status.includes('crit') ||
-        estaPorCaducar
-      ) {
-
+      } else if (status === 'bajo' || status === 'proximo_a_caducar' || (dias !== null && dias <= 3)) {
         faltantes++;
-      }
-
-      else {
-
+      } else {
         disponible++;
       }
-
     });
 
-
-    const total =
-      disponible +
-      faltantes +
-      agotados;
-
-
-    const porcentaje =
-      total > 0
-        ? Math.round(
-            (disponible / total) * 100
-          )
-        : 0;
-
+    const total = disponible + faltantes + agotados + caducados;
+    const porcentaje = total > 0 ? Math.round((disponible / total) * 100) : 0;
 
     return {
-
       disponible,
-
       faltantes,
-
       agotados,
-
+      caducados,
       total,
-
       porcentaje
-
     };
   }
 
