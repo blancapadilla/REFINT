@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase';
 import { RefrigeradorService } from './refrigerador.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface ProductoInventario {
   id: string;
@@ -24,17 +25,53 @@ export interface Categoria {
 })
 export class InventarioService {
 
+  // =========================================================
+  // 1. ESTADO REACTIVO GLOBAL (RxJS BehaviorSubject)
+  // =========================================================
+  private productosSubject = new BehaviorSubject<ProductoInventario[]>([]);
+  public productos$: Observable<ProductoInventario[]> = this.productosSubject.asObservable();
+
   constructor(
     private supabase: SupabaseService,
     private refrigeradorService: RefrigeradorService
-  ) {}
+  ) {
+    // Inicialización al arrancar el servicio
+    this.refrescarProductos();
+    this.activarRealtime();
+  }
+
+  // =========================================================
+  // 2. SUPABASE REALTIME (Escucha en vivo de cambios)
+  // =========================================================
+  private activarRealtime(): void {
+    this.supabase.client
+      .channel('public:inventory_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'inventory_items' },
+        (payload) => {
+          console.log('⚡ Cambio en tiempo real detectado en Supabase:', payload);
+          // Refresca el estado reactivo cuando Python, el ESP32 o la app modifiquen items
+          this.refrescarProductos();
+        }
+      )
+      .subscribe();
+  }
+
+  /**
+   * Carga los productos desde Supabase y actualiza el BehaviorSubject
+   */
+  async refrescarProductos(refrigeratorId?: string): Promise<ProductoInventario[]> {
+    const productos = await this.getProductos(refrigeratorId);
+    this.productosSubject.next(productos);
+    return productos;
+  }
 
 
   /**
    * Obtiene los datos sin procesar de la vista v_inventory_current
    */
   async getInventory() {
-
     const { data, error } = await this.supabase.client
       .from('v_inventory_current')
       .select('*');
@@ -71,7 +108,6 @@ export class InventarioService {
         'Error al obtener productos desde Supabase:',
         error
       );
-
       return [];
     }
 
@@ -142,7 +178,6 @@ export class InventarioService {
       .select('id, name, slug');
 
     if (error) {
-
       console.error(
         'Error al obtener categorías:',
         error
@@ -164,12 +199,10 @@ export class InventarioService {
     ];
 
     (data || []).forEach((cat: any) => {
-
       categoriasList.push({
         id: cat.slug || cat.name.toLowerCase(),
         nombre: cat.name
       });
-
     });
 
     return categoriasList;
@@ -178,9 +211,6 @@ export class InventarioService {
 
   /**
    * Elimina un producto de inventory_items.
-   *
-   * El trigger de Supabase registrará automáticamente
-   * el movimiento correspondiente en inventory_movements.
    */
   async eliminarProducto(id: string): Promise<boolean> {
 
@@ -190,25 +220,23 @@ export class InventarioService {
       .eq('id', id);
 
     if (error) {
-
       console.error(
         'Error al eliminar producto de Supabase:',
         error
       );
-
       return false;
     }
 
+    // Actualiza el estado reactivo inmediatamente
+    await this.refrescarProductos();
     return true;
   }
 
 
   /**
    * Alias de eliminarProducto
-   * para dar soporte a llamadas deleteItem().
    */
   async deleteItem(id: string): Promise<boolean> {
-
     return this.eliminarProducto(id);
   }
 
@@ -232,8 +260,7 @@ export class InventarioService {
       throw error;
     }
 
-    const rows =
-      (data ?? []) as Array<{ status: string }>;
+    const rows = (data ?? []) as Array<{ status: string }>;
 
     const counts = {
       fresh: 0,
@@ -244,7 +271,6 @@ export class InventarioService {
     };
 
     rows.forEach(row => {
-
       if (row.status === 'disponible') {
         counts.fresh++;
       }
@@ -263,7 +289,6 @@ export class InventarioService {
       if (row.status === 'caducado') {
         counts.expired++;
       }
-
     });
 
     return counts;
@@ -293,27 +318,14 @@ export class InventarioService {
     }
 
     return (data ?? []).map((row: any) => ({
-
-      name:
-        row.product?.name ??
-        'Sin nombre',
-
-      quantity:
-        Number(row.quantity ?? 0)
-
+      name: row.product?.name ?? 'Sin nombre',
+      quantity: Number(row.quantity ?? 0)
     }));
   }
 
 
   /**
    * Agrega un nuevo producto a Supabase.
-   *
-   * IMPORTANTE:
-   * Aquí YA NO se registra manualmente el movimiento
-   * en inventory_movements.
-   *
-   * El trigger de Supabase lo hace automáticamente
-   * cuando se inserta el registro en inventory_items.
    */
   async addProducto(payload: {
     nombre: string;
@@ -327,36 +339,20 @@ export class InventarioService {
 
     const client = this.supabase.client;
 
-
-    // =====================================================
     // 1. VALIDAR NOMBRE
-    // =====================================================
-
-    const name =
-      (payload.nombre || '').trim();
+    const name = (payload.nombre || '').trim();
 
     if (!name) {
-      throw new Error(
-        'El nombre del producto es obligatorio.'
-      );
+      throw new Error('El nombre del producto es obligatorio.');
     }
 
-
-    // =====================================================
     // 2. OBTENER MARCA
-    // =====================================================
-
     const brand =
-      payload.marca &&
-      payload.marca.trim().length > 0
+      payload.marca && payload.marca.trim().length > 0
         ? payload.marca.trim()
         : null;
 
-
-    // =====================================================
     // 3. BUSCAR SI EL PRODUCTO YA EXISTE
-    // =====================================================
-
     let productId: string | null = null;
 
     let existingQuery = client
@@ -365,190 +361,88 @@ export class InventarioService {
       .eq('name', name);
 
     if (brand === null) {
-
-      existingQuery =
-        existingQuery.is('brand', null);
-
+      existingQuery = existingQuery.is('brand', null);
     } else {
-
-      existingQuery =
-        existingQuery.eq('brand', brand);
-
+      existingQuery = existingQuery.eq('brand', brand);
     }
 
-    const {
-      data: existingProduct,
-      error: searchError
-    } = await existingQuery
+    const { data: existingProduct, error: searchError } = await existingQuery
       .limit(1)
       .maybeSingle();
 
     if (searchError) {
-
-      console.error(
-        'Error buscando producto:',
-        searchError
-      );
-
+      console.error('Error buscando producto:', searchError);
     }
 
     if (existingProduct) {
-
-      productId =
-        existingProduct.id;
-
+      productId = existingProduct.id;
     }
 
-
-    // =====================================================
     // 4. CREAR PRODUCTO BASE SI NO EXISTE
-    // =====================================================
-
     if (!productId) {
-
-      const {
-        data: newProduct,
-        error: productError
-      } = await client
+      const { data: newProduct, error: productError } = await client
         .from('products')
         .insert({
           name: name,
           brand: brand,
-          default_unit:
-            payload.unidad || 'unidad'
+          default_unit: payload.unidad || 'unidad'
         })
         .select('id')
         .single();
 
       if (productError) {
-
-        console.error(
-          'Error creando producto:',
-          productError
-        );
-
+        console.error('Error creando producto:', productError);
         throw productError;
       }
 
-      productId =
-        newProduct.id;
+      productId = newProduct.id;
     }
 
-
-    // =====================================================
     // 5. OBTENER REFRIGERADOR DEL USUARIO
-    // =====================================================
-
-    const fridge =
-      await this.refrigeradorService
-        .getMiRefrigerador();
+    const fridge = await this.refrigeradorService.getMiRefrigerador();
 
     if (!fridge) {
-
-      throw new Error(
-        'No se encontró un refrigerador activo para este usuario.'
-      );
+      throw new Error('No se encontró un refrigerador activo para este usuario.');
     }
 
-
-    // =====================================================
     // 6. OBTENER USUARIO ACTUAL
-    // =====================================================
-
-    const {
-      data: userResponse,
-      error: userError
-    } = await client.auth.getUser();
+    const { data: userResponse, error: userError } = await client.auth.getUser();
 
     if (userError) {
-
-      console.error(
-        'Error obteniendo usuario:',
-        userError
-      );
-
+      console.error('Error obteniendo usuario:', userError);
       throw userError;
     }
 
-    const user =
-      userResponse?.user;
+    const user = userResponse?.user;
 
     if (!user) {
-
-      throw new Error(
-        'No hay un usuario autenticado.'
-      );
+      throw new Error('No hay un usuario autenticado.');
     }
 
-
-    // =====================================================
     // 7. INSERTAR EN INVENTORY_ITEMS
-    // =====================================================
-
-    const {
-      data,
-      error
-    } = await client
+    const { data, error } = await client
       .from('inventory_items')
       .insert({
-
-        refrigerator_id:
-          fridge.id,
-
-        product_id:
-          productId,
-
-        quantity:
-          payload.cantidad ?? 1,
-
-        unit:
-          payload.unidad || 'unidad',
-
-        expires_on:
-          payload.fechaVencimiento || null,
-
-        source:
-          'manual',
-
-        image_path:
-          null,
-
-        created_by:
-          user.id
-
+        refrigerator_id: fridge.id,
+        product_id: productId,
+        quantity: payload.cantidad ?? 1,
+        unit: payload.unidad || 'unidad',
+        expires_on: payload.fechaVencimiento || null,
+        source: 'manual',
+        image_path: null,
+        created_by: user.id
       })
       .select('*')
       .single();
 
-
-    // =====================================================
     // 8. VALIDAR INSERCIÓN
-    // =====================================================
-
     if (error) {
-
-      console.error(
-        'Error guardando producto en inventory_items:',
-        error
-      );
-
+      console.error('Error guardando producto en inventory_items:', error);
       throw error;
     }
 
-
-    // =====================================================
-    // 9. EL HISTORIAL LO CREA SUPABASE AUTOMÁTICAMENTE
-    // =====================================================
-
-    console.log(
-      'Producto guardado correctamente:',
-      data
-    );
-
-    console.log(
-      'Movimiento de inventario registrado automáticamente por el trigger.'
-    );
-
+    // Actualiza el estado reactivo inmediatamente
+    await this.refrescarProductos();
 
     return data;
   }
