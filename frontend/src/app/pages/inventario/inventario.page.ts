@@ -93,7 +93,7 @@ export class InventarioPage {
     await this.cargarInventario();
   }
 
-  async cargarInventario() {
+async cargarInventario() {
     try {
       const data = await this.inventoryService.getInventory();
       
@@ -103,11 +103,12 @@ export class InventarioPage {
           id: item.id,
           nombre: item.product_name ?? 'Producto',
           cantidad: `${item.quantity ?? 0} ${item.unit ?? ''}`.trim(),
-          categoria: this.normalizarCategoria(item), // 2. Modificado para analizar todo el item
+          categoria: this.normalizarCategoria(item),
           estado: estadoVisual,
           etiquetaEstado: this.obtenerEtiquetaEstado(estadoVisual),
           vencimiento: this.formatearVencimiento(item.days_to_expiry, item.expires_on),
-          imagen: this.obtenerImagenProducto(item),
+          // 👇 Usamos la función inteligente del servicio
+          imagen: this.inventoryService.obtenerImagenProducto(item),
           fuente: item.source === 'ai' ? 'ai' : 'manual'
         };
       });
@@ -119,15 +120,17 @@ export class InventarioPage {
     }
   }
 
+  // Manejador de error cuando una URL externa no logra cargar
   // 3. NUEVA LÓGICA DE ETIQUETAS: Busca en la categoría y en el nombre del producto
   normalizarCategoria(item: any): string {
-    const catName = (item.category_name || '').toLowerCase();
-    const prodName = (item.product_name || '').toLowerCase();
+    const catName = (item.category_name || item.categoria || '').toLowerCase();
+    const prodName = (item.product_name || item.nombre || '').toLowerCase();
 
-    if (catName.includes('lácteo') || catName.includes('lacteo') || prodName.includes('leche') || prodName.includes('queso') || prodName.includes('yogurt') || prodName.includes('huevo')) return 'lacteos';
-    if (catName.includes('fruta') || catName.includes('verdura') || prodName.includes('tomate') || prodName.includes('espinaca') || prodName.includes('apio') || prodName.includes('platano')) return 'vegetales';
-    if (catName.includes('carne') || catName.includes('proteína') || prodName.includes('pollo')) return 'carnes';
-    if (catName.includes('bebida') || prodName.includes('agua') || prodName.includes('refresco')) return 'bebidas';
+    if (catName.includes('lácteo') || catName.includes('lacteo') || catName.includes('huevo') || prodName.includes('leche') || prodName.includes('queso') || prodName.includes('yogurt') || prodName.includes('huevo')) return 'lacteos';
+    if (catName.includes('fruta') || catName.includes('vegetal') || catName.includes('verdura') || prodName.includes('tomate') || prodName.includes('espinaca') || prodName.includes('apio') || prodName.includes('platano')) return 'vegetales';
+    if (catName.includes('carne') || catName.includes('proteína') || catName.includes('proteina') || prodName.includes('pollo') || prodName.includes('pescado')) return 'carnes';
+    if (catName.includes('bebida') || prodName.includes('agua') || prodName.includes('refresco') || prodName.includes('jugo')) return 'bebidas';
+    if (catName.includes('congelado') || prodName.includes('helado') || prodName.includes('hielo')) return 'congelados';
 
     return 'otros';
   }

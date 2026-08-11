@@ -451,19 +451,67 @@ export class InventarioService {
     return data;
   }
 
-  obtenerImagenProducto(item: any): string {
-    // Imagen vectorial de respaldo (No requiere archivo local)
-    const DEFAULT_SVG = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Crect x="3" y="3" width="18" height="18" rx="4" fill="%23f1f5f9" stroke="none"/%3E%3Cpath d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/%3E%3Cpolyline points="3.27 6.96 12 12.01 20.73 6.96"/%3E%3Cline x1="12" y1="22.08" x2="12" y2="12"/%3E%3C/svg%3E';
+// =========================================================
+  // ÍCONOS Y VECTORES BASADOS EN CATEGORÍAS DE ALIMENTOS
+  // =========================================================
+  // =========================================================
+  // ÍCONOS Y VECTORES VECTORIALES LIMPIOS POR CATEGORÍA
+  // =========================================================
 
+//inventario.service.ts:
+  obtenerImagenProducto(item: any): string {
+    // 1. Si el producto tiene una URL real de imagen en Supabase Storage
     if (item.product_image_path && /^https?:\/\//i.test(item.product_image_path)) {
       return item.product_image_path;
     }
-
     if (item.image_path && /^https?:\/\//i.test(item.image_path)) {
       return item.image_path;
     }
 
-    // Retorna el SVG nativo en lugar de una ruta inexistente
-    return DEFAULT_SVG;
+    const catName = (item.category_name || item.categoria || '').toLowerCase();
+    const prodName = (item.product_name || item.nombre || '').toLowerCase();
+
+    // A. LÁCTEOS & HUEVOS (Cartón de leche)
+    if (
+      catName.includes('lacteo') || catName.includes('lácteo') || catName.includes('huevo') ||
+      prodName.includes('leche') || prodName.includes('queso') || prodName.includes('yogurt') || prodName.includes('huevo') || prodName.includes('crema') || prodName.includes('mantequilla')
+    ) {
+      return 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Crect width="24" height="24" rx="6" fill="%23dbeaff"/%3E%3Cpath fill="none" stroke="%230053db" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8 2h8v3H8zM6 5h12l1 16H5zM6 11h12"/%3E%3C/svg%3E';
+    }
+
+    // B. VEGETALES Y FRUTAS (Hoja verde)
+    if (
+      catName.includes('vegetal') || catName.includes('fruta') || catName.includes('verdura') ||
+      prodName.includes('tomate') || prodName.includes('espinaca') || prodName.includes('apio') || prodName.includes('platano') || prodName.includes('zanahoria') || prodName.includes('cebolla')
+    ) {
+      return 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Crect width="24" height="24" rx="6" fill="%23dcfce7"/%3E%3Cpath fill="none" stroke="%2316a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9a7 7 0 0 1-10 9zM2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/%3E%3C/svg%3E';
+    }
+
+    // C. CARNES & PROTEÍNAS (Pierna de pollo)
+ if (
+      catName.includes('carne') || catName.includes('protein') || catName.includes('proteín') ||
+      prodName.includes('pollo') || prodName.includes('res') || prodName.includes('cerdo') || prodName.includes('pescado') || prodName.includes('jamon') || prodName.includes('salchicha')
+    ) {
+      return 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Crect width="24" height="24" rx="6" fill="%23fee2e2"/%3E%3Cpath fill="none" stroke="%23dc2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 4a4.5 4.5 0 0 1 6.36 6.36l-4.24 4.24a6 6 0 0 1-7.5 1l-3.2 3.2a2 2 0 1 1-2.83-2.83l3.2-3.2a6 6 0 0 1 1-7.5z"/%3E%3Cpath fill="none" stroke="%23dc2626" stroke-width="1.8" stroke-linecap="round" d="M12 9.5a2.5 2.5 0 0 1 3.5 3.5"/%3E%3C/svg%3E';
+    }
+    
+    // D. BEBIDAS (Gota de agua / Líquido)
+    if (
+      catName.includes('bebida') || catName.includes('jugo') || catName.includes('refresco') ||
+      prodName.includes('agua') || prodName.includes('jugo') || prodName.includes('refresco') || prodName.includes('cerveza') || prodName.includes('te') || prodName.includes('cafe')
+    ) {
+      return 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Crect width="24" height="24" rx="6" fill="%23e0f2fe"/%3E%3Cpath fill="none" stroke="%230284c7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/%3E%3C/svg%3E';
+    }
+
+    // E. CONGELADOS (Copo de nieve)
+    if (
+      catName.includes('congelado') || catName.includes('hielo') ||
+      prodName.includes('hielo') || prodName.includes('helado') || prodName.includes('nieve')
+    ) {
+      return 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Crect width="24" height="24" rx="6" fill="%23e0e7ff"/%3E%3Cpath fill="none" stroke="%234f46e5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M2 12h20M20 16l-4-4 4-4M4 8l4 4-4 4M16 4l-4 4-4-4M8 20l4-4 4 4"/%3E%3C/svg%3E';
+    }
+
+    // F. OTROS / SNACKS / CHIPS (Caja de producto / Paquete)
+    return 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Crect width="24" height="24" rx="6" fill="%23f1f5f9"/%3E%3Cpath fill="none" stroke="%2364748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96l8.73 5.05 8.73-5.05M12 22.08V12"/%3E%3C/svg%3E';
   }
 }
