@@ -4,6 +4,10 @@
   padding-top: 18px;
 }
 
+.stats-container {
+  min-height: 100%;
+}
+
 .stats-header {
   position: sticky;
   top: 0;
@@ -36,166 +40,512 @@
   place-items: center;
 }
 
+
+/* ================================= */
+/* CONTENIDO PRINCIPAL */
+/* ================================= */
+
 .stats-main {
   padding: 0 18px 40px;
   display: grid;
   gap: 20px;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 16px;
+
+/* ================================= */
+/* TITULO */
+/* ================================= */
+
+.stats-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 4px;
 }
 
-.metric-card {
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 20px;
-  box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+.stats-title-row h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #191c1e;
+}
+
+.stats-title-row p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.period-card {
+  min-width: 92px;
+  min-height: 58px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  background: #f1f4f8;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #334155;
+  font-size: 13px;
+  text-align: center;
+}
+
+.period-card ion-icon {
+  font-size: 17px;
+}
+
+
+/* ================================= */
+/* TARJETAS DE ESTADISTICAS */
+/* ================================= */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
+.metric-card {
+  min-height: 108px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 15px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .metric-card strong {
-  font-size: 36px;
+  font-size: 20px;
   font-weight: 800;
+  color: #1e293b;
 }
 
 .metric-label {
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0;
+  text-transform: none;
   color: #64748b;
 }
 
 .metric-note {
-  font-size: 13px;
-  color: #475569;
+  font-size: 12px;
 }
 
-.danger-card {
-  background: #ffefef;
+.metric-note.success {
+  color: #00834a;
 }
+
+.metric-note.danger {
+  color: #dc2626;
+}
+
+
+/* ================================= */
+/* TARJETAS DE GRAFICAS */
+/* ================================= */
 
 .chart-card {
   background: #ffffff;
-  border-radius: 28px;
-  padding: 24px;
-  box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
 }
 
 .chart-card h2 {
-  margin: 0 0 18px;
-  font-size: 18px;
+  margin: 0 0 16px;
+  font-size: 16px;
   font-weight: 700;
+  color: #191c1e;
 }
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.small-card {
+  padding: 16px;
+}
+
+
+/* ================================= */
+/* GRAFICA DE TENDENCIA */
+/* ================================= */
 
 .line-chart {
   position: relative;
   height: 220px;
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-  border-radius: 28px;
+  background: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .line-grid {
   position: absolute;
-  inset: 0;
-  background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
-  background-size: 100% 44px, 44px 100%;
-  opacity: 0.7;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 42px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.line-path {
+.line-grid span {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.trend-svg {
   position: absolute;
   left: 0;
-  bottom: 20px;
+  right: 0;
+  top: 8px;
+
   width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, transparent 25%, rgba(37,99,235,0.2) 25%, rgba(37,99,235,0.2) 50%, transparent 50%, transparent 75%, rgba(37,99,235,0.2) 75%);
-  background-size: 100% 100%;
-  mask-image: linear-gradient(to top, transparent 0%, black 20%, black 90%, transparent 100%);
+  height: 155px;
+
+  overflow: visible;
 }
 
-.small-card {
-  padding: 20px;
+.trend-line {
+  fill: none;
+  stroke: #0066e6;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
 }
 
-.bar-chart {
-  display: grid;
-  gap: 14px;
+.trend-area {
+  fill: rgba(0, 102, 230, 0.10);
+  stroke: none;
 }
 
-.bar-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px;
-  align-items: center;
-  gap: 12px;
+.trend-point {
+  fill: #ffffff;
+  stroke: #0066e6;
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
 }
 
-.bar {
-  height: 14px;
-  border-radius: 999px;
-  background: #dbeafe;
-  position: relative;
-  overflow: hidden;
-}
-
-.bar::after {
-  content: '';
+.trend-labels {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #2563eb, #64a8fe);
+  left: 0;
+  right: 0;
+  bottom: 2px;
+
+  height: 38px;
+
+  display: flex;
+  justify-content: space-between;
 }
 
-.bar-1::after { width: 55%; }
-.bar-2::after { width: 90%; }
-.bar-3::after { width: 50%; }
-.bar-4::after { width: 40%; }
-.bar-5::after { width: 75%; }
+.trend-label {
+  width: 14%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.trend-label strong {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.trend-label span {
+  font-size: 9px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+
+/* ================================= */
+/* PRODUCTOS MAS CONSUMIDOS */
+/* ================================= */
+
+.product-chart {
+  height: 190px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+
+  gap: 8px;
+
+  padding: 10px 3px 0;
+}
+
+.product-column {
+  height: 100%;
+
+  flex: 1;
+  max-width: 70px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.product-value {
+  font-size: 10px;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.product-bar-area {
+  width: 28px;
+  height: 120px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.product-bar {
+  width: 28px;
+
+  min-height: 4px;
+  max-height: 120px;
+
+  border-radius: 6px 6px 0 0;
+
+  background: #64a8fe;
+
+  transition: height 0.3s ease;
+}
+
+.product-name {
+  margin-top: 8px;
+
+  width: 100%;
+
+  text-align: center;
+
+  font-size: 9px;
+  color: #475569;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ================================= */
+/* DONA DE CADUCIDAD */
+/* ================================= */
 
 .donut-legend {
   display: grid;
-  gap: 18px;
+
+  grid-template-columns: 150px 1fr;
+
   align-items: center;
+
+  gap: 20px;
 }
 
 .donut-chart {
-  width: 160px;
-  height: 160px;
+  width: 130px;
+  height: 130px;
+
   border-radius: 50%;
-  background: conic-gradient(#007e37 0 65%, #0060ac 65% 90%, #ba1a1a 90% 100%);
-  margin: 0 auto;
+
   position: relative;
+
+  margin: auto;
 }
 
 .donut-chart::before {
   content: '';
+
   position: absolute;
+
   inset: 24px;
+
   border-radius: 50%;
-  background: #f7f9fb;
+
+  background: #ffffff;
 }
+
+.donut-center {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 2;
+}
+
+.donut-center strong {
+  font-size: 20px;
+  color: #1e293b;
+}
+
+.donut-center span {
+  font-size: 10px;
+  color: #64748b;
+}
+
+
+/* ================================= */
+/* LEYENDA */
+/* ================================= */
 
 .legend-list {
   display: grid;
-  gap: 10px;
+  gap: 18px;
 }
+
+.legend-item {
+  display: grid;
+
+  grid-template-columns: 12px 1fr auto;
+
+  align-items: center;
+
+  gap: 9px;
+
+  padding-bottom: 10px;
+
+  border-bottom: 1px solid #edf0f3;
+}
+
+.legend-item:last-child {
+  border-bottom: 0;
+}
+
+.legend-item strong {
+  display: block;
+
+  font-size: 11px;
+
+  color: #475569;
+
+  font-weight: 500;
+}
+
+.legend-item span {
+  display: block;
+
+  font-size: 10px;
+
+  color: #94a3b8;
+
+  margin-top: 2px;
+}
+
+.legend-item b {
+  font-size: 11px;
+
+  color: #475569;
+}
+
+
+/* ================================= */
+/* COLORES DE LA DONA */
+/* ================================= */
 
 .legend-swatch {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  border-radius: 999px;
-  margin-right: 8px;
+  width: 12px;
+  height: 12px;
+
+  border-radius: 50%;
 }
 
-.legend-swatch.green { background: #007e37; }
-.legend-swatch.blue { background: #0060ac; }
-.legend-swatch.red { background: #ba1a1a; }
+.legend-swatch.green {
+  background: #007e37;
+}
+
+.legend-swatch.blue {
+  background: #0060ac;
+}
+
+.legend-swatch.red {
+  background: #ba1a1a;
+}
+
+
+/* ================================= */
+/* RESPONSIVE */
+/* ================================= */
 
 @media (max-width: 640px) {
-  .stats-grid { grid-template-columns: 1fr; }
+
+  .stats-main {
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 14px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .metric-card {
+    min-height: 100px;
+    padding: 14px;
+  }
+
+  .metric-card strong {
+    font-size: 19px;
+  }
+
+  .chart-card {
+    padding: 15px;
+  }
+
+  .donut-legend {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .donut-chart {
+    width: 140px;
+    height: 140px;
+  }
+
+  .legend-list {
+    width: 100%;
+  }
+}
+
+
+@media (max-width: 380px) {
+
+  .stats-title-row h1 {
+    font-size: 20px;
+  }
+
+  .period-card {
+    min-width: 82px;
+  }
+
+  .metric-card {
+    padding: 12px;
+  }
+
+  .metric-card strong {
+    font-size: 18px;
+  }
+
 }
