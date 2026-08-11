@@ -1,6 +1,6 @@
 <ion-content class="inventory-content">
   <div class="inventory-container">
-    <app-header title="Refint" [showSearch]="true" [showSettings]="true" (search)="buscar()"></app-header>
+    <app-header title="Refint" [showSearch]="false" [showSettings]="true"></app-header>
 
     <main class="inventory-main">
       <section class="hero-row">
@@ -20,55 +20,64 @@
         </div>
       </section>
 
-      <!-- TARJETAS DE SENSORES Y ESTADO -->
-      <section class="realtime-grid">
-        <article class="realtime-card kpi-temp">
-          <span class="kpi-label">Temperatura</span>
-          <div class="kpi-value-row">
-            <strong>{{ temperatura }}</strong>
-            <span class="kpi-unit">°C</span>
-          </div>
-          <div class="kpi-foot success">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-            <span>Óptima</span>
-          </div>
-        </article>
+      <!-- RECUADRO UNIFICADO: ESTADO DEL REFRIGERADOR -->
+      <section class="fridge-status-card" (click)="irAEstadoSistema()" role="button" tabindex="0">
+        <h3 class="card-title">Estado del Refrigerador</h3>
 
-        <article class="realtime-card kpi-humidity">
-          <span class="kpi-label">Humedad</span>
-          <div class="kpi-value-row">
-            <strong>45</strong>
-            <span class="kpi-unit">%</span>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-label">ESP32 STATUS</span>
+            <div class="status-val">
+              <span class="status-dot online"></span>
+              <strong>{{ deviceStatus.esp.value }}</strong>
+            </div>
           </div>
-          <div class="kpi-foot neutral">
-            <ion-icon name="water-outline"></ion-icon>
-            <span>Nivel Estable</span>
-          </div>
-        </article>
 
-        <article class="realtime-card kpi-esp">
-          <span class="kpi-label">ESP32 Status</span>
-          <div class="status-live-row">
-            <span class="live-dot"></span>
-            <strong>{{ deviceStatus.esp.value }}</strong>
+          <div class="status-item">
+            <span class="status-label">CÁMARA</span>
+            <div class="status-val">
+              <span class="status-dot online"></span>
+              <strong>{{ deviceStatus.camera.value }}</strong>
+            </div>
           </div>
-          <span class="kpi-note">Potencia de señal: Excelente</span>
-        </article>
 
-        <article class="realtime-card kpi-sync">
-          <span class="kpi-label">Última Sinc.</span>
-          <div class="status-live-row">
-            <ion-icon [icon]="timeOutline"></ion-icon>
-            <strong>{{ deviceStatus.lastSync }}</strong>
+          <div class="status-item">
+            <span class="status-label">WIFI</span>
+            <div class="status-val">
+              <ion-icon [icon]="wifiOutline" class="wifi-icon"></ion-icon>
+              <strong>Excelente</strong>
+            </div>
           </div>
-          <span class="kpi-note">Auto-update habilitado</span>
-        </article>
+
+          <div class="status-item">
+            <span class="status-label">TEMPERATURA</span>
+            <div class="status-val">
+              <strong>{{ temperatura }}°C</strong>
+              <span class="status-tag success">Óptima</span>
+            </div>
+          </div>
+
+          <div class="status-item full-width">
+            <span class="status-label">ÚLTIMA SINC.</span>
+            <div class="status-val">
+              <ion-icon [icon]="timeOutline" class="time-icon"></ion-icon>
+              <span>{{ deviceStatus.lastSync }}</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="dashboard-layout">
+        <!-- COLUMNA IZQUIERDA: TARJETAS Y PRODUCTOS POR VENCER -->
         <div class="dashboard-left">
           <section class="stats-cards">
-            <article class="total-products-card">
+            <!-- 1. TOTAL PRODUCTOS -> REDIRIGE A INVENTARIO -->
+            <article
+              class="total-products-card clickable"
+              (click)="irA('/inventario')"
+              role="button"
+              tabindex="0"
+            >
               <div class="total-copy">
                 <span>TOTAL PRODUCTOS</span>
                 <h1>{{ totalProductos }}</h1>
@@ -79,7 +88,14 @@
               </div>
             </article>
 
-            <article *ngFor="let summary of summaryCards" class="summary-card summary-{{ summary.type }}">
+            <!-- 2 Y 3. POR VENCER (ALERTAS) Y ESCASEANDO (LISTA DE COMPRAS) -->
+            <article
+              *ngFor="let summary of summaryCards"
+              class="summary-card summary-{{ summary.type }} clickable"
+              (click)="irA(summary.path)"
+              role="button"
+              tabindex="0"
+            >
               <div class="summary-copy">
                 <span>{{ summary.title }}</span>
                 <h2>{{ summary.value }}</h2>
@@ -114,10 +130,17 @@
           </section>
         </div>
 
+        <!-- COLUMNA DERECHA: DISTRIBUCIÓN DE INVENTARIO (ÚNICA Y CLIQUEABLE) -->
         <aside class="dashboard-right">
-          <section class="inventory-chart">
+          <section
+            class="inventory-chart clickable"
+            (click)="irA('/estadisticas')"
+            role="button"
+            tabindex="0"
+          >
             <div class="section-header">
               <h2>Distribución de Inventario</h2>
+              <button class="see-all" type="button">Ver detalles</button>
             </div>
             <article class="chart-card">
               <div class="chart-preview">
@@ -163,7 +186,6 @@
       </section>
     </main>
 
-    <!-- NAVEGACIÓN INFERIOR (DESACTIVA INVENTARIO EN DASHBOARD) -->
     <nav class="bottom-nav">
       <button
         *ngFor="let nav of bottomNavItems"
@@ -177,7 +199,7 @@
             <svg class="custom-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="4" rx="1.5" />
               <path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
-              <line x1="10" y1="13" x2="14" y2="14" />
+              <line x1="10" y1="13" x2="14" y2="13" />
             </svg>
           </ng-container>
           <ng-template #standardIcon>

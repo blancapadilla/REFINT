@@ -3,7 +3,7 @@
 }
 
 .inventory-content {
-  --background: #f7f9fb;
+  --background: #f8fafc;
 }
 
 .inventory-container {
@@ -26,14 +26,14 @@
 
 .hero-copy h2 {
   margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-  color: #191c1e;
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .hero-copy p {
-  margin: 6px 0 0;
-  color: #434655;
+  margin: 4px 0 0;
+  color: #64748b;
   font-size: 14px;
 }
 
@@ -50,129 +50,122 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-}
 
-.hero-btn ion-icon {
-  font-size: 18px;
+  ion-icon {
+    font-size: 18px;
+  }
 }
 
 .hero-btn-primary {
-  background: #d4e3ff;
-  color: #003c70;
+  background: #60a5fa;
+  color: #ffffff;
 }
 
 .hero-btn-secondary {
-  background: #e6e8ea;
-  color: #191c1e;
+  background: #e2e8f0;
+  color: #334155;
 }
 
-.realtime-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.realtime-card {
+/* =====================================================
+   ESTADO DEL REFRIGERADOR (TARJETA TIPO SEGUNDA IMAGEN)
+   ===================================================== */
+.fridge-status-card {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-left: 4px solid transparent;
-  display: flex;
-  flex-direction: column;
-  min-height: 126px;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 8px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
+  border-left: 5px solid #0053db;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-title {
+    margin: 0 0 18px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 12px;
+  }
+
+  .status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &.full-width {
+      grid-column: span 2;
+    }
+  }
+
+  .status-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    text-transform: uppercase;
+  }
+
+  .status-val {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    strong {
+      font-size: 15px;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    span {
+      font-size: 14px;
+      color: #334155;
+    }
+
+    ion-icon {
+      font-size: 18px;
+
+      &.wifi-icon {
+        color: #0053db;
+      }
+
+      &.time-icon {
+        color: #64748b;
+      }
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+
+      &.online {
+        background-color: #16a34a;
+      }
+    }
+
+    .status-tag.success {
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+  }
 }
 
-.kpi-temp {
-  border-left-color: #004ac6;
-}
-
-.kpi-humidity {
-  border-left-color: #64a8fe;
-}
-
-.kpi-esp {
-  border-left-color: #007e37;
-}
-
-.kpi-sync {
-  border-left-color: #c3c6d7;
-}
-
-.kpi-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #434655;
-  font-weight: 700;
-}
-
-.kpi-value-row {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.kpi-value-row strong {
-  font-size: 40px;
-  line-height: 1;
-  color: #191c1e;
-}
-
-.kpi-unit {
-  font-size: 18px;
-  color: #434655;
-}
-
-.kpi-foot,
-.status-live-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: auto;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.kpi-foot ion-icon,
-.status-live-row ion-icon {
-  font-size: 16px;
-}
-
-.kpi-foot.success {
-  color: #006229;
-}
-
-.kpi-foot.neutral {
-  color: #434655;
-}
-
-.status-live-row strong {
-  font-size: 20px;
-  color: #191c1e;
-}
-
-.live-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #007e37;
-  box-shadow: 0 0 0 4px rgba(0, 126, 55, 0.18);
-}
-
-.kpi-note {
-  margin-top: auto;
-  font-size: 12px;
-  color: #434655;
-}
-
+/* Resto de estilos existentes del layout */
 .dashboard-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
@@ -183,8 +176,8 @@
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 8px !important; /* Reducido de 12px/16px a 8px */
+  margin-bottom: 8px !important;
 }
 
 .total-products-card,
@@ -237,24 +230,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
 
-.total-icon ion-icon {
-  font-size: 24px;
+  ion-icon {
+    font-size: 24px;
+  }
 }
 
 .summary-card {
   padding: 16px;
-}
 
-.summary-card.summary-warning {
-  background: #ffdad6;
-  border-color: #f4b8b0;
-}
+  &.summary-warning {
+    background: #ffdad6;
+    border-color: #f4b8b0;
+  }
 
-.summary-card.summary-danger {
-  background: #d4e3ff;
-  border-color: #a4c9ff;
+  &.summary-danger {
+    background: #d4e3ff;
+    border-color: #a4c9ff;
+  }
 }
 
 .summary-copy span {
@@ -297,12 +290,12 @@
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 14px;
-}
 
-.section-header h2 {
-  margin: 0;
-  font-size: 20px;
-  color: #191c1e;
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #191c1e;
+  }
 }
 
 .see-all {
@@ -319,10 +312,10 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
-}
 
-.product-item:last-child {
-  margin-bottom: 0;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .product-image {
@@ -332,12 +325,12 @@
   overflow: hidden;
   background: #f2f4f6;
   flex-shrink: 0;
-}
 
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .product-info {
@@ -349,11 +342,11 @@
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 6px;
-}
 
-.product-title-row h3 {
-  margin: 0;
-  font-size: 15px;
+  h3 {
+    margin: 0;
+    font-size: 15px;
+  }
 }
 
 .product-expiry-text {
@@ -365,12 +358,12 @@
   border-radius: 999px;
   background: #e0e3e5;
   overflow: hidden;
-}
 
-.product-progress span {
-  display: block;
-  height: 100%;
-  background: #ba1a1a;
+  span {
+    display: block;
+    height: 100%;
+    background: #ba1a1a;
+  }
 }
 
 .chart-card {
@@ -432,18 +425,10 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-}
 
-.legend-swatch.legend-primary {
-  background: #004ac6;
-}
-
-.legend-swatch.legend-secondary {
-  background: #64a8fe;
-}
-
-.legend-swatch.legend-tertiary {
-  background: #007e37;
+  &.legend-primary { background: #004ac6; }
+  &.legend-secondary { background: #64a8fe; }
+  &.legend-tertiary { background: #007e37; }
 }
 
 .legend-name,
@@ -476,6 +461,11 @@
   padding: 14px;
   color: #ffffff;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.68));
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+  }
 }
 
 .recipe-badge {
@@ -485,15 +475,10 @@
   padding: 5px 10px;
   border-radius: 999px;
   background: rgba(100, 168, 254, 0.28);
-}
 
-.recipe-badge.orange {
-  background: rgba(255, 167, 84, 0.3);
-}
-
-.recipe-overlay h3 {
-  margin: 0;
-  font-size: 18px;
+  &.orange {
+    background: rgba(255, 167, 84, 0.3);
+  }
 }
 
 .bottom-nav {
@@ -564,7 +549,13 @@
   }
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 900px) {
+
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 8px !important;
+  }
+
   .dashboard-layout {
     grid-template-columns: 1fr;
   }
@@ -575,10 +566,6 @@
 }
 
 @media (max-width: 900px) {
-  .realtime-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .stats-cards {
     grid-template-columns: 1fr;
   }
@@ -606,15 +593,33 @@
     justify-content: center;
   }
 
-  .realtime-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .recipes-hero {
     grid-template-columns: 1fr;
   }
 
   .hero-copy h2 {
     font-size: 24px;
+  }
+
+  .total-products-card,
+.summary-card {
+  margin: 0 !important; /* Elimina cualquier margen individual residual */
+  padding: 14px; 
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+}
+
+.inventory-chart {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.99);
   }
 }

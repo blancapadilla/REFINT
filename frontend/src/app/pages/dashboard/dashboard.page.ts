@@ -24,7 +24,8 @@ import {
   timeOutline,
   alertCircleOutline,
   checkmarkCircleOutline,
-  waterOutline
+  waterOutline,
+  wifiOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -45,20 +46,20 @@ export class DashboardPage implements OnInit, OnDestroy {
   cubeOutline = cubeOutline;
   alertCircleOutline = alertCircleOutline;
   timeOutline = timeOutline;
+  wifiOutline = wifiOutline;
 
-  // Datos dinámicos conectados
   temperatura = '--';
   humedad = '45';
 
   deviceStatus = {
-    esp: { label: 'ESP32 STATUS', value: 'Offline', state: 'offline' },
-    camera: { label: 'CÁMARA', value: 'Inactiva', state: 'offline' },
-    lastSync: 'Sin datos'
+    esp: { label: 'ESP32 STATUS', value: 'Online', state: 'online' },
+    camera: { label: 'CÁMARA', value: 'Activa', state: 'online' },
+    lastSync: 'Hace 2 min'
   };
 
   summaryCards = [
-    { type: 'warning', title: 'Por vencer', value: '0', subtitle: 'Alimentos próximos a caducar' },
-    { type: 'danger', title: 'Escaseando', value: '0', subtitle: 'Productos por reabastecer' }
+    { type: 'warning', title: 'Por vencer', value: '0', subtitle: 'Alimentos próximos a caducar', path: '/alertas' },
+    { type: 'danger', title: 'Escaseando', value: '0', subtitle: 'Productos por reabastecer', path: '/lista-compras' }
   ];
 
   expiringProducts: Array<{
@@ -107,7 +108,8 @@ export class DashboardPage implements OnInit, OnDestroy {
       timeOutline,
       alertCircleOutline,
       checkmarkCircleOutline,
-      waterOutline
+      waterOutline,
+      wifiOutline
     });
   }
 
@@ -143,7 +145,6 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   async cargarDashboard() {
     try {
-      // 1. Obtener resumen de v_dashboard_summary
       const summary = await this.dashboardService.getSummary();
 
       if (summary) {
@@ -153,38 +154,39 @@ export class DashboardPage implements OnInit, OnDestroy {
         }
 
         this.summaryCards = [
-          { 
-            type: 'warning', 
-            title: 'Por vencer', 
-            value: `${summary.expiring_products ?? 0}`, 
-            subtitle: 'Alimentos próximos a caducar' 
-          },
-          { 
-            type: 'danger', 
-            title: 'Escaseando', 
-            value: `${summary.low_stock_products ?? summary.missing_products ?? 0}`, 
-            subtitle: 'Productos por reabastecer' 
-          }
+          {
+          type: 'warning',
+          title: 'Por vencer',
+          value: `${summary.expiring_products ?? 0}`,
+          subtitle: 'Alimentos próximos a caducar',
+          path: '/alertas'
+        },
+        {
+          type: 'danger',
+          title: 'Escaseando',
+          value: `${summary.missing_products ?? summary.low_stock_products ?? 0}`,
+          subtitle: 'Productos por reabastecer',
+          path: '/lista-compras'
+        }
         ];
 
         this.deviceStatus = {
-          esp: { 
-            label: 'ESP32 STATUS', 
-            value: summary.esp32_status === 'online' ? 'Online' : 'Offline', 
-            state: summary.esp32_status ?? 'offline' 
+          esp: {
+            label: 'ESP32 STATUS',
+            value: summary.esp32_status === 'online' ? 'Online' : 'Offline',
+            state: summary.esp32_status ?? 'offline'
           },
-          camera: { 
-            label: 'CÁMARA', 
-            value: summary.camera_status === 'online' ? 'Activa' : 'Inactiva', 
-            state: summary.camera_status ?? 'offline' 
+          camera: {
+            label: 'CÁMARA',
+            value: summary.camera_status === 'online' ? 'Activa' : 'Inactiva',
+            state: summary.camera_status ?? 'offline'
           },
-          lastSync: summary.last_sync_at ? 'Reciente' : 'Hace 2 min'
+          lastSync: summary.last_sync_at ? 'Hace 2 min' : 'Hace 2 min'
         };
       }
 
-      // 2. Obtener lista real de productos por vencer
       const expiringData = await this.dashboardService.getExpiringProducts();
-      
+
       this.expiringProducts = (expiringData || []).map((item: any) => ({
         nombre: item.product_name ?? 'Producto',
         image: item.product_image_path || item.image_path || 'assets/images/products/default-product.png',
@@ -196,6 +198,10 @@ export class DashboardPage implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error al cargar datos del Dashboard:', error);
     }
+  }
+
+  irAEstadoSistema() {
+    this.router.navigate(['/estado-sistema']);
   }
 
   ejecutarAccion(action: string) {
