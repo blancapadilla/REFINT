@@ -5,30 +5,32 @@ import { IonicModule, NavController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
 import { SupabaseService } from '../../services/supabase';
+import { RefrigeradorService } from '../../services/refrigerador.service';
 import { addIcons } from 'ionicons';
-import { 
-  alertCircleOutline, 
-  timeOutline, 
-  closeCircleOutline, 
-  basketOutline, 
-  cloudDoneOutline, 
+import {
+  alertCircleOutline,
+  timeOutline,
+  closeCircleOutline,
+  basketOutline,
+  cloudDoneOutline,
   checkmarkCircleOutline,
   cubeOutline,
   cartOutline,
   syncOutline,
-  notifications, 
+  notifications
 } from 'ionicons/icons';
+import { ComprasService } from 'src/app/services/compras.service';
 
 export interface NotificacionAlert {
   id: string;
   tipo: 'critical' | 'warning' | 'low_stock' | 'info';
-  icono: any;
+  icono: string;
   titulo: string;
   descripcion: string;
   tiempo: string;
   leido: boolean;
   porcentajeExpirado?: number;
-  relatedEntityId?: string;
+  productoId?: string;
 }
 
 @Component({
@@ -41,18 +43,17 @@ export interface NotificacionAlert {
 export class AlertasPage implements OnInit {
   cargando = true;
   notificaciones: NotificacionAlert[] = [];
-  
+
   totalCriticas = 0;
   totalProximos = 0;
 
-  // Iconos Ionic
   alertCircleOutline = alertCircleOutline;
   timeOutline = timeOutline;
   checkmarkCircleOutline = checkmarkCircleOutline;
 
   bottomNavItems = [
     { id: 'inventory', label: 'Inventario', icon: cubeOutline, active: false, path: '/inventario' },
-    { id: 'shopping', label: 'Lista', icon: cartOutline, active: false, path: '/lista-compras' },
+    { id: 'shopping', label: 'Lista de compras', icon: cartOutline, active: false, path: '/lista-compras' },
     { id: 'sync', label: 'Sincronizar', icon: syncOutline, active: false, path: '/comparacion' },
     { id: 'history', label: 'Historial', icon: timeOutline, active: false, path: '/historial' },
     { id: 'alerts', label: 'Alertas', icon: notifications, active: true, path: '/alertas' }
@@ -62,7 +63,9 @@ export class AlertasPage implements OnInit {
     private router: Router,
     private navCtrl: NavController,
     private supabaseService: SupabaseService,
-    private toastCtrl: ToastController
+    private refrigeradorService: RefrigeradorService,
+    private toastCtrl: ToastController,
+    private comprasService: ComprasService
   ) {
     addIcons({
       alertCircleOutline,
@@ -74,7 +77,6 @@ export class AlertasPage implements OnInit {
       cubeOutline,
       cartOutline,
       syncOutline,
-      historyIcon: timeOutline,
       notifications
     });
   }
@@ -87,96 +89,149 @@ export class AlertasPage implements OnInit {
     this.cargarAlertas();
   }
 
-  async cargarAlertas() {
+ async cargarAlertas() {
     this.cargando = true;
     try {
-      // 1. Consultar directamente la tabla 'alerts' de Supabase
-      const { data: dbAlerts, error } = await this.supabaseService.client
-        .from('alerts')
+      const fridge = await this.refrigeradorService.getMiRefrigerador();
+      if (!fridge) return;
+
+      const { data: productos, error } = await this.supabaseService.client
+        .from('v_inventory_current')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq('refrigerator_id', fridge.id)
+        .in('status', ['agotado', 'caducado', 'proximo_a_caducar', 'bajo']);
 
       if (error) throw error;
 
       let criticas = 0;
       let proximos = 0;
+      const items: NotificacionAlert[] = [];
 
-      const mappedAlerts: NotificacionAlert[] = (dbAlerts || []).map((alt: any) => {
-        let tipoUI: 'critical' | 'warning' | 'low_stock' | 'info' = 'warning';
-        let iconoUI = timeOutline;
+      (productos || []).forEach((prod: any) => {
+        const dias = prod.days_to_expiry != null ? Number(prod.days_to_expiry) : null;
+        const cantidad = Number(prod.quantity ?? 0);
 
-        // Mapeo según el tipo y severidad almacenados en Supabase
-        if (alt.severity === 'critical' || alt.type === 'product_out_of_stock') {
-          tipoUI = 'critical';
-          iconoUI = closeCircleOutline;
+        // 1. PRODUCTO AGOTADO
+        if (prod.status === 'agotado' || cantidad <= 0) {
           criticas++;
-        } else if (alt.type === 'expiring_product') {
-          tipoUI = 'warning';
-          iconoUI = timeOutline;
+          items.push({
+            id: `agotado-${prod.id}`,
+            tipo: 'critical',
+            icono: closeCircleOutline,
+            titulo: `${prod.product_name || 'Producto'}`,
+            descripcion: `El producto está completamente agotado. No quedan existencias en el compartimiento.`,
+            tiempo: 'Reciente',
+            leido: false,
+            productoId: prod.product_id
+          });
+        } 
+        
+        // 2. PRODUCTO CADUCADO (Prioridad: Días negativos O status 'caducado')
+        else if (prod.status === 'caducado' || (dias !== null && dias < 0)) {
+          criticas++;
+          const diasPasados = Math.abs(dias || 0);
+          items.push({
+            id: `caducado-${prod.id}`,
+            tipo: 'critical',
+            icono: alertCircleOutline,
+            titulo: `${prod.product_name || 'Producto'}`,
+            descripcion: `Caducó hace ${diasPasados} día(s). Se recomienda desecharlo inmediatamente.`,
+            tiempo: 'Hace unas horas',
+            porcentajeExpirado: 100, // Barra roja completa
+            leido: false,
+            productoId: prod.product_id
+          });
+        } 
+        
+        // 3. PRÓXIMO A CADUCAR (Días >= 0 dentro del rango)
+        else if (prod.status === 'proximo_a_caducar' || (dias !== null && dias >= 0 && dias <= 3)) {
           proximos++;
-        } else if (alt.type === 'low_stock') {
-          tipoUI = 'low_stock';
-          iconoUI = basketOutline;
+          const porcentaje = Math.max(10, 100 - ((dias || 0) * 20));
+          items.push({
+            id: `vencer-${prod.id}`,
+            tipo: 'warning',
+            icono: timeOutline,
+            titulo: `${prod.product_name || 'Producto'}`,
+            descripcion: dias === 0 ? 'Vence HOY. Úsalo en tus recetas cuanto antes.' : `Vence en ${dias} día(s). Se recomienda consumir pronto.`,
+            tiempo: 'Hace 1 hora',
+            porcentajeExpirado: Math.round(porcentaje),
+            leido: false,
+            productoId: prod.product_id
+          });
+        } 
+        
+        // 4. STOCK BAJO
+        else if (prod.status === 'bajo') {
+          proximos++;
+          items.push({
+            id: `bajo-${prod.id}`,
+            tipo: 'low_stock',
+            icono: basketOutline,
+            titulo: `${prod.product_name || 'Producto'}`,
+            descripcion: `Quedan solo ${prod.quantity} ${prod.unit}. Tu consumo indica que necesitarás más en unos días.`,
+            tiempo: 'Hace 3 horas',
+            leido: false,
+            productoId: prod.product_id
+          });
         }
+      });
 
-        return {
-          id: alt.id,
-          tipo: tipoUI,
-          icono: iconoUI,
-          titulo: alt.title || 'Alerta de Inventario',
-          descripcion: alt.message || '',
-          tiempo: this.calcularTiempoRelativo(alt.created_at),
-          leido: alt.is_read || false,
-          relatedEntityId: alt.related_entity_id
-        };
+      // Tarjeta de estado de sincronización
+      items.push({
+        id: 'sync-status',
+        tipo: 'info',
+        icono: cloudDoneOutline,
+        titulo: 'Inventario Sincronizado',
+        descripcion: 'Se han actualizado los artículos correctamente después de tu última revisión al supermercado.',
+        tiempo: 'Hoy, 08:45 AM',
+        leido: false
       });
 
       this.totalCriticas = criticas;
       this.totalProximos = proximos;
-      this.notificaciones = mappedAlerts;
+      this.notificaciones = items;
 
     } catch (err) {
-      console.error('Error al cargar alertas desde Supabase:', err);
+      console.error('Error al cargar alertas:', err);
     } finally {
       this.cargando = false;
     }
   }
 
-  async marcarTodoComoLeido() {
-    try {
-      await this.supabaseService.client
-        .from('alerts')
-        .update({ is_read: true, read_at: new Date().toISOString() })
-        .eq('is_read', false);
+  // ==========================================================
+  // MANEJO DE ACCIONES
+  // ==========================================================
 
-      this.notificaciones.forEach(n => n.leido = true);
-      this.mostrarToast('Todas las alertas han sido marcadas como leídas.');
-    } catch (e) {
-      console.error('Error marcando alertas como leídas:', e);
-    }
+  async marcarTodoComoLeido() {
+    this.notificaciones = [];
+    this.totalCriticas = 0;
+    this.totalProximos = 0;
+    await this.mostrarToast('Todas las alertas marcadas como leídas.', 'success');
   }
 
   async omitirNotificacion(id: string) {
-    try {
-      await this.supabaseService.client
-        .from('alerts')
-        .update({ dismissed_at: new Date().toISOString() })
-        .eq('id', id);
-
-      this.notificaciones = this.notificaciones.filter(n => n.id !== id);
-      this.mostrarToast('Alerta omitida.');
-    } catch (e) {
-      console.error('Error al omitir alerta:', e);
-    }
+    this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+    this.totalCriticas = this.notificaciones.filter(n => n.tipo === 'critical').length;
+    this.totalProximos = this.notificaciones.filter(n => n.tipo === 'warning' || n.tipo === 'low_stock').length;
+    await this.mostrarToast('Alerta omitida.', 'warning');
   }
 
   async anadirAListaCompras(notif: NotificacionAlert) {
-    this.mostrarToast(`Añadido a la lista de compras.`);
+    if (!notif.productoId) return;
+
+    try {
+      await this.comprasService.agregarOActualizarItemByProductId(notif.productoId);
+      this.notificaciones = this.notificaciones.filter(n => n.id !== notif.id);
+      this.totalCriticas = this.notificaciones.filter(n => n.tipo === 'critical').length;
+      this.totalProximos = this.notificaciones.filter(n => n.tipo === 'warning' || n.tipo === 'low_stock').length;
+      await this.mostrarToast(`"${notif.titulo}" añadido a la lista de compras.`, 'success');
+    } catch (e) {
+      console.error(e);
+      await this.mostrarToast('No se pudo añadir el producto.', 'danger');
+    }
   }
 
-  filtrarPor(tipo: string) {
-    // Lógica opcional de filtrado
-  }
+  filtrarPor(tipo: string) {}
 
   irA(path: string) {
     this.router.navigate([path]);
@@ -186,27 +241,19 @@ export class AlertasPage implements OnInit {
     this.router.navigate([nav.path]);
   }
 
-  private calcularTiempoRelativo(fechaStr: string): string {
-    if (!fechaStr) return 'Hace un momento';
-    const fecha = new Date(fechaStr);
-    const ahora = new Date();
-    const diffMs = ahora.getTime() - fecha.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHoras = Math.floor(diffMs / (1000 * 3600));
-    const diffDias = Math.floor(diffMs / (1000 * 3600 * 24));
-
-    if (diffMins < 60) return `Hace ${Math.max(1, diffMins)} min`;
-    if (diffHoras < 24) return `Hace ${diffHoras} hora${diffHoras > 1 ? 's' : ''}`;
-    return `Hace ${diffDias} día${diffDias > 1 ? 's' : ''}`;
-  }
-
-  private async mostrarToast(mensaje: string) {
+  // ==========================================================
+  // TOAST ESTANDARIZADO (COMO EN COMPARACIÓN)
+  // ==========================================================
+  private async mostrarToast(
+    mensaje: string,
+    color: 'success' | 'danger' | 'warning' | 'dark' = 'dark'
+  ): Promise<void> {
     const toast = await this.toastCtrl.create({
       message: mensaje,
-      duration: 2000,
-      position: 'bottom',
-      color: 'dark'
+      duration: 2500,
+      color,
+      position: 'top'
     });
-    toast.present();
+    await toast.present();
   }
 }

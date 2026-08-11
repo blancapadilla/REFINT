@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase';
+import { RefrigeradorService } from './refrigerador.service';
 
 export interface WeeklyTrendItem {
   day: string;
@@ -21,7 +22,7 @@ export interface DeviceStatus {
   providedIn: 'root'
 })
 export class DashboardService {
-  constructor(private supabase: SupabaseService) {}
+  constructor(private supabase: SupabaseService, private refrigeradorService: RefrigeradorService) {}
 
   /**
    * Obtiene el resumen consolidado del refrigerador desde v_dashboard_summary
@@ -150,5 +151,18 @@ export class DashboardService {
       .limit(1);
 
     return !error;
+  }
+
+  async getInventoryDistribution() {
+    const fridge = await this.refrigeradorService.getMiRefrigerador();
+    if (!fridge) return [];
+
+    const { data, error } = await this.supabase.client
+      .from('v_inventory_current')
+      .select('category_name, product_name, quantity')
+      .eq('refrigerator_id', fridge.id);
+
+    if (error) return [];
+    return data;
   }
 }

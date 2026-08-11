@@ -290,14 +290,180 @@ export class ComprasService {
     }
   }
 
-  // ==========================================
-  // GENERAR LISTA AUTOMÁTICA
-  // ==========================================
+ 
+  // =========================================================
+  // GENERAR LISTA AUTOMÁTICA DESDE EL INVENTARIO CRÍTICO
+  // =========================================================
+  async generarListaAutomatica(): Promise<number> {
+    const fridge = await this.supabase.client
+      .from('refrigerators')
+      .select('id')
+      .limit(1)
+      .single();
 
-  async generarListaAutomatica(): Promise<void> {
+    if (!fridge.data) return 0;
 
-    console.log(
-      'La generación automática se realizará posteriormente.'
-    );
+    // 1. Consultar ítems agotados, caducados o por vencer del refrigerador activo
+    const { data: faltantes } = await this.supabase.client
+      .from('v_inventory_current')
+      .select('product_id, quantity, unit, status')
+      .eq('refrigerator_id', fridge.data.id)
+      .in('status', ['agotado', 'caducado', 'proximo_a_caducar', 'bajo']);
+
+    if (!faltantes || faltantes.length === 0) return 0;
+
+    // 2. Insertar cada producto en la lista activa
+    let agregados = 0;
+    for (const item of faltantes) {
+      if (item.product_id) {
+        await this.agregarOActualizarItemByProductId(item.product_id, 1, item.unit || 'unidad');
+        agregados++;
+      }
+    }
+
+    return agregados;
+  }
+
+  // ==========================================
+  // ELIMINAR PRODUCTO DE LA LISTA
+  // ==========================================
+  async eliminarItem(itemId: string): Promise<void> {
+    const { error } = await this.supabase.client
+      .from('shopping_list_items')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) {
+      console.error('Error eliminando item:', error);
+      throw error;
+    }
+  }
+
+  // ==========================================
+  // AGREGAR PRODUCTO MANUAL A LA LISTA
+  // ==========================================
+  async agregarItemManual(nombreProducto: string): Promise<void> {
+    // 1. Obtener la lista activa
+    let { data: listas } = await this.supabase.client
+      .from('shopping_lists')
+      .select('id')
+      .eq('status', 'active')
+      .limit(1);
+
+    // Si no hay lista activa, la protección de la BD requerirá crear una (asumiendo que ya hay una, tomamos el ID)
+    if (!listas || listas.length === 0) throw new Error("No hay lista activa");
+    const listaId = listas[0].id;
+
+    // 2. Buscar si el producto ya existe en el catálogo global
+    let productId: string;
+    const { data: prodExistente } = await this.supabase.client
+      .from('products')
+      .select('id')
+      .ilike('name', nombreProducto.trim())
+      .limit(1)
+      .maybeSingle();
+
+    if (prodExistente) {
+      productId = prodExistente.id;
+    } else {
+      // 3. Si no existe, lo creamos rápido en el catálogo de productos
+      const { data: nuevoProd, error: prodErr } = await this.supabase.client
+        .from('products')
+        .insert({ name: nombreProducto.trim(), default_unit: 'unidad' })
+        .select('id')
+        .single();
+      
+      if (prodErr) throw prodErr;
+      productId = nuevoProd.id;
+    }
+
+    // 4. Agregarlo a la lista de compras
+    const { error: insertErr } = await this.supabase.client
+      .from('shopping_list_items')
+      .insert({
+        shopping_list_id: listaId,
+        product_id: productId,
+        desired_quantity: 1,
+        is_auto_generated: false
+      });
+
+    if (insertErr) throw insertErr;
+  }
+
+  // =========================================================
+  // AÑADIR/ACTUALIZAR ITEM EN LA LISTA DESDE CUALQUIER PANTALLA
+  // =========================================================
+  async agregarOActualizarItemByProductId(
+    productId: string, 
+    cantidad = 1, 
+    unidad = 'unidad'
+  ): Promise<void> {
+    const { data: fridge } = await this.supabase.client
+      .from('refrigerators')
+      .select('id')
+      .limit(1)
+      .maybeSingle();
+
+    if (!fridge) return;
+
+    // 1. Obtener la lista de compras activa del refrigerador
+    let { data: listas } = await this.supabase.client
+      .from('shopping_lists')
+      .select('id')
+      .eq('refrigerator_id', fridge.id)
+      .eq('status', 'active')
+      .limit(1);
+
+    let listaId: string;
+
+    if (!listas || listas.length === 0) {
+      // Si no hay lista activa, la creamos en automático
+      const { data: nuevaLista, error: createError } = await this.supabase.client
+        .from('shopping_lists')
+        .insert({ refrigerator_id: fridge.id, name: 'Mi Lista', status: 'active' })
+        .select('id')
+        .single();
+
+      // 🟢 Validación para evitar el error "'nuevaLista' is possibly null"
+      if (createError || !nuevaLista) {
+        console.error('Error creando lista de compras:', createError);
+        return;
+      }
+
+      listaId = nuevaLista.id;
+    } else {
+      listaId = listas[0].id;
+    }
+
+    // 2. Verificar si el producto ya estaba en la lista
+    const { data: existente } = await this.supabase.client
+      .from('shopping_list_items')
+      .select('id, desired_quantity')
+      .eq('shopping_list_id', listaId)
+      .eq('product_id', productId)
+      .maybeSingle();
+
+    if (existente) {
+      // Si ya existía, desmarcamos como comprado y aseguramos la cantidad
+      await this.supabase.client
+        .from('shopping_list_items')
+        .update({
+          is_purchased: false,
+          desired_quantity: Math.max(Number(existente.desired_quantity || 1), cantidad)
+        })
+        .eq('id', existente.id);
+    } else {
+      // Si no existía, lo insertamos
+      await this.supabase.client
+        .from('shopping_list_items')
+        .insert({
+          shopping_list_id: listaId,
+          product_id: productId,
+          desired_quantity: cantidad,
+          unit: unidad,
+          is_purchased: false,
+          is_auto_generated: true
+        });
+    }
   }
 }

@@ -282,3 +282,57 @@ ion-content{
   .product-item, .recipe-hero{ grid-template-columns:1fr }
   .nav-item.special{ transform:translateY(-10px) }
 }
+
+/* =========================================================
+   DISEÑO DE TOAST FLOTANTE PERSONALIZADO (REFINT)
+   ========================================================= */
+ion-toast.custom-refint-toast {
+  /* Elevación para no chocar con la barra inferior nav de 64px */
+  margin-bottom: 85px !important;
+
+  &::part(container) {
+    border-radius: 18px;
+    padding: 6px 14px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+    backdrop-filter: blur(10px);
+    max-width: 90%;
+    margin: 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &::part(message) {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  &::part(icon) {
+    font-size: 20px;
+    margin-right: 10px;
+  }
+
+  /* 🎨 VARIANTES DE COLOR ALINEADAS A TU APP */
+  &.toast-info {
+    --background: #0f172a; /* Slate Oscuro */
+    --color: #ffffff;
+    --icon-color: #38bdf8;
+  }
+
+  &.toast-success {
+    --background: #064e3b; /* Verde Bosque Oscuro */
+    --color: #ffffff;
+    --icon-color: #34d399;
+  }
+
+  &.toast-warning {
+    --background: #7c2d12; /* Naranja Terracota Oscuro */
+    --color: #ffffff;
+    --icon-color: #fb923c;
+  }
+
+  &.toast-danger {
+    --background: #7f1d1d; /* Rojo Carmesí Oscuro */
+    --color: #ffffff;
+    --icon-color: #f87171;
+  }
+}

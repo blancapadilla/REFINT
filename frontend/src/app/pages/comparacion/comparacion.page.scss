@@ -1043,3 +1043,39 @@ ion-content::part(scroll) {
   }
 
 }
+
+/* RECUADRO CADUCADO */
+.summary-purple {
+  border-left: 4px solid #7c3aed;
+}
+
+.summary-purple .summary-icon-circle {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.summary-purple .summary-label {
+  color: #6d28d9;
+}
+
+/* BORDES Y TEXTOS DE ÍTEMS EN LISTA CRÍTICA */
+.border-caducado { border-color: #ddd6fe !important; }
+.border-agotado { border-color: #ffbcbc !important; }
+.border-faltante { border-color: #ffd36b !important; }
+
+.text-caducado { color: #7c3aed !important; font-weight: 700; }
+.text-agotado { color: #dc2626 !important; font-weight: 700; }
+.text-faltante { color: #d97706 !important; font-weight: 700; }
+
+/* REAJUSTE DE FOOTER DE USO */
+.usage-footer {
+  display: flex;
+  justify-content: space-between;
+  color: #657080;
+  font-size: 12px;
+  
+  strong {
+    margin-left: 4px;
+    color: #1e293b;
+  }
+}

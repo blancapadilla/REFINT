@@ -27,7 +27,8 @@ import {
   notificationsOutline,
   syncOutline,
   timeOutline,
-  warningOutline
+  warningOutline,
+  alertCircleOutline
 } from 'ionicons/icons';
 
 import {
@@ -79,8 +80,8 @@ type ViewState =
 })
 
 
-export class ComparacionPage
-  implements OnInit, OnDestroy {
+export class ComparacionPage implements OnInit, OnDestroy {
+  readonly alertCircleOutline = alertCircleOutline;
 
 
   /* ==========================================================
@@ -244,10 +245,24 @@ export class ComparacionPage
 
       timeOutline,
 
-      warningOutline
+      warningOutline,
+      alertCircleOutline
 
     });
 
+  }
+
+  formatSubtext(item: InventarioSyncItem): string {
+    if (item.estado === 'caducado') {
+      const dias = Math.abs(item.days_to_expiry || 0);
+      return `Caducó hace ${dias} día(s)`;
+    }
+    if (item.estado === 'faltante') {
+      if (item.days_to_expiry === 0) return 'Vence HOY';
+      if (item.days_to_expiry != null && item.days_to_expiry > 0) return `Vence en ${item.days_to_expiry} día(s)`;
+      return `Quedan: ${item.cantidad} ${item.unidad}`;
+    }
+    return `Quedan: ${item.cantidad} ${item.unidad}`;
   }
 
 
