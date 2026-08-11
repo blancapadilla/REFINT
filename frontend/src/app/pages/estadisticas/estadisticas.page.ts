@@ -60,7 +60,6 @@ export class EstadisticasPage implements OnInit {
   ];
 
   trendData: WeeklyTrendItem[] = [];
-
   trendPoints: TrendPoint[] = [];
 
   topProducts: Array<{
@@ -87,9 +86,7 @@ export class EstadisticasPage implements OnInit {
   }
 
   async loadStatistics(): Promise<void> {
-
     try {
-
       const [
         scanCount,
         avgTemp,
@@ -98,231 +95,139 @@ export class EstadisticasPage implements OnInit {
         topProducts,
         trendData
       ] = await Promise.all([
-
         this.dashboardService.getCompletedScanCount(),
-
         this.dashboardService.getAverageFridgeTemperature(),
-
         this.dashboardService.getSavingsEstimate(),
-
         this.inventarioService.getInventoryStatusCounts(),
-
         this.inventarioService.getTopProducts(5),
-
         this.dashboardService.getWeeklyScanTrend(7)
-
       ]);
 
       /*
        * TARJETAS PRINCIPALES
        */
-
       this.metrics = [
-
         {
           label: 'Escaneos',
           value: scanCount.toString(),
           note: '+12% vs mes anterior'
         },
-
         {
           label: 'Temp. Promedio',
           value: `${avgTemp.toFixed(1)}°C`,
-          note: avgTemp >= 0
-            ? 'Óptimo'
-            : 'No disponible'
+          note: avgTemp >= 0 ? 'Óptimo' : 'No disponible'
         },
-
         {
           label: 'Ahorro Est.',
           value: `$${savings.toFixed(2)}`,
           note: 'Basado en inventario'
         },
-
         {
           label: 'Desperdicio',
-
           value:
             statusCounts.total > 0
-              ? `${Math.round(
-                  (statusCounts.expired /
-                    statusCounts.total) * 100
-                )}%`
+              ? `${Math.round((statusCounts.expired / statusCounts.total) * 100)}%`
               : '0%',
-
-          note:
-            `${statusCounts.expired} caducados`
+          note: `${statusCounts.expired} caducados`
         }
-
       ];
 
       /*
        * TENDENCIA SEMANAL
        */
-
       this.trendData = trendData;
-
       this.prepareTrendPoints();
 
       /*
        * PRODUCTOS MÁS CONSUMIDOS
        */
-
       this.topProducts = topProducts;
-
       this.maxProductQuantity = Math.max(
         1,
-        ...topProducts.map(
-          product => product.quantity
-        )
+        ...topProducts.map(product => product.quantity)
       );
 
       /*
        * CADUCIDAD
        */
-
       this.expiryCounts = {
-
         fresh: statusCounts.fresh,
-
         soon: statusCounts.soon,
-
         critical: statusCounts.critical
-
       };
 
     } catch (error) {
-
-      console.error(
-        'Error cargando datos de estadísticas:',
-        error
-      );
-
+      console.error('Error cargando datos de estadísticas:', error);
     }
-
   }
 
   /*
-   * Prepara los puntos para la gráfica
+   * Prepara los puntos para la gráfica SVG
    */
-
   prepareTrendPoints(): void {
-
     if (!this.trendData.length) {
-
       this.trendPoints = [];
-
       return;
-
     }
 
-    const max = Math.max(
-      1,
-      ...this.trendData.map(
-        item => item.count
-      )
-    );
-
+    const max = Math.max(1, ...this.trendData.map(item => item.count));
     const total = this.trendData.length;
 
-    this.trendPoints =
-      this.trendData.map(
-        (item, index) => {
+    this.trendPoints = this.trendData.map((item, index) => {
+      const x = total === 1 ? 50 : 5 + (index / (total - 1)) * 90;
+      const y = 90 - (item.count / max) * 70;
 
-          const x =
-            total === 1
-              ? 50
-              : 5 + (
-                  index /
-                  (total - 1)
-                ) * 90;
-
-          const y =
-            90 -
-            (
-              item.count /
-              max
-            ) * 70;
-
-          return {
-            day: item.day,
-            count: item.count,
-            x,
-            y
-          };
-
-        }
-      );
-
+      return {
+        day: item.day,
+        count: item.count,
+        x,
+        y
+      };
+    });
   }
 
   /*
-   * Puntos para el SVG
+   * Puntos para el elemento <polyline> del SVG
    */
-
   getTrendSvgPoints(): string {
-
-    return this.trendPoints
-      .map(
-        point =>
-          `${point.x},${point.y}`
-      )
-      .join(' ');
-
+    return this.trendPoints.map(point => `${point.x},${point.y}`).join(' ');
   }
 
   /*
-   * Porcentaje de cada estado
+   * Porcentaje de cada estado de caducidad
    */
-
-  getExpiryPercentage(
-    value: number
-  ): number {
-
+  getExpiryPercentage(value: number): number {
     const total =
       this.expiryCounts.fresh +
       this.expiryCounts.soon +
       this.expiryCounts.critical;
 
     if (total === 0) {
-
       return 0;
-
     }
 
-    return (
-      value /
-      total
-    ) * 100;
-
+    return (value / total) * 100;
   }
 
   /*
-   * Dona dinámica
+   * Gradiente cónico para el gráfico de dona
    */
-
   getDonutBackground(): string {
+    const total =
+      this.expiryCounts.fresh +
+      this.expiryCounts.soon +
+      this.expiryCounts.critical;
 
-    const fresh =
-      this.getExpiryPercentage(
-        this.expiryCounts.fresh
-      );
+    // Si no hay productos, mostrar un aro gris neutro en lugar de rojo
+    if (total === 0) {
+      return 'conic-gradient(#e2e8f0 0% 100%)';
+    }
 
-    const soon =
-      this.getExpiryPercentage(
-        this.expiryCounts.soon
-      );
-
-    const critical =
-      this.getExpiryPercentage(
-        this.expiryCounts.critical
-      );
+    const fresh = this.getExpiryPercentage(this.expiryCounts.fresh);
+    const soon = this.getExpiryPercentage(this.expiryCounts.soon);
 
     const freshEnd = fresh;
-
-    const soonEnd =
-      fresh +
-      soon;
+    const soonEnd = fresh + soon;
 
     return `
       conic-gradient(
@@ -331,42 +236,24 @@ export class EstadisticasPage implements OnInit {
         #ba1a1a ${soonEnd}% 100%
       )
     `;
-
   }
 
   /*
-   * Nombre corto para evitar que se corte demasiado
+   * Recorte de nombre para evitar desbordamiento en la gráfica
    */
-
-  shortProductName(
-    name: string
-  ): string {
-
+  shortProductName(name: string): string {
     if (!name) {
-
       return 'Producto';
-
     }
 
     if (name.length <= 12) {
-
       return name;
-
     }
 
-    return name.substring(
-      0,
-      11
-    ) + '...';
-
+    return name.substring(0, 11) + '...';
   }
 
   irAConfig(): void {
-
-    this.router.navigate([
-      '/configuracion'
-    ]);
-
+    this.router.navigate(['/configuracion']);
   }
-
 }
