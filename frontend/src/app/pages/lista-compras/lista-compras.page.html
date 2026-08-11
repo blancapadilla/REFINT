@@ -102,5 +102,51 @@
       </button>
     </nav>
 
+    
+
   </div>
 </ion-content>
+
+<!-- CÓDIGO EXISTENTE DE LA PANTALLA... -->
+
+<!-- MODAL PERSONALIZADO PARA AGREGAR PRODUCTO -->
+<ion-modal [isOpen]="modalAgregarAbierto" (didDismiss)="cerrarModal()" class="custom-add-modal">
+  <ng-template>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon-circle">
+          <ion-icon name="cart-outline"></ion-icon>
+        </div>
+        <h2>Añadir a la lista</h2>
+        <p>Escribe el nombre del producto que necesitas comprar.</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="input-field-wrap">
+          <ion-icon name="pricetag-outline" class="input-icon"></ion-icon>
+          <input 
+            type="text" 
+            [(ngModel)]="nuevoProductoNombre" 
+            placeholder="Ej. Manzanas, Jabón, Leche..." 
+            (keyup.enter)="confirmarAgregarManual()"
+            autofocus
+          />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-secondary" (click)="cerrarModal()">
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          class="btn-modal-primary" 
+          [disabled]="!nuevoProductoNombre.trim() || guardandoItem"
+          (click)="confirmarAgregarManual()"
+        >
+          {{ guardandoItem ? 'Guardando...' : 'Agregar' }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

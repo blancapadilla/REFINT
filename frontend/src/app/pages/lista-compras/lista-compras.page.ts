@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { FormsModule } from '@angular/forms';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular'; // 👈 IMPORTANTE AÑADIR
-import { trashOutline, checkmarkOutline /* ... tus otros iconos ... */ } from 'ionicons/icons';
 
 import { AppHeaderComponent } from '../../shared/components/app-header/app-header.component';
-
 import {
   ComprasService,
   ItemCompra,
@@ -14,7 +12,6 @@ import {
 } from 'src/app/services/compras.service';
 
 import { addIcons } from 'ionicons';
-
 import {
   settingsOutline,
   searchOutline,
@@ -28,7 +25,10 @@ import {
   cartOutline,
   syncOutline,
   timeOutline,
-  notificationsOutline
+  notificationsOutline,
+  trashOutline,
+  checkmarkOutline,
+  pricetagOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -38,15 +38,12 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     IonicModule,
     AppHeaderComponent
   ]
 })
 export class ListaComprasPage implements OnInit {
-
-  // ==========================================
-  // ICONOS
-  // ==========================================
 
   settingsOutline = settingsOutline;
   searchOutline = searchOutline;
@@ -56,22 +53,18 @@ export class ListaComprasPage implements OnInit {
   waterOutline = waterOutline;
   nutritionOutline = nutritionOutline;
   addOutline = addOutline;
-
-  // ==========================================
-  // DATOS
-  // ==========================================
+  trashOutline = trashOutline;
+  checkmarkOutline = checkmarkOutline;
+  pricetagOutline = pricetagOutline;
 
   categorias: CategoriaCompra[] = [];
-
   ahorroProyectado = '20%';
-
   cargando = true;
-
   error = '';
 
-  // ==========================================
-  // MENÚ INFERIOR
-  // ==========================================
+  modalAgregarAbierto = false;
+  nuevoProductoNombre = '';
+  guardandoItem = false;
 
   bottomNavItems = [
     {
@@ -114,13 +107,14 @@ export class ListaComprasPage implements OnInit {
   constructor(
     private router: Router,
     private comprasService: ComprasService,
-    private alertController: AlertController
+    private toastCtrl: ToastController
   ) {
-
     addIcons({
-      trashOutline, 
+      trashOutline,
       checkmarkOutline,
+      pricetagOutline,
       settingsOutline,
+      searchOutline,
       sparklesOutline,
       trendingDownOutline,
       leafOutline,
@@ -133,232 +127,142 @@ export class ListaComprasPage implements OnInit {
       timeOutline,
       notificationsOutline
     });
-
   }
-
-  // ==========================================
-  // INICIO
-  // ==========================================
 
   ngOnInit() {
-
     this.cargarLista();
-
   }
 
-  // ==========================================
-  // CARGAR LISTA DESDE SUPABASE
-  // ==========================================
+  ionViewWillEnter() {
+    this.cargarLista();
+  }
 
   async cargarLista() {
-
     this.cargando = true;
     this.error = '';
 
     try {
-
-      const res =
-        await this.comprasService.getListaCompras();
-
-      this.categorias =
-        res.categorias;
-
-      this.ahorroProyectado =
-        res.estadisticas.ahorro_proyectado;
-
-      console.log(
-        'Lista de compras desde Supabase:',
-        res
-      );
-
+      const res = await this.comprasService.getListaCompras();
+      this.categorias = res.categorias;
+      this.ahorroProyectado = res.estadisticas.ahorro_proyectado;
     } catch (error) {
-
-      console.error(
-        'Error cargando lista de compras:',
-        error
-      );
-
-      this.error =
-        'No se pudo cargar la lista de compras.';
-
+      console.error('Error cargando lista de compras:', error);
+      this.error = 'No se pudo cargar la lista de compras.';
       this.categorias = [];
-
     } finally {
-
       this.cargando = false;
-
     }
   }
-
-  // ==========================================
-  // MARCAR / DESMARCAR
-  // ==========================================
 
   async toggleItem(item: ItemCompra) {
-
-    const estadoAnterior =
-      item.marcado;
-
-    // Cambio visual inmediato
-
-    item.marcado =
-      !item.marcado;
+    const estadoAnterior = item.marcado;
+    item.marcado = !item.marcado;
 
     try {
-
-      await this.comprasService.toggleItem(
-        item.id
-      );
-
-      console.log(
-        'Producto actualizado correctamente:',
-        item.nombre
-      );
-
+      await this.comprasService.toggleItem(item.id);
     } catch (error) {
-
-      console.error(
-        'Error actualizando producto:',
-        error
-      );
-
-      // Regresar al estado anterior
-
-      item.marcado =
-        estadoAnterior;
-
-      alert(
-        'No se pudo actualizar el producto.'
-      );
+      console.error('Error actualizando producto:', error);
+      item.marcado = estadoAnterior;
+      await this.mostrarToast('No se pudo actualizar el estado del producto.', 'danger');
     }
   }
 
-  // ==========================================
-  // GENERAR LISTA AUTOMÁTICA
-  // ==========================================
+  async generarListaAutomatica() {
+    try {
+      this.cargando = true;
+      const totalAgregados = await this.comprasService.generarListaAutomatica();
+      await this.cargarLista();
 
-  generarListaAutomatica() {
-
-    this.router.navigate([
-      '/escaneo-inteligente'
-    ]);
-
+      if (totalAgregados > 0) {
+        await this.mostrarToast(`Se agregaron ${totalAgregados} producto(s) faltantes automáticamente.`, 'success');
+      } else {
+        await this.mostrarToast('Tu inventario está completo. No hay productos pendientes.', 'success');
+      }
+    } catch (e) {
+      console.error('Error al generar lista automática:', e);
+      await this.mostrarToast('Ocurrió un error al generar la lista.', 'danger');
+    } finally {
+      this.cargando = false;
+    }
   }
 
-  // ==========================================
-  // DASHBOARD
-  // ==========================================
-
-  irADashboard() {
-
-    this.router.navigate([
-      '/inventario'
-    ]);
-
+  agregarItem() {
+    this.nuevoProductoNombre = '';
+    this.modalAgregarAbierto = true;
   }
 
-  // ==========================================
-  // BÚSQUEDA
-  // ==========================================
-
-  buscar() {
-
-    console.log(
-      'Buscar en lista de compras'
-    );
-
+  cerrarModal() {
+    this.modalAgregarAbierto = false;
   }
 
-  // ==========================================
-  // CONFIGURACIÓN
-  // ==========================================
+  async confirmarAgregarManual() {
+    if (!this.nuevoProductoNombre.trim()) return;
 
-  irAConfiguracion() {
-
-    this.router.navigate([
-      '/configuracion'
-    ]);
-
+    this.guardandoItem = true;
+    try {
+      await this.comprasService.agregarItemManual(this.nuevoProductoNombre);
+      this.cerrarModal();
+      await this.cargarLista();
+    } catch (e) {
+      console.error('Error agregando item manual:', e);
+      await this.mostrarToast('No se pudo agregar el producto.', 'danger');
+    } finally {
+      this.guardandoItem = false;
+    }
   }
 
-  // ==========================================
-  // AGREGAR PRODUCTO
-  // ==========================================
-async agregarItem() {
-    const alert = await this.alertController.create({
-      header: 'Añadir a la lista',
-      message: '¿Qué necesitas comprar?',
-      inputs: [
-        {
-          name: 'producto',
-          type: 'text',
-          placeholder: 'Ej. Manzanas, Jabón, Leche...'
-        }
-      ],
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Agregar',
-          handler: async (data) => {
-            if (data.producto && data.producto.trim() !== '') {
-              try {
-                await this.comprasService.agregarItemManual(data.producto);
-                await this.cargarLista(); // Refresca la lista para mostrar el nuevo
-              } catch (e) {
-                console.error(e);
-              }
-            }
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
-
-  // ==========================================
-  // ELIMINAR DE LA LISTA
-  // ==========================================
   async eliminarDeLista(item: ItemCompra, event: Event) {
-    event.stopPropagation(); // Evita que se marque el checkbox por accidente
-    
-    // Quita el foco para evitar el warning 'Blocked aria-hidden'
+    event.stopPropagation();
+
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
 
     try {
       await this.comprasService.eliminarItem(item.id);
-      await this.cargarLista(); // Refresca la lista para quitarlo visualmente
+      await this.cargarLista();
     } catch (error) {
-      console.error('Error al eliminar', error);
+      console.error('Error al eliminar:', error);
+      await this.mostrarToast('No se pudo eliminar el producto.', 'danger');
     }
   }
 
-  // ==========================================
-  // NAVEGACIÓN INFERIOR
-  // ==========================================
+  // ==========================================================
+  // TOAST ESTANDARIZADO (COMO EN COMPARACIÓN)
+  // ==========================================================
+  private async mostrarToast(
+    mensaje: string,
+    color: 'success' | 'danger' | 'warning' | 'dark' = 'dark'
+  ): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message: mensaje,
+      duration: 2500,
+      color,
+      position: 'top'
+    });
+    await toast.present();
+  }
+
+  irADashboard() {
+    this.router.navigate(['/dashboard']);
+  }
+
+  irAConfiguracion() {
+    this.router.navigate(['/configuracion']);
+  }
+
+  buscar() {
+    console.log('Buscar en lista de compras');
+  }
 
   navegar(item: any) {
-
-    this.bottomNavItems =
-      this.bottomNavItems.map(
-        nav => ({
-          ...nav,
-          active:
-            nav.id === item.id
-        })
-      );
+    this.bottomNavItems = this.bottomNavItems.map(nav => ({
+      ...nav,
+      active: nav.id === item.id
+    }));
 
     if (item.path) {
-
-      this.router.navigate([
-        item.path
-      ]);
-
+      this.router.navigate([item.path]);
     }
-
   }
-
 }

@@ -75,18 +75,71 @@ export class DashboardPage {
     await this.cargarDashboard();
   }
 
-  async cargarDashboard() { 
+async cargarDashboard() {
     try {
+      // 1. OBTENEMOS EL REFRIGERADOR ACTIVO
+      const fridge = await this.dashboardService['refrigeradorService'].getMiRefrigerador();
+      if (!fridge) return;
+
+      // 2. CONSULTAMOS EL INVENTARIO VIVO
+      const inventory = await this.dashboardService['supabase'].client
+        .from('v_inventory_current')
+        .select('*')
+        .eq('refrigerator_id', fridge.id);
+
+      const items = inventory.data || [];
+      this.totalProductos = items.length;
+
+      let porVencer = 0;
+      let escaseando = 0;
+
+      // 3. CLASIFICACIÓN MATEMÁTICA EXACTA
+      items.forEach((item: any) => {
+        const dias = item.days_to_expiry != null ? Number(item.days_to_expiry) : null;
+        const cantidad = Number(item.quantity ?? 0);
+
+        // A. ESCASEANDO (Agotados + Caducados + Stock Bajo)
+        if (
+          item.status === 'agotado' || 
+          cantidad <= 0 || 
+          item.status === 'caducado' || 
+          (dias !== null && dias < 0) || 
+          item.status === 'bajo'
+        ) {
+          escaseando++;
+        }
+
+        // B. POR VENCER (Solo alimentos vigentes que caducan en 0 a 3 días)
+        else if (
+          (item.status === 'proximo_a_caducar' || (dias !== null && dias >= 0 && dias <= 3)) &&
+          cantidad > 0
+        ) {
+          porVencer++;
+        }
+      });
+
+      // 4. ACTUALIZAMOS LAS TARJETAS DEL DASHBOARD
+      this.summaryCards = [
+        { 
+          type: 'warning', 
+          title: 'Por vencer', 
+          value: `${porVencer}`, 
+          subtitle: 'Alimentos próximos a caducar',
+          path: '/alertas'
+        },
+        { 
+          type: 'danger', 
+          title: 'Escaseando', 
+          value: `${escaseando}`, 
+          subtitle: 'Productos por reabastecer',
+          path: '/lista-compras'
+        }
+      ];
+
+      // 5. ESTADO DEL HARDWARE Y TEMPERATURA
       const summary = await this.dashboardService.getSummary();
       if (summary) {
-        this.totalProductos = summary.total_products ?? 0;
         this.temperatura = summary.current_temperature_c != null ? `${summary.current_temperature_c}` : '3';
-
-        this.summaryCards = [
-          { type: 'warning', title: 'Por vencer', value: `${summary.expiring_products ?? 0}`, subtitle: 'Alimentos próximos a caducar', path: '/alertas' },
-          { type: 'danger', title: 'Escaseando', value: `${summary.missing_products ?? summary.low_stock_products ?? 0}`, subtitle: 'Productos por reabastecer', path: '/lista-compras' }
-        ];
-
         this.deviceStatus = {
           esp: { label: 'ESP32 STATUS', value: summary.esp32_status === 'online' ? 'Online' : 'Offline', state: summary.esp32_status ?? 'offline' },
           camera: { label: 'CÁMARA', value: summary.camera_status === 'online' ? 'Activa' : 'Inactiva', state: summary.camera_status ?? 'offline' },
@@ -94,9 +147,10 @@ export class DashboardPage {
         };
       }
 
-      // 2. PRODUCTOS PRÓXIMOS A VENCER Y MATEMÁTICAS DE PROGRESO
+      // 6. LISTA DE PRODUCTOS PRÓXIMOS A VENCER
       const expiringData = await this.dashboardService.getExpiringProducts();
       const DEFAULT_SVG = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"%3E%3Crect x="3" y="3" width="18" height="18" rx="4" fill="%23f1f5f9" stroke="none"/%3E%3Cpath d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/%3E%3Cpolyline points="3.27 6.96 12 12.01 20.73 6.96"/%3E%3Cline x1="12" y1="22.08" x2="12" y2="12"/%3E%3C/svg%3E';
+
       this.expiringProducts = (expiringData || []).map((item: any) => {
         const dias = item.days_to_expiry;
         let progreso = 0;
@@ -111,7 +165,7 @@ export class DashboardPage {
             progreso = 90;
           } else {
             venceTexto = `Vence en ${dias} día(s)`;
-            progreso = Math.max(10, 100 - (dias * 20)); // 1 día = 80%, 2 días = 60%, etc.
+            progreso = Math.max(10, 100 - (dias * 20));
           }
         }
 
@@ -120,20 +174,17 @@ export class DashboardPage {
           image: item.product_image_path || item.image_path || DEFAULT_SVG,
           vence: venceTexto,
           progreso: progreso,
-          clase: item.status === 'caducado' ? 'danger' : 'warning'
+          clase: (item.status === 'caducado' || (dias !== null && dias < 0)) ? 'danger' : 'warning'
         };
       });
 
-      // 3. GRÁFICA DE DISTRIBUCIÓN DINÁMICA
-      // 3. GRÁFICA DE DISTRIBUCIÓN DINÁMICA
+      // 7. GRÁFICA DE DISTRIBUCIÓN
       const distData = await this.dashboardService.getInventoryDistribution();
       let lacteos = 0, vegetales = 0, proteinas = 0, otros = 0, totalChart = 0;
 
       distData.forEach((item: any) => {
         const catName = (item.category_name || '').toLowerCase();
         const prodName = (item.product_name || '').toLowerCase();
-        
-        // Sumamos la CANTIDAD real del producto (ej. 12 papas + 6 tomates)
         const qty = Number(item.quantity ?? 0); 
         totalChart += qty;
 
@@ -143,7 +194,6 @@ export class DashboardPage {
         else otros += qty;
       });
 
-      // Guardamos el total físico para mostrarlo en el centro de la dona
       this.totalUnidades = totalChart;
 
       if (totalChart > 0) {
@@ -171,7 +221,6 @@ export class DashboardPage {
           stops.push(`#006229 ${currentPct}% ${currentPct + pProteinas}%`);
           currentPct += pProteinas;
         }
-        // Agregamos la categoría "Otros" visualmente a la leyenda
         if (pOtros > 0) {
           this.distributionLegend.push({ color: 'gray', label: 'Otros (Snacks, Bebidas)', percent: pOtros });
           stops.push(`#94a3b8 ${currentPct}% 100%`);
@@ -182,7 +231,8 @@ export class DashboardPage {
         this.distributionLegend = [];
         this.chartGradient = 'conic-gradient(#e2e8f0 0% 100%)';
       }
-     } catch (error) {
+
+    } catch (error) {
       console.error('Error al cargar datos del Dashboard:', error);
     }
   }

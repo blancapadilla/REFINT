@@ -19,6 +19,7 @@ import {
   syncOutline,
   notifications
 } from 'ionicons/icons';
+import { ComprasService } from 'src/app/services/compras.service';
 
 export interface NotificacionAlert {
   id: string;
@@ -63,7 +64,8 @@ export class AlertasPage implements OnInit {
     private navCtrl: NavController,
     private supabaseService: SupabaseService,
     private refrigeradorService: RefrigeradorService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private comprasService: ComprasService
   ) {
     addIcons({
       alertCircleOutline,
@@ -87,14 +89,12 @@ export class AlertasPage implements OnInit {
     this.cargarAlertas();
   }
 
-  async cargarAlertas() {
+ async cargarAlertas() {
     this.cargando = true;
     try {
-      // 1. Obtenemos el refrigerador actual
       const fridge = await this.refrigeradorService.getMiRefrigerador();
       if (!fridge) return;
 
-      // 2. Extraemos el inventario vivo, filtrando solo lo que requiere atención
       const { data: productos, error } = await this.supabaseService.client
         .from('v_inventory_current')
         .select('*')
@@ -107,10 +107,12 @@ export class AlertasPage implements OnInit {
       let proximos = 0;
       const items: NotificacionAlert[] = [];
 
-      // 3. Mapeamos las alertas dinámicamente según su estado
       (productos || []).forEach((prod: any) => {
-        
-        if (prod.status === 'agotado') {
+        const dias = prod.days_to_expiry != null ? Number(prod.days_to_expiry) : null;
+        const cantidad = Number(prod.quantity ?? 0);
+
+        // 1. PRODUCTO AGOTADO
+        if (prod.status === 'agotado' || cantidad <= 0) {
           criticas++;
           items.push({
             id: `agotado-${prod.id}`,
@@ -124,26 +126,27 @@ export class AlertasPage implements OnInit {
           });
         } 
         
-        else if (prod.status === 'caducado') {
+        // 2. PRODUCTO CADUCADO (Prioridad: Días negativos O status 'caducado')
+        else if (prod.status === 'caducado' || (dias !== null && dias < 0)) {
           criticas++;
-          const dias = Math.abs(prod.days_to_expiry || 0);
+          const diasPasados = Math.abs(dias || 0);
           items.push({
             id: `caducado-${prod.id}`,
             tipo: 'critical',
             icono: alertCircleOutline,
             titulo: `${prod.product_name || 'Producto'}`,
-            descripcion: `Caducó hace ${dias} día(s). Se recomienda desecharlo inmediatamente.`,
+            descripcion: `Caducó hace ${diasPasados} día(s). Se recomienda desecharlo inmediatamente.`,
             tiempo: 'Hace unas horas',
-            porcentajeExpirado: 100, // Barra al máximo
+            porcentajeExpirado: 100, // Barra roja completa
             leido: false,
             productoId: prod.product_id
           });
         } 
         
-        else if (prod.status === 'proximo_a_caducar') {
+        // 3. PRÓXIMO A CADUCAR (Días >= 0 dentro del rango)
+        else if (prod.status === 'proximo_a_caducar' || (dias !== null && dias >= 0 && dias <= 3)) {
           proximos++;
-          const dias = prod.days_to_expiry || 0;
-          const porcentaje = Math.max(10, 100 - (dias * 20)); // Cálculo del progreso de la barra
+          const porcentaje = Math.max(10, 100 - ((dias || 0) * 20));
           items.push({
             id: `vencer-${prod.id}`,
             tipo: 'warning',
@@ -151,12 +154,13 @@ export class AlertasPage implements OnInit {
             titulo: `${prod.product_name || 'Producto'}`,
             descripcion: dias === 0 ? 'Vence HOY. Úsalo en tus recetas cuanto antes.' : `Vence en ${dias} día(s). Se recomienda consumir pronto.`,
             tiempo: 'Hace 1 hora',
-            porcentajeExpirado: Math.round(porcentaje), // Asignamos la barra a la alerta naranja
+            porcentajeExpirado: Math.round(porcentaje),
             leido: false,
             productoId: prod.product_id
           });
         } 
         
+        // 4. STOCK BAJO
         else if (prod.status === 'bajo') {
           proximos++;
           items.push({
@@ -172,7 +176,7 @@ export class AlertasPage implements OnInit {
         }
       });
 
-      // 4. Agregamos la tarjeta verde de sistema (Inventario Sincronizado)
+      // Tarjeta de estado de sincronización
       items.push({
         id: 'sync-status',
         tipo: 'info',
@@ -202,58 +206,32 @@ export class AlertasPage implements OnInit {
     this.notificaciones = [];
     this.totalCriticas = 0;
     this.totalProximos = 0;
-    this.mostrarToast('Todas las alertas han sido marcadas como leídas.');
+    await this.mostrarToast('Todas las alertas marcadas como leídas.', 'success');
   }
 
   async omitirNotificacion(id: string) {
     this.notificaciones = this.notificaciones.filter(n => n.id !== id);
-    
-    // Recalculamos los totales dinámicamente
     this.totalCriticas = this.notificaciones.filter(n => n.tipo === 'critical').length;
     this.totalProximos = this.notificaciones.filter(n => n.tipo === 'warning' || n.tipo === 'low_stock').length;
-    
-    this.mostrarToast('Alerta omitida.');
+    await this.mostrarToast('Alerta omitida.', 'warning');
   }
 
   async anadirAListaCompras(notif: NotificacionAlert) {
     if (!notif.productoId) return;
-    
+
     try {
-      const fridge = await this.refrigeradorService.getMiRefrigerador();
-      if (!fridge) return;
-
-      // Buscar si el usuario tiene una lista de compras activa
-      const { data: listas } = await this.supabaseService.client
-        .from('shopping_lists')
-        .select('id')
-        .eq('refrigerator_id', fridge.id)
-        .eq('status', 'active')
-        .limit(1);
-
-      if (listas && listas.length > 0) {
-         // Realizar un upsert directo para añadir a la base de datos
-         await this.supabaseService.client
-          .from('shopping_list_items')
-          .upsert({
-             shopping_list_id: listas[0].id,
-             product_id: notif.productoId,
-             desired_quantity: 1,
-             is_auto_generated: true
-          });
-      }
-
-      // Quitamos la alerta visualmente
-      this.omitirNotificacion(notif.id);
-      this.mostrarToast(`"${notif.titulo}" añadido a la lista de compras.`);
-
-    } catch(e) {
-      console.error('Error al añadir a lista de compras:', e);
+      await this.comprasService.agregarOActualizarItemByProductId(notif.productoId);
+      this.notificaciones = this.notificaciones.filter(n => n.id !== notif.id);
+      this.totalCriticas = this.notificaciones.filter(n => n.tipo === 'critical').length;
+      this.totalProximos = this.notificaciones.filter(n => n.tipo === 'warning' || n.tipo === 'low_stock').length;
+      await this.mostrarToast(`"${notif.titulo}" añadido a la lista de compras.`, 'success');
+    } catch (e) {
+      console.error(e);
+      await this.mostrarToast('No se pudo añadir el producto.', 'danger');
     }
   }
 
-  filtrarPor(tipo: string) {
-    // Opción para saltar al filtro si tocan la tarjeta superior
-  }
+  filtrarPor(tipo: string) {}
 
   irA(path: string) {
     this.router.navigate([path]);
@@ -263,13 +241,19 @@ export class AlertasPage implements OnInit {
     this.router.navigate([nav.path]);
   }
 
-  private async mostrarToast(mensaje: string) {
+  // ==========================================================
+  // TOAST ESTANDARIZADO (COMO EN COMPARACIÓN)
+  // ==========================================================
+  private async mostrarToast(
+    mensaje: string,
+    color: 'success' | 'danger' | 'warning' | 'dark' = 'dark'
+  ): Promise<void> {
     const toast = await this.toastCtrl.create({
       message: mensaje,
-      duration: 2000,
-      position: 'bottom',
-      color: 'dark'
+      duration: 2500,
+      color,
+      position: 'top'
     });
-    toast.present();
+    await toast.present();
   }
 }
